@@ -1,0 +1,11 @@
+[package]
+name = "kg_rag_rust"
+version = "0.1.0"
+edition = "2021"
+description = "Knowledge Graph RAG with Verifiable Citations — 完整 Rust 版(实体抽取→Neo4j 图存储→多跳遍历→强制 [N] 引用)"
+
+[dependencies]
+reqwest = { version = "0.12", features = ["json", "blocking"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"

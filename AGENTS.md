@@ -1,6 +1,7 @@
 # AGENTS.md — kimi_code_test 项目
 
 > pi 启动时自动加载。面向 agent 的工作纪律精简版,完整版见 [`RULES.md`](./RULES.md)。
+> **当前主项目**：`kg_rag_rust/`(纯 Rust 知识图谱 RAG + 可验证引用,零外部服务)。详见 [`README.md`](./README.md)。
 
 ## AI 工作准则(八耻八荣 · 精简命令式)
 
@@ -48,6 +49,18 @@
 4. **大输出命令先给摘要**:`git diff --stat`、`ls | head`、构建只看尾部/错误(`| tail -50` 或 `| grep -i error`)。
 5. **长任务显式声明超时**,避免挂起空耗。
 6. **上下文最小化**:汇报只带关键片段,不贴大段日志/配置全文。
+
+---
+
+## mr 指令映射(强制)
+
+> 用户消息以 **`mr ` 开头**(如 "mr 列出项目文件" / "mr 分析这个错误")→ **必须**走 lsx-mp-rust 项目(已部署到 `~/.pi/agent/projects/lsx-mp-rust/`,pi 直连 deepseek,无需 QClaw):
+>
+> ```bash
+> cd ~/.pi/agent/projects/lsx-mp-rust && ./target/release/mr.exe run "<mr 后面的内容>"
+> ```
+>
+> 即:`mr X` → `mr.exe run "X"`(完整管线:开单→JSON plan→并行执行→交付→方法树→wiki)。
 
 ---
 
