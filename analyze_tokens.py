@@ -3,8 +3,12 @@
 - toolResult 是独立 role(content 为 text 块的 JSON)
 - 估算: 中英混合按 3 char/token
 """
-import sqlite3, json
+import sqlite3, json, sys
 from collections import Counter, defaultdict
+
+# Windows 控制台默认 GBK,强制 UTF-8 输出,避免中文乱码
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
 DB = r'C:/Users/Administrator/.openclaw/agents/main/agent/openclaw-agent.sqlite'
 conn = sqlite3.connect(DB)
@@ -25,8 +29,10 @@ def extract_text(content):
             if isinstance(c, dict):
                 if c.get('type') == 'text':
                     parts.append(c.get('text', ''))
-                elif c.get('type') == 'tool_use':
-                    parts.append(json.dumps(c.get('input', {}), ensure_ascii=False))
+                elif c.get('type') == 'thinking':
+                    parts.append(c.get('thinking', ''))
+                elif c.get('type') == 'toolCall':
+                    parts.append(json.dumps(c.get('arguments', {}), ensure_ascii=False))
                 else:
                     parts.append(json.dumps(c, ensure_ascii=False))
         return '\n'.join(parts)
@@ -52,16 +58,23 @@ for sid, seq, ej, ts in rows:
     role_total[role] += t
     msg_count[role] += 1
 
-    # 工具名(从 assistant 的 tool_use 提取)
+    # 工具名(从 assistant 消息的 toolCall block 提取)
     if role == 'assistant' and isinstance(msg.get('content'), list):
         for c in msg['content']:
-            if isinstance(c, dict) and c.get('type') == 'tool_use':
+            if isinstance(c, dict) and c.get('type') == 'toolCall':
                 tool_total[c.get('name', '?')] += 1
 
 print("=" * 55)
 print("QClaw 真实 token 消耗分析(估算)")
 print("=" * 55)
-print(f"时间范围: 2026-08-03 ~ 08-09 (7 天)")
+import datetime as _dt
+def _fmt(ts):
+    return _dt.datetime.fromtimestamp(ts / 1000).strftime('%Y-%m-%d %H:%M')
+
+if rows:
+    print(f"时间范围: {_fmt(rows[0][3])} ~ {_fmt(rows[-1][3])} (自动推导)")
+else:
+    print("时间范围: (无数据)")
 print(f"总估算: {grand:,} tokens / {sum(msg_count.values())} 条消息 / {len(sessions)} 个会话")
 print()
 
