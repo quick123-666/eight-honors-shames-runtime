@@ -68,6 +68,8 @@ kimi_code_test/
 
 **原因**:RULE-COMPLETE-001(禁止精简版)+ RULE-RUST-001(Rust 优先)。kg_rag_rust 是完整 Rust 版,功能覆盖原版全部(实体抽取/图存储/语义检索/多跳遍历/强制引用),且零外部服务依赖。
 
+> **原则【准则 12 完整版】**:`RULES.md` § 三 准则 12 明确——交付不缩范围/不偷工/不省略核心功能,100% 实现用户原意。Plan 与最终范围 = 完整版全功能,可分阶段交付但不得默认精简。
+
 ---
 
 > 当前活跃项目:**kg_rag_rust**。其余子项目(TokenThrottle/analyze_tokens.py)仅作历史归档。
