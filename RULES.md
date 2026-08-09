@@ -99,6 +99,39 @@
 
 ---
 
+## 四、省 token 操作纪律(pi 侧执行细则)
+
+> 对应准则 5(主动验证)/ 6(遵循规范)。pi 的 bash 输出内建截断(2000 行/50KB),但真正省 token 靠操作习惯。以下细则强制约束 pi agent 的 tool 输出量,压缩输入 token。
+>
+> 基线:`analyze_tokens.py` 实测 toolResult 占 53.2%(163K tok / 306K 总量),是最大可省空间。
+
+### 4.1 bash 输出限流
+
+- 默认给命令加 `| head -N`(N≤100)或 `grep`/`rg` 过滤,只留相关行。
+- 禁止:`ls -R`、`cat` 大文件、`find /` 全盘扫描、`git log` 不带 `-N`、`diff` 全量输出。
+- 大输出命令先看摘要:`git diff --stat`、`ls | head`、目录树 `find . -maxdepth 2`。
+- 构建/测试输出只看尾部与错误:`cmd 2>&1 | tail -50` 或 `| grep -i error`。
+
+### 4.2 read 按需分段
+
+- 大文件用 `offset`/`limit` 分页读,需要多少读多少;不整读 50KB 以上文件。
+
+### 4.3 查代码走 codegraph
+
+- 优先 `codegraph_explore` 一次性打包符号/流程,避免多轮 grep/read 循环。
+- 改前用 `codegraph_impact` 看爆炸半径,小步改。
+
+### 4.4 上下文最小化
+
+- 汇报只带关键片段,不贴大段日志/配置全文。
+- 长任务显式声明超时(默认 60s),避免挂起空耗。
+
+### 4.5 效果度量
+
+- 用 `analyze_tokens.py` 周期性复测,对比改造前后 toolResult 占比(基线 53.2%),验证省 token 效果。
+
+---
+
 ## 附录:在本项目的执行映射
 
 | 八耻八荣 | 在本项目的具体动作 |
