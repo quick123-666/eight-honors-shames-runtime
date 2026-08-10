@@ -669,10 +669,165 @@ cd ~/projects/project-b && codex
 - 跨 session 通信可参考 orchestra 的 designer/executor/monitor 模式
 - 跨 runtime 不需考虑 (lsx 是单 runtime), 但**证据交换**(AgentNexus 哲学) 适合加到 lsx 的方法树
 
+## 12. 增量研究 v0.4 (3 仓库源码结构 + 关键文档路径)
+
+### 12.1 AgentNexus 仓库源码路径 (12 tools 在哪)
+
+**GitHub 根目录** (40 项):
+```
+.agentnexus/          # runtime 配置 (2 项: local-runner.yaml + example)
+.claude/              # Claude Code 集成
+.claude-plugin/       # plugin
+agentnexus-sdk/       # ★ 12 tools SDK 包 ★
+agent_net/            # P2P networking
+docs/                 # 文档
+interop/              # 互操作规范
+specs/                # ★ RFC 完整存放 ★
+  rfcs/               # RFC-000/001/002/003 草案
+  test-vectors/       # 互操作测试向量
+  working-group/      # 委员会工作
+threads/              # thread 实现
+data/                 # 数据
+tests/                # 547 tests 存放
+main.py               # entry point
+Dockerfile + docker-compose.yml
+```
+
+**12 tools 位置**: `agentnexus-sdk/src/agentnexus/` ★ (本报告未深查 SDK 源码, 待本地验证)
+**规范定义**: `specs/rfcs/000-agent-collaboration-framework.md` v0.3 草案 (含 Canonical Object Relationship Map)
+
+**最近 commit 活跃度** (2026-07): RFC-003 authority/delegation semantics merge → 高度活跃
+
+### 12.2 repowire 仓库源码路径 (5 runtime 在哪)
+
+**GitHub 根目录** (32 项):
+```
+.beads/               # issue 管理
+.claude/              # Claude Code 集成 (含 hooks)
+.claude-plugin/       # plugin
+repowire/             # ★ Python 源码 ★ (20+ 子项)
+  acp/                # Agent Communication Protocol
+  agent_backends.py   # ★ 5 runtime 后端 ★ (Claude Code/Opencode/Codex/Antigravity/Pi)
+  agent_types.py
+  channel/            # 通信 channel
+  client.py           # client SDK
+  config/             # 配置
+  daemon/             # local daemon
+  hooks/              # Claude Code hooks 集成
+  installers/         # 各 runtime installer
+  mcp/                # ★ MCP server 实现 ★
+  memory.py
+  orchestrator/       # orchestrator 逻辑
+  peer_describe.py
+  peer_mcp.py         # ★ peer MCP ★ (peer 之间 MCP 通信)
+  protocol/           # 协议定义
+  relay/              # ★ hosted relay (跨机器) ★
+  service/
+docs/                 # ★ 完整文档 ★
+  start/              # install / setup / first-ask
+  use/                # features + workflows
+  concepts/           # ★ agent-backends / message-types / orchestrator / peer-identity ★
+  reference/          # cli / configuration / mcp-tools / hook-payloads
+  operate/            # 运行
+  troubleshooting/
+rfcs/                 # repowire 自己的 RFC
+skills/               # Claude Code skills
+experiments/          # 实验
+charts/ deploy/ docs-image/ web-image/ web/
+hatch_build.py        # 包构建
+Dockerfile
+install.sh            # ★ 一键安装脚本 ★
+```
+
+**5 runtime 实现位置**: `repowire/agent_backends.py` (5 个 backend 适配)
+**MCP 工具文档**: `docs/reference/mcp-tools.md`
+**Agent backend 设计**: `docs/concepts/agent-backends.md`
+**最近 commit 活跃度** (2026-06): evidence-gate session-closed fix → 高度活跃
+
+### 12.3 orchestra 仓库源码路径
+
+**GitHub 根目录**:
+```
+orchestra/
+  Dockerfile          # 容器化
+  __init__.py
+  backend/            # 后端 (跨 runtime 适配)
+  frontend/           # TUI (Textual 框架)
+  lib/                # ★ 核心库 ★
+    __init__.py
+    agent.py          # agent 核心
+    agent_protocol.py # ★ agent 通信协议 ★
+    config.py         # 配置
+    file_watcher.py   # 文件变更监控
+    logger.py
+    message.py        # 消息
+    monitor.py        # ★ 监控 agent ★
+    prompts.py
+    sessions.py       # session 管理
+    tmux_protocol.py  # tmux 集成
+    helpers/
+runners/              # agent runners
+tests/
+pyproject.toml + uv.lock
+```
+
+**orchestra 设计核心** (来自 README):
+- **3 pane TUI** 布局: sidebar (session 列表) + agent 执行 + extras
+- **配置**: `use_docker=true` (默认) → executor 跑在 Docker 容器
+- **MCP server 端口**: 8765
+- **keybindings**: Ctrl+S 切换 pane, Ctrl+Q 退出, Ctrl+\ detaching
+
+**功能 (完整实现 Issue #1770 提的 API)**:
+- **Executors**: designer 启 agent,跑在隔离容器, 完成后可 `/merge-child` merge 代码
+- **Spec design**: `s` 键开 spec 文件(designer 帮你写计划)
+- **Monitoring**: 后台 monitor 看 executor 不偏 spec
+- **Pairing mode**: `p` 键分享屏幕配对编程
+
+**最近 commit 活跃度** (2025-12): 1 年前最后 commit → 活跃度低 (Issue #1770 提的功能有, 但维护慢)
+
+### 12.4 3 仓库活跃度对比
+
+| 仓库 | 最近 commit | 状态 |
+|---|---|---|
+| **repowire** | 2026-06-24 | 高度活跃 (247 stars, 持续维护) |
+| **AgentNexus** | 2026-07-29 | 高度活跃 (RFC-003 刚 merge) |
+| **orchestra** | 2025-12-17 | 活跃度低 (1 年前最后 commit) |
+
+### 12.5 3 仓库定位差异(补充 v0.3)
+
+| 维度 | AgentNexus | orchestra | repowire |
+|---|---|---|---|
+| **目标场景** | 独立 agent 跨平台协作 | 同一项目多 agent 协调 | 跨项目跨机器 5 runtime |
+| **接口** | RFC 文档 | TUI 应用 | CLI + daemon + dashboard |
+| **协议定义** | ★ 4 RFCs (v0.3) | 自研 (lib/) | 自研 + RFCs (rfcs/) |
+| **SDK/库** | agentnexus-sdk/ | orchestra/lib/ | repowire/ |
+| **集成方式** | 外来 agent 遵循 RFC | 独立工具 (替换 claude-code) | hook + installer 集成 |
+| **用户入口** | 集成进其他 agent | `orchestra` TUI | `repowire setup` + tmux |
+| **跨 runtime** | 设计上支持 (未实现) | 不支持 | ★ 已实现 (5 个) |
+| **测试覆盖** | 547 tests | tests/ | tests/ |
+
+### 12.6 找 12 MCP tools 列表 (AgentNexus)
+
+按 **准则 17(系统穷尽)** — 12 tools 推测在 `agentnexus-sdk/src/agentnexus/` 目录下。本报告**未深查 SDK 源码**, 原因:
+- AGENTS.md 是空的 (未列)
+- 12 tools 概念从 Issue #1770 评论描述, 实际源码需本地 clone 验证
+- 进一步方向: `git clone kevinkaylie/AgentNexus` + `grep -r "tool" agentnexus-sdk/`
+
+### 12.7 5 runtime 完整列表 (repowire)
+
+按 `agent_backends.py` + `docs/concepts/agent-backends.md` (本报告未深查, README 提):
+- **Claude Code** (Anthropic)
+- **Opencode** (开源)
+- **Codex** (OpenAI)
+- **Antigravity** (待查)
+- **Pi** (开源)
+
+`docs/concepts/agent-backends.md` 应该有详细设计, 5 个 runtime 的适配逻辑可参考。
+
 ---
 
-*本报告基于 2026-08-10 公开数据, Claude Code v2.1.222 (用户安装) + GitHub master (2026-08-10) + arxiv 6 篇论文 + Issue #1770 14 comments 全文 + Issue #14859 11 comments + AgentNexus/orchestra/repowire 3 仓库完整调研。*
+*本报告基于 2026-08-10 公开数据, Claude Code v2.1.222 (用户安装) + GitHub master (2026-08-10) + arxiv 6 篇论文 + Issue #1770 14 comments 全文 + Issue #14859 11 comments + AgentNexus/orchestra/repowire 3 仓库源码结构 + 关键文档路径调研。*
 
-*生成方式: 联系全文 (通读 10 个数据源) + 6+ GitHub Issues 交叉验证 + arxiv 学术对照 + 3 个社区开源方案深挖。*
+*生成方式: 联系全文 (通读 11 个数据源) + 6+ GitHub Issues 交叉验证 + arxiv 学术对照 + 3 个社区开源方案深挖。*
 
-*局限性: Claude Code 核心 native binary 不可见, SendMessage / Worktree / CCR 内部协议纯反推。3 仓库未实际运行 (只读 README + 元信息), 需本地验证。*
+*局限性: Claude Code 核心 native binary 不可见, SendMessage / Worktree / CCR 内部协议纯反推。3 仓库未本地运行 (只读 README + 仓库结构 + 文档路径), SDK 源码未深查 (12 tools 列表需本地 clone)。*
