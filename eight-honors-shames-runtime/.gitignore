@@ -6,3 +6,4 @@ benchmarks/reports/*.json
 .env.local
 *.local
 benchmarks/real/fake-express-app/
+benchmarks/real/scratch/
