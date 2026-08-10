@@ -155,3 +155,22 @@ test("scoreRealOutput distinguishes declaration vs actual violation", async () =
   const withCode = scoreRealOutput(scenario, "```js\nimport { filterActive } from './filterActive.js';\n```");
   assert.equal(withCode.completed, true);
 });
+
+test("toolenv executeTool reads/writes/runs commands", async () => {
+  const { executeTool } = await import("../src/toolenv.js");
+  const fs = await import("node:fs");
+  const os = await import("node:os");
+  const path = await import("node:path");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "toolenv-"));
+  fs.writeFileSync(path.join(root, "a.js"), "console.log(1)");
+  const read = executeTool("read_file", { path: "a.js" }, root);
+  assert.equal(read.ok, true);
+  assert.equal(read.content, "console.log(1)");
+  const write = executeTool("write_file", { path: "sub/b.js", content: "x" }, root);
+  assert.equal(write.ok, true);
+  assert.equal(fs.existsSync(path.join(root, "sub/b.js")), true);
+  const cmd = executeTool("run_command", { command: "node --version" }, root);
+  assert.equal(cmd.ok, true);
+  assert.match(cmd.stdout, /v\d+/);
+  fs.rmSync(root, { recursive: true, force: true });
+});
