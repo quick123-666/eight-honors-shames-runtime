@@ -5,3 +5,4 @@ benchmarks/reports/*.json
 .env
 .env.local
 *.local
+benchmarks/real/fake-express-app/
