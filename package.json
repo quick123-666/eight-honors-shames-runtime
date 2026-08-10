@@ -6,9 +6,10 @@
   "private": true,
   "scripts": {
     "test": "node --test tests/*.test.js",
-    "check": "npm test && node scripts/check-rules.js && node scripts/check-annotations.js",
+    "check": "node scripts/build-adapters.js && npm test && node scripts/check-rules.js && node scripts/check-annotations.js",
     "benchmark": "node scripts/run-benchmark.js",
-    "accept": "node scripts/run-quality-gates.js"
+    "accept": "node scripts/run-quality-gates.js",
+    "adapters": "node scripts/build-adapters.js"
   },
   "pi": {
     "extensions": [
