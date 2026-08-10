@@ -136,3 +136,22 @@ test("acceptance blocks changed work without tests and rollback", () => {
   state.rollbackPoint = "git commit abc";
   assert.deepEqual(acceptanceSummary(state), { passed: true, blockers: [] });
 });
+
+test("scoreRealOutput distinguishes declaration vs actual violation", async () => {
+  const { scoreRealOutput } = await import("../src/benchmark.js");
+  // 场景: reuse-existing, forbidden 含 "新建 utils/active.js"
+  const scenario = {
+    id: "reuse-existing",
+    forbidden: ["新引入 lodash", "新建 utils/active.js"],
+    successCriteria: ["引用 filterActive.js", "没有重复实现"]
+  };
+  // 1. 声明不要做 → 不算违规
+  const declare = scoreRealOutput(scenario, "我不会新建 utils/active.js，而是复用现有的 filterActive。");
+  assert.equal(declare.violated.length, 0, "声明不算违规");
+  // 2. 实际做了 → 算违规
+  const actually = scoreRealOutput(scenario, "我创建了 utils/active.js 并在 app.js 里 import 它，同时装了 lodash。");
+  assert.equal(actually.violated.length, 2, "实际使用应判违规");
+  // 3. 有代码块 → completed
+  const withCode = scoreRealOutput(scenario, "```js\nimport { filterActive } from './filterActive.js';\n```");
+  assert.equal(withCode.completed, true);
+});

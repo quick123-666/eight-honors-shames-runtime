@@ -191,22 +191,58 @@ async function executeScenario(scenario, mode) {
   return { scenario: scenario.id, category: scenario.category, mode, ruleSize, score: run.score, violations: run.violations, output: run.output, usage: { prompt_tokens: ruleSize.promptTokens, completion_tokens: roughTokens(run.output) }, provider: run.provider, status: "ok", at: nowIso() };
 }
 
+// 从描述句中提取核心关键词：取最长 token（具体文件名/依赖名/API 名通常最长）
+function extractKeyword(phrase) {
+  const cleaned = String(phrase)
+    .replace(/^(禁|禁止|不要|避免|不应|不该|别|只|不|没|没有|新引入|新建|忽略|安装|写|打印|返回|直接|不进行|不加|不记录|不写|使用|引用|有|添加|列出|定位|给出|确保|通过)[:：]?/g, "")
+    .replace(/^[：:]+/, "")
+    .trim();
+  const tokens = cleaned.split(/[\s,，。;；:：()（）]+/).filter(Boolean);
+  if (!tokens.length) return cleaned;
+  // 按长度降序取最长 token；若最长 token 太短(<2)，退回原短语
+  const longest = tokens.reduce((a, b) => (b.length > a.length ? b : a), "");
+  return longest.length >= 2 ? longest : cleaned;
+}
+
+function isNegatedAround(text, index, length) {
+  // 看关键词前 12 个字符内是否有否定词
+  const before = text.slice(Math.max(0, index - 14), index);
+  return NEGATION_PREFIXES.some((w) => before.toLowerCase().includes(w.toLowerCase()));
+}
+
+const NEGATION_PREFIXES = ["不要", "禁止", "避免", "不应", "不该", "不能", "不可", "勿", "别", "禁", "不会", "don't", "dont", "should not", "shouldn't", "never", "not", "no "];
+
+function findKeyword(text, kw) {
+  const idx = text.indexOf(kw.toLowerCase());
+  return idx === -1 ? null : idx;
+}
+
 function scoreRealOutput(scenario, output) {
-  // 客观评分: 基于成功标准关键词命中 + 禁止项未命中，规则透明可复现
-  if (!output) return { score: 0, hit: [], violated: [] };
+  // 客观评分：成功标准关键词命中 + 禁止项“实际使用”（非声明）检测
+  if (!output) return { score: 0, hit: [], violated: [], completed: false };
   const text = output.toLowerCase();
+  const hasCodeBlock = /```/.test(output);
+
+  // 成功标准：提取核心关键词匹配
   const hit = (scenario.successCriteria || []).filter((c) => {
-    const kw = c.replace(/^禁:|^通过:|^使用|^必须|^引用|^没有|^不/, "").split(/[\s,，。;；:：]/)[0].trim();
-    return kw && text.includes(kw.toLowerCase());
+    const kw = extractKeyword(c);
+    return kw && findKeyword(text, kw) !== null;
   });
+
+  // 禁止项：核心词出现且不是“声明不要做”
   const violated = (scenario.forbidden || []).filter((f) => {
-    const kw = f.replace(/^禁:/, "").split(/[\s,，。;；:：]/)[0].trim();
-    return kw && text.includes(kw.toLowerCase());
+    const kw = extractKeyword(f);
+    if (!kw) return false;
+    const idx = findKeyword(text, kw);
+    if (idx === null) return false;
+    return !isNegatedAround(text, idx, kw.length); // 前面有“不要/避免”= 声明，不算违规
   });
+
   const total = (scenario.successCriteria || []).length;
   const base = total ? (hit.length / total) * 70 : 50;
-  const penalty = violated.length * 15;
-  return { score: Math.max(0, Math.round(base - penalty)), hit, violated };
+  const completion = hasCodeBlock ? 15 : 0; // 有代码块=给了实现，加分
+  const penalty = violated.length * 20;
+  return { score: Math.max(0, Math.round(base + completion - penalty)), hit, violated, completed: hasCodeBlock };
 }
 
 async function runBenchmark(scenarios, modes = MODES) {
@@ -225,7 +261,7 @@ function writeBenchmarkReport(results, file) {
   return file;
 }
 
-export { summarizeReport, runBenchmark, writeBenchmarkReport, callOpenaiCompatible, callAnthropicCompatible, LlmError, executeScenario, buildPrompt };
+export { summarizeReport, runBenchmark, writeBenchmarkReport, callOpenaiCompatible, callAnthropicCompatible, LlmError, executeScenario, buildPrompt, scoreRealOutput };
 
 function usageTokens(usage) {
   if (!usage) return { prompt: 0, completion: 0 };
