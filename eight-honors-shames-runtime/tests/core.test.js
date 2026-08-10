@@ -59,19 +59,19 @@ test("audit and acceptance expose structured reports", () => {
   assert.equal(report.passed, true);
 });
 
-test("benchmark returns every scenario and mode", () => {
-  const results = runBenchmark([{ id: "sample", category: "minimal", task: "x", forbidden: ["lodash"], successCriteria: [] }], ["baseline", "full"]);
+test("benchmark returns every scenario and mode", async () => {
+  const results = await runBenchmark([{ id: "sample", category: "minimal", task: "x", forbidden: ["lodash"], successCriteria: [] }], ["baseline", "full"]);
   assert.equal(results.length, 2);
   assert.ok(results.every((result) => result.ruleSize && typeof result.score === "number"));
 });
 
-test("benchmark provider can be overridden", () => {
-  const results = runBenchmark([{ id: "x", category: "minimal", task: "x" }], ["baseline"]);
+test("benchmark provider can be overridden", async () => {
+  const results = await runBenchmark([{ id: "x", category: "minimal", task: "x" }], ["baseline"]);
   assert.equal(results[0].provider, "deterministic");
 });
 
-test("summary aggregates per mode and separates errors", () => {
-  const results = runBenchmark([{ id: "a", category: "minimal", task: "a" }, { id: "b", category: "reuse", task: "b" }], ["baseline", "lite", "full", "ultra"]);
+test("summary aggregates per mode and separates errors", async () => {
+  const results = await runBenchmark([{ id: "a", category: "minimal", task: "a" }, { id: "b", category: "reuse", task: "b" }], ["baseline", "lite", "full", "ultra"]);
   const summary = summarizeReport(results);
   assert.equal(summary.baseline.count, 2);
   assert.equal(summary.lite.count, 2);

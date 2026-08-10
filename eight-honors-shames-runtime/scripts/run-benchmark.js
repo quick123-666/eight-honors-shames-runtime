@@ -5,7 +5,6 @@ import fs from "node:fs";
 import path from "node:path";
 
 loadEnvFiles(resolveEnvFiles());
-
 const MODES = ["baseline", "lite", "full", "ultra"];
 const scenarios = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, "../benchmarks/scenarios/scenarios.json"), "utf8"));
 const provider = process.env.EIGHT_RULES_LLM || "deterministic";

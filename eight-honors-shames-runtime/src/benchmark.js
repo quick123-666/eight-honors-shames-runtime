@@ -75,6 +75,41 @@ function callOpenaiCompatible({ base, model, prompt, timeoutMs = 60000 }) {
   });
 }
 
+function callAnthropicCompatible({ base, model, prompt, timeoutMs = 60000 }) {
+  return withSecret("MINIMAX_API_KEY", (apiKey) => {
+    if (!apiKey) throw new LlmError("MINIMAX_API_KEY is not set", { code: "missing_api_key" });
+    const url = `${base.replace(/\/$/, "")}/v1/messages`;
+    const body = JSON.stringify({ model, max_tokens: 2048, messages: [{ role: "user", content: prompt }] });
+    // 用 node 原生 fetch（不用 curl）—— 避免 Windows Git Bash 管道把 UTF-8 中文转成 GBK 乱码
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    return fetch(url, {
+      method: "POST",
+      headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "Content-Type": "application/json" },
+      body,
+      signal: controller.signal
+    }).then(async (resp) => {
+      clearTimeout(timer);
+      const httpStatus = resp.status;
+      const raw = await resp.text();
+      let parsed;
+      try { parsed = JSON.parse(raw); } catch { throw new LlmError(`non-JSON response (HTTP ${httpStatus})`, { status: httpStatus, code: "non_json", body: raw.slice(0, 500) }); }
+      if (httpStatus < 200 || httpStatus >= 300) {
+        const message = parsed?.error?.message || `HTTP ${httpStatus}`;
+        throw new LlmError(`LLM HTTP ${httpStatus}: ${message}`, { status: httpStatus, code: parsed?.error?.type || "http_error", body: JSON.stringify(parsed).slice(0, 500) });
+      }
+      if (parsed?.error) throw new LlmError(`LLM error: ${parsed.error.message || "unknown"}`, { status: httpStatus, code: parsed.error.type || "api_error", body: JSON.stringify(parsed).slice(0, 500) });
+      const content = parsed.content?.[0]?.text || "";
+      if (!content) throw new LlmError("LLM returned no content", { status: httpStatus, code: "no_content", body: JSON.stringify(parsed).slice(0, 500) });
+      return { content, usage: parsed.usage || { prompt_tokens: roughTokens(prompt), completion_tokens: 0 }, httpStatus };
+    }).catch((err) => {
+      clearTimeout(timer);
+      if (err?.name === "AbortError") throw new LlmError(`request aborted after ${timeoutMs}ms`, { code: "timeout" });
+      throw err instanceof LlmError ? err : new LlmError(`fetch transport error: ${err.message}`, { code: "transport_error" });
+    });
+  });
+}
+
 function deterministicRun(scenario, mode, prompt) {
   const violations = [];
   for (const forbidden of scenario.forbidden || []) {
@@ -98,7 +133,19 @@ function deterministicRun(scenario, mode, prompt) {
 
 function llmProvider() { return process.env.EIGHT_RULES_LLM || "deterministic"; }
 
-function executeScenario(scenario, mode) {
+// 允许从 Pi 的 auth.json 读取 MiniMax key，避免把 key 写进 .env / 对话
+function loadMinimaxKeyFromPi() {
+  if (process.env.MINIMAX_API_KEY) return process.env.MINIMAX_API_KEY;
+  try {
+    const home = process.env.USERPROFILE || process.env.HOME;
+    const auth = JSON.parse(fs.readFileSync(`${home}/.pi/agent/auth.json`, "utf8"));
+    const key = auth["minimax-cn"]?.key || auth.minimax;
+    if (key && typeof key === "string") return key;
+  } catch {}
+  return null;
+}
+
+async function executeScenario(scenario, mode) {
   const prompt = buildPrompt(scenario, mode);
   const ruleSize = {
     fullInjectedChars: mode === "off" ? 0 : fullInstructions(mode).length,
@@ -108,23 +155,60 @@ function executeScenario(scenario, mode) {
     promptTokens: roughTokens(prompt)
   };
   const provider = llmProvider();
-  if (provider !== "openai") {
-    const run = deterministicRun(scenario, mode, prompt);
-    return { scenario: scenario.id, category: scenario.category, mode, ruleSize, score: run.score, violations: run.violations, output: run.output, usage: { prompt_tokens: ruleSize.promptTokens, completion_tokens: roughTokens(run.output) }, provider: run.provider, status: "ok", at: nowIso() };
+  if (provider === "minimax") {
+    const apiKey = loadMinimaxKeyFromPi();
+    if (!apiKey) return { scenario: scenario.id, category: scenario.category, mode, ruleSize, score: null, violations: [], output: "", usage: null, provider: "minimax:MiniMax-M3", status: "error", error: { name: "LlmError", message: "no MiniMax key available (env MINIMAX_API_KEY or ~/.pi/agent/auth.json)", code: "missing_key" }, at: nowIso() };
+    process.env.MINIMAX_API_KEY = apiKey; // 供 withSecret 使用，仅进程内存
+    const startedAt = Date.now();
+    try {
+      const { content, usage, httpStatus } = await callAnthropicCompatible({ base: process.env.MINIMAX_BASE_URL || "https://api.minimaxi.com/anthropic", model: process.env.MINIMAX_MODEL || "MiniMax-M3", prompt });
+      const judged = scoreRealOutput(scenario, content);
+      return { scenario: scenario.id, category: scenario.category, mode, ruleSize, score: judged.score, hit: judged.hit, violated: judged.violated, violations: judged.violated, output: content, usage, provider: `minimax:${process.env.MINIMAX_MODEL || "MiniMax-M3"}`, httpStatus, status: "ok", durationMs: Date.now() - startedAt, at: nowIso() };
+    } catch (error) {
+      return { scenario: scenario.id, category: scenario.category, mode, ruleSize, score: null, violations: [], output: "", usage: null, provider: `minimax:${process.env.MINIMAX_MODEL || "MiniMax-M3"}`, status: "error", error: { name: error.name, message: error.message, code: error.code, httpStatus: error.status }, durationMs: Date.now() - startedAt, at: nowIso() };
+    }
   }
-  const env = requiredKeysPresent();
-  if (!env.present) return { scenario: scenario.id, category: scenario.category, mode, ruleSize, score: null, violations: [], output: "", usage: null, provider: `openai:${process.env.OPENAI_MODEL || "gpt-4o-mini"}`, status: "error", error: { name: "LlmError", message: `missing env: ${env.missing.join(", ")}`, code: "missing_env" }, at: nowIso() };
-  const startedAt = Date.now();
-  try {
-    const { content, usage, httpStatus } = callOpenaiCompatible({ base: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1", model: process.env.OPENAI_MODEL || "gpt-4o-mini", prompt });
-    return { scenario: scenario.id, category: scenario.category, mode, ruleSize, score: null, violations: [], output: content, usage, provider: `openai:${process.env.OPENAI_MODEL || "gpt-4o-mini"}`, httpStatus, status: "ok", durationMs: Date.now() - startedAt, at: nowIso() };
-  } catch (error) {
-    return { scenario: scenario.id, category: scenario.category, mode, ruleSize, score: null, violations: [], output: "", usage: null, provider: `openai:${process.env.OPENAI_MODEL || "gpt-4o-mini"}`, status: "error", error: { name: error.name, message: error.message, code: error.code, httpStatus: error.status }, durationMs: Date.now() - startedAt, at: nowIso() };
+  if (provider === "openai") {
+    const env = requiredKeysPresent();
+    if (!env.present) return { scenario: scenario.id, category: scenario.category, mode, ruleSize, score: null, violations: [], output: "", usage: null, provider: `openai:${process.env.OPENAI_MODEL || "gpt-4o-mini"}`, status: "error", error: { name: "LlmError", message: `missing env: ${env.missing.join(", ")}`, code: "missing_env" }, at: nowIso() };
+    const startedAt = Date.now();
+    try {
+      const { content, usage, httpStatus } = callOpenaiCompatible({ base: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1", model: process.env.OPENAI_MODEL || "gpt-4o-mini", prompt });
+      return { scenario: scenario.id, category: scenario.category, mode, ruleSize, score: null, violations: [], output: content, usage, provider: `openai:${process.env.OPENAI_MODEL || "gpt-4o-mini"}`, httpStatus, status: "ok", durationMs: Date.now() - startedAt, at: nowIso() };
+    } catch (error) {
+      return { scenario: scenario.id, category: scenario.category, mode, ruleSize, score: null, violations: [], output: "", usage: null, provider: `openai:${process.env.OPENAI_MODEL || "gpt-4o-mini"}`, status: "error", error: { name: error.name, message: error.message, code: error.code, httpStatus: error.status }, durationMs: Date.now() - startedAt, at: nowIso() };
+    }
   }
+  const run = deterministicRun(scenario, mode, prompt);
+  return { scenario: scenario.id, category: scenario.category, mode, ruleSize, score: run.score, violations: run.violations, output: run.output, usage: { prompt_tokens: ruleSize.promptTokens, completion_tokens: roughTokens(run.output) }, provider: run.provider, status: "ok", at: nowIso() };
 }
 
-function runBenchmark(scenarios, modes = MODES) {
-  return modes.flatMap((mode) => scenarios.map((scenario) => executeScenario(scenario, mode)));
+function scoreRealOutput(scenario, output) {
+  // 客观评分: 基于成功标准关键词命中 + 禁止项未命中，规则透明可复现
+  if (!output) return { score: 0, hit: [], violated: [] };
+  const text = output.toLowerCase();
+  const hit = (scenario.successCriteria || []).filter((c) => {
+    const kw = c.replace(/^禁:|^通过:|^使用|^必须|^引用|^没有|^不/, "").split(/[\s,，。;；:：]/)[0].trim();
+    return kw && text.includes(kw.toLowerCase());
+  });
+  const violated = (scenario.forbidden || []).filter((f) => {
+    const kw = f.replace(/^禁:/, "").split(/[\s,，。;；:：]/)[0].trim();
+    return kw && text.includes(kw.toLowerCase());
+  });
+  const total = (scenario.successCriteria || []).length;
+  const base = total ? (hit.length / total) * 70 : 50;
+  const penalty = violated.length * 15;
+  return { score: Math.max(0, Math.round(base - penalty)), hit, violated };
+}
+
+async function runBenchmark(scenarios, modes = MODES) {
+  const results = [];
+  for (const mode of modes) {
+    for (const scenario of scenarios) {
+      results.push(await executeScenario(scenario, mode));
+    }
+  }
+  return results;
 }
 
 function writeBenchmarkReport(results, file) {
@@ -133,7 +217,15 @@ function writeBenchmarkReport(results, file) {
   return file;
 }
 
-export { summarizeReport, runBenchmark, writeBenchmarkReport, callOpenaiCompatible, LlmError, executeScenario, buildPrompt };
+export { summarizeReport, runBenchmark, writeBenchmarkReport, callOpenaiCompatible, callAnthropicCompatible, LlmError, executeScenario, buildPrompt };
+
+function usageTokens(usage) {
+  if (!usage) return { prompt: 0, completion: 0 };
+  return {
+    prompt: usage.prompt_tokens ?? usage.input_tokens ?? 0,
+    completion: usage.completion_tokens ?? usage.output_tokens ?? 0
+  };
+}
 
 function summarizeReport(results) {
   const byMode = {};
@@ -149,8 +241,9 @@ function summarizeReport(results) {
     } else {
       v.ok += 1;
       v.score += typeof r.score === "number" ? r.score : 0;
-      v.promptTokens += r.usage?.prompt_tokens || r.ruleSize?.promptTokens || 0;
-      v.completionTokens += r.usage?.completion_tokens || 0;
+      const { prompt, completion } = usageTokens(r.usage);
+      v.promptTokens += prompt || r.ruleSize?.promptTokens || 0;
+      v.completionTokens += completion;
       v.violations += r.violations?.length || 0;
     }
   }
