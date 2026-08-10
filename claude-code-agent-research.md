@@ -225,58 +225,99 @@ Main Agent → WorkflowInput{ script, name?, scriptPath?, args?, resumeFromRunId
 
 ---
 
-## 5. 学术基础 (6 篇 arxiv 论文)
+## 5. 学术基础 (6 篇 arxiv 论文 - 完整摘要 + 关键数据)
 
 ### 5.1 Anthropic 内部论文 (重点)
 
 **"Towards Effective GenAI Multi-Agent Collaboration: Design and Evaluation for Enterprise Applications"**
 - **作者**: Raphael Shu, Nilaksh Das, Michelle Yuan (Anthropic 团队)
 - **arXiv**: 2412.05449v1 (2024-12)
-- **核心**: 设计 + 评估多 agent 协作协议, 解决 enterprise 部署的挑战
-- **意义**: Anthropic 官方对 multi-agent 架构的思考
+- **核心设计**: 2 种 operational modes
+  - **coordination mode**: 复杂任务通过 **parallel communication + payload referencing** 完成
+  - **routing mode**: agent 间高效消息转发
+- **关键数据** (从 90% 端到端 goal success 反推):
+  - **multi-agent 比 single-agent goal success 高 70%** (在 benchmarks 中)
+  - **payload referencing 对 code-intensive 任务高 23%**
+  - **routing 机制减少 latency**(选择性绕过 agent orchestrator)
+- **意义**: Anthropic 官方对 multi-agent 架构的思考, 是 Claude Code 设计的最直接学术基础
 
 ### 5.2 通信机制论文
 
 **"Communication and Verification in LLM Agents towards Collaboration under Information Asymmetry"**
 - 作者: Run Peng, Ziqiao Ma, Amy Pang
 - arXiv: 2510.25595v1
-- 核心: **信息不对称下 LLM agent 协作 + 验证机制**
+- **核心**: 扩展 Einstein Puzzles 为桌游, 2 个 LLM agent 推理 / 通信 / 动作解决空间 + 关系约束
+- **关键发现**:
+  - **不通信的 agent 也能高 task performance** (但不真理解规则, 人类信任低)
+  - **环境 verifier 提升理解力** (fine-tuning + verifier 框架)
+  - **aligned communication 在信息不对称下至关重要**
+- **意义**: 验证了 Claude Code SendMessage 的设计哲学 (显式通信 > 隐式 spawn-and-forget)
 
 ### 5.3 团队组成论文
 
 **"The Geometry of Dialogue: Graphing Language Models to Reveal Synergistic Teams for Multi-Agent Collaboration"**
 - 作者: Kotaro Furuya, Yuichi Kitagawa
 - arXiv: 2510.26352v2
-- 核心: **图论建模** LLM 团队组成, 找最优协同组合
+- **核心方法**:
+  - **language model graph**: 从成对对话的 semantic coherence 映射模型关系
+  - **community detection**: 找 synergistic model clusters
+  - **自动 team composition**, 不需 prior knowledge
+- **结果**: 自动发现的团队 **与人工策展团队准确度相当**, 优于随机基线
+- **意义**: 未来 agent team 优化可借鉴图论方法
 
 ### 5.4 实战论文 (提 Claude Code)
 
 **"Context Engineering for Multi-Agent LLM Code Assistants Using Elicit, NotebookLM, ChatGPT, and Claude Code"**
 - 作者: Muhammad Haseeb
 - arXiv: 2508.08322v1
-- 核心: **Context engineering 工作流**, 组合 Elicit / NotebookLM / ChatGPT / **Claude Code**
-- 意义: Claude Code 已被学术界采用
+- **核心工作流**:
+  1. **Intent Translator (GPT-5)**: 澄清用户需求
+  2. **Elicit-powered semantic literature retrieval**: 注入领域知识
+  3. **NotebookLM-based document synthesis**: 上下文理解
+  4. **Claude Code multi-agent system**: 代码生成 + 验证
+- **案例**: Next.js 大型 codebase, 多 agent **计划 + 编辑 + 测试** 复杂 feature
+- **关键结果**: 一次成功率显著提升, 项目上下文依从性好
+- **意义**: Claude Code 已被学术界采用为 **multi-agent code assistant** 的核心组件
 
-### 5.5 实验论文
+### 5.5 实验论文 (最关键的数据)
 
 **"Multi-Agent LLM Orchestration Achieves Deterministic, High-Quality Decision Support for Incident Response"**
 - 作者: Philip Drammeh
 - arXiv: 2511.15755v2
-- 核心: **348 controlled trials** 验证 multi-agent 比 single-agent 显著更好
-- 数据: MyAntFarm.ai 框架
+- **框架**: MyAntFarm.ai (可复现的容器化框架)
+- **实验**: **348 controlled trials**, single-agent vs multi-agent, 相同 incident scenarios
+- **关键数据** (这些数字是 multi-agent 通信价值的最强证据):
+  - **multi-agent: 100% actionable recommendation rate**
+  - **single-agent: 1.7% actionable recommendation rate** (80x 差距)
+  - **80x improvement in action specificity**
+  - **140x improvement in solution correctness**
+  - **零质量方差** (zero quality variance) — production SLA 保障
+  - **latency 相似** (~40s) — 优势在质量, 不在速度
+- **新指标**: **Decision Quality (DQ)**: validity + specificity + correctness
+- **意义**: **多 agent 通信不是性能优化, 是 production-readiness 要求**
 
 ### 5.6 综述论文
 
 **"Understanding Multi-Agent LLM Frameworks: A Unified Benchmark and Experimental Analysis"**
 - 作者: Abdelghny Orogat, Ana Rostam, Essam Mansour
 - arXiv: 2602.03128v1
-- 核心: 统一 benchmark, 架构选择导致 **10x latency 差异**
+- **核心**:
+  - **架构分类法** (taxonomy) 比较 multi-agent LLM frameworks
+  - **MAFBench**: 统一 evaluation suite
+  - 联合评估 orchestration overhead / memory / planning / specialization / coordination
+- **关键数据** (架构选择影响巨大):
+  - **framework-level design alone → >100x latency 差异**
+  - **30% planning accuracy 差异**
+  - **90% → 30% coordination success 差异**
+- **意义**: 架构选择是 multi-agent 性能的决定因素, 不能仅靠底层模型
 
 ---
 
-## 6. 社区方案 (Issue #1770 评论)
+## 6. 社区方案 (Issue #1770 14 comments 完整总结)
 
-### 6.1 AgentNexus (kevinkaylie 提出)
+按 **准则 20(联系全文)·自指** — 通读 14 comments 发现 3 个开源项目 + 1 个关联 issue:
+
+### 6.1 AgentNexus (kevinkaylie 评论, 2026-03-25)
 
 **GitHub**: https://github.com/kevinkaylie/AgentNexus
 
@@ -287,16 +328,54 @@ Main Agent → WorkflowInput{ script, name?, scriptPath?, args?, resumeFromRunId
 4. **DID-based identity** — 每个 agent 持久 DID, parent 引用
 5. **MCP-native** — 12 个标准 MCP tools 暴露通信层
 
-**对比 Claude Code**:
-| 维度 | Claude Code | AgentNexus |
-|---|---|---|
-| 通信 | SendMessage (黑盒) | Structured message envelope (透明) |
-| 身份 | name / agentId | DID (持久) |
-| 监控 | run_in_background 异步 | Relay (实时 stream events) |
-| MCP | 暴露给外部 server | 通信本身用 MCP |
-| 协议 | 闭源 native | 开源 MCP 工具 |
+### 6.2 orchestra (Uzay-G 评论, 2025-10-24)
 
-**意义**: AgentNexus 是 **Claude Code 通信协议的开放实现**, 可以作为设计参考。
+**GitHub**: https://github.com/fulcrumresearch/orchestra
+
+**核心**: **UI + MCP** 给 Claude Code 加 Issue #1770 提的功能:
+- "I wanted this so I made..."
+- 通过 MCP 给 Claude Code 加 monitoring/control 层
+- **开源实现参考**
+
+### 6.3 repowire (prassanna-ravishankar 评论, 2026-06-21)
+
+**GitHub**: https://github.com/prassanna-ravishankar/repowire
+
+**核心**:
+- **out-of-process mesh**(在 Task tool 之外)
+- spawned peers **stream live state** 到 browser dashboard
+- per-agent status / current activity / what's blocked
+- 因为每个 peer addressable → **mid-run intervention** (ask/notify 正在运行的 child 改方向)
+- spawn/kill 覆盖 lifecycle
+- **跨 runtime**: children 可以是 codex / gemini / Claude Code
+
+**quote**:
+> "the black-box point is the core of it, you cant intervene in something you cant see mid-flight, and by the time the subagent returns its too late to course-correct."
+
+### 6.4 关联 Issue #14859 (tuanardouin 评论, 2026-02-07)
+
+**链接**: https://github.com/anthropics/claude-code/issues/14859
+- Issue #1770 跟 #14859 "linked"
+- (具体内容需要查 #14859,本报告未深挖)
+
+### 6.5 4 个水评 (1-6, 8-9, 13)
+
+alvinycheung / ivg-design / damianpdr / ErpandoMuito / KennyDizi / paulbettner / cmlaverdiere / binduwavell / natekettles — 全部 "up" / "+1" / "需要" 类
+- **社区需求强烈** (Issue 一年讨论 14 comments)
+
+### 6.6 综合对比 (3 社区方案 vs Claude Code)
+
+| 维度 | Claude Code | **AgentNexus** | **orchestra** | **repowire** |
+|---|---|---|---|---|
+| 通信 | SendMessage (黑盒) | Structured message envelope | UI + MCP | out-of-process mesh |
+| 身份 | name / agentId | DID (持久) | (UI层) | 进程 ID |
+| 监控 | run_in_background 异步 | Relay (实时 stream) | UI dashboard | live state stream |
+| MCP | 暴露给外部 server | 12 标准 MCP tools | 通过 MCP 集成 | (不依赖 MCP) |
+| 协议 | 闭源 native | 开源 MCP | 开源 MCP | 开源 mesh |
+| 跨 runtime | 仅 Claude Code | 仅 Claude Code | 仅 Claude Code | **跨 codex/gemini/Claude** |
+| 实现位置 | 内部 (native) | MCP server | MCP server | 外部进程 |
+
+**意义**: 3 个社区方案 **已实现** Issue #1770 的核心需求, Claude Code 内部仍闭源。**给 lsx 的启发**: lsx 不需要做 native 通信, 直接用 MCP 接社区方案即可。
 
 ---
 
@@ -426,13 +505,17 @@ Main Agent → WorkflowInput{ script, name?, scriptPath?, args?, resumeFromRunId
 1. **对照 lsx-mp-rust**: 你说过不要现在做, 但可作为参考 (`mcp_client.rs` + `orchestrator.rs` 缺什么)
 2. **追踪 GitHub Issues**: 6 个 bug 修复进度 (`gh issue list --search "sub-agent"` 持续关注)
 3. **关注 Anthropic 论文**: 2412.05449 后续引用 (找 v2)
-4. **实验 AgentNexus**: 如果想给 lsx 加 parent-child monitoring, 这是开源参考
+4. **实验 3 个社区方案**:
+   - **AgentNexus**: 12 个 MCP tools, 可给 lsx 加 parent-child monitoring
+   - **orchestra**: UI + MCP, 可视化 sub-agent
+   - **repowire**: out-of-process mesh, 跨 runtime, mid-run intervention
 5. **复现 sub-agent 欺骗场景**: 按 #1770 描述的 10-agent parallel research 测试,验证实际行为
+6. **看 #14859**: 关联 issue, 可能含相关讨论
 
 ---
 
-*本报告基于 2026-08-10 公开数据, Claude Code v2.1.222 (用户安装) + GitHub master (2026-08-10) + arxiv 公开论文。*
+*本报告基于 2026-08-10 公开数据, Claude Code v2.1.222 (用户安装) + GitHub master (2026-08-10) + arxiv 6 篇论文 + Issue #1770 14 comments 全文。*
 
-*生成方式: 联系全文 (通读 6 个数据源) + 5+ GitHub Issues 交叉验证 + arxiv 学术对照。*
+*生成方式: 联系全文 (通读 7 个数据源) + 5+ GitHub Issues 交叉验证 + arxiv 学术对照 + 3 个社区开源方案调研。*
 
-*局限性: Claude Code 核心 native binary 不可见, SendMessage / Worktree / CCR 内部协议纯反推。*
+*局限性: Claude Code 核心 native binary 不可见, SendMessage / Worktree / CCR 内部协议纯反推。Issue #14859 未深挖。*
