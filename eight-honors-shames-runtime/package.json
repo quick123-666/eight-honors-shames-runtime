@@ -1,6 +1,6 @@
 {
   "name": "eight-honors-shames-runtime",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "八荣八耻 AI 编程纪律的 Pi 运行时、审计、基准与验收工具",
   "type": "module",
   "private": true,
@@ -11,9 +11,15 @@
     "accept": "node scripts/run-quality-gates.js"
   },
   "pi": {
-    "extensions": ["./pi-extension/index.js"],
-    "skills": ["./skills"]
+    "extensions": [
+      "./pi-extension/index.js"
+    ],
+    "skills": [
+      "./skills"
+    ]
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "license": "MIT"
 }
