@@ -106,7 +106,7 @@ async function callWithTools({ base, model, messages, maxTokens = 2048, timeoutM
 }
 
 // ============ Agentic Loop ============
-export async function runToolEnvTask({ base, model, task, root, maxSteps = 12, onStep, prepare }) {
+export async function runToolEnvTask({ base, model, task, root, maxSteps = 20, onStep, prepare }) {
   // prepare: 由调用方决定如何初始化 root（如复制模板+git init）
   if (prepare) {
     await prepare(root);
@@ -153,12 +153,29 @@ export async function runToolEnvTask({ base, model, task, root, maxSteps = 12, o
       onStep?.(step, tu.name, tu.input, exec);
     }
 
-    // 拼回 tool_result
-    const toolResultBlocks = results.map(({ tu, exec }) => ({
-      type: "tool_result",
-      tool_use_id: tu.id,
-      content: exec.ok ? (exec.content ?? exec.stdout ?? JSON.stringify(exec).slice(0, 5000)) : `ERROR: ${exec.error}`
-    }));
+    // 连续多步没写代码 → 注入提醒（防止模型陷入探索/诊断循环）
+    const writeCount = steps.filter((s) => s.kind === "tool" && s.name === "write_file").length;
+    const noWriteStreak = step >= 6 && writeCount === 0;
+
+    // 拼回 tool_result：FAIL 时明确标注退出码，避免模型误以为工具故障
+    const toolResultBlocks = results.map(({ tu, exec }) => {
+      let content;
+      if (exec.ok) {
+        content = exec.content ?? exec.stdout ?? JSON.stringify(exec).slice(0, 5000);
+      } else {
+        const detail = exec.stdout || exec.stderr || exec.error || "";
+        content = `命令退出码 ${exec.exitCode}（这是测试/命令失败，不是工具故障）。输出:\n${String(detail).slice(0, 8000)}`;
+      }
+      return { type: "tool_result", tool_use_id: tu.id, content };
+    });
+    // 没写代码的提醒注入到 tool_result 之前
+    if (noWriteStreak) {
+      toolResultBlocks.push({
+        type: "tool_result",
+        tool_use_id: results[0]?.tu?.id || "sys",
+        content: `提醒：你已经探索/排查了多步，但还没用 write_file 修改任何文件。任务要求必须实际写代码完成修改。请立刻用 write_file 完成核心修改，再运行测试验证。`
+      });
+    }
     messages.push(
       { role: "assistant", content: content.map((c) => (c.type === "tool_use" ? c : { type: "text", text: c.text })) },
       { role: "user", content: toolResultBlocks }

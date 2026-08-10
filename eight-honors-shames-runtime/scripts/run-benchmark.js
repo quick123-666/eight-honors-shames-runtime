@@ -17,7 +17,7 @@ if (provider === "openai") {
   console.log(`# secret summary: ${JSON.stringify(secretSummary())}`);
 }
 console.log("");
-const results = runBenchmark(scenarios, MODES);
+const results = await runBenchmark(scenarios, MODES);
 const file = writeBenchmarkReport(results, path.join(import.meta.dirname, "../benchmarks/reports/latest.json"));
 const summary = summarizeReport(results);
 console.log("## 总览");
