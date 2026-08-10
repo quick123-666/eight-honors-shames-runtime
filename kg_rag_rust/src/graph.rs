@@ -135,7 +135,9 @@ impl KnowledgeGraph {
     /// BFS 多跳遍历:从起始实体扩展 depth 跳,返回推理路径 + 证据
     pub fn traverse(&self, start: &[String], depth: u32) -> Vec<TraversalHop> {
         let mut out = Vec::new();
-        let mut visited: std::collections::HashSet<String> = std::collections::HashSet::new();
+        // 起点预标记 visited:起点是遍历出发点而非“新发现”节点,
+        // 避免成环图无意义回跳起点(与参考实现:起点不算路径节点一致)
+        let mut visited: std::collections::HashSet<String> = start.iter().cloned().collect();
         let mut frontier: Vec<(String, String)> = start // (node, path_so_far)
             .iter()
             .map(|n| (n.clone(), n.clone()))

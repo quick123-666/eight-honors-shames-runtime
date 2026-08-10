@@ -9,11 +9,7 @@
 //!   kg_rag_rust ask "<问题>" [--depth 2] [--data data/graph.json]
 //!   kg_rag_rust clear [--data data/graph.json]
 //!   kg_rag_rust stats [--data data/graph.json]
-mod answer;
-mod graph;
-mod llm;
-mod models;
-mod semantic;
+use kg_rag_rust::{answer, graph, llm, models, semantic};
 
 use anyhow::{Context, Result};
 
