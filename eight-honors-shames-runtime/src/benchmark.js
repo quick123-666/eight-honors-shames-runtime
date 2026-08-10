@@ -1,10 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { fullInstructions, summarize } from "../src/rules.js";
-import { rulesVersion, rulesPath } from "../src/config.js";
+import { fullInstructions, summarize, rulesVersion, rulesPath } from "../src/core.js";
 import { loadEnvFiles, resolveEnvFiles, secretSummary, requiredKeysPresent, rejectIfSecretsInText } from "../src/env.js";
-import { withSecret, reportSecrets } from "../src/secrets.js";
+import { withSecret, reportSecrets } from "../src/env.js";
 
 loadEnvFiles(resolveEnvFiles());
 

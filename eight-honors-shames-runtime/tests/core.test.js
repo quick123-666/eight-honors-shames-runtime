@@ -1,14 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildInstructions, fullInstructions, normalizeMode, resolveMode, summarize } from "../src/rules.js";
+import { buildInstructions, fullInstructions, normalizeMode, resolveMode, summarize, readLatestRules, rulesVersion, extractPrinciples } from "../src/core.js";
 import { parseCommand } from "../pi-extension/index.js";
 import { checkAnnotations } from "../src/annotations.js";
-import { readLatestRules, rulesVersion, extractPrinciples } from "../src/config.js";
 import { auditRepository } from "../src/audit.js";
 import { acceptanceReport } from "../src/acceptance.js";
-import { acceptanceSummary, createAcceptanceState, resolveSessionMode } from "../src/state.js";
+import { acceptanceSummary, createAcceptanceState, resolveSessionMode } from "../src/acceptance.js";
+import { applyDotenv, loadDotenv, parseDotenv, resolveEnvFiles } from "../src/env.js";
 import { runBenchmark, summarizeReport } from "../src/benchmark.js";
-import { applyDotenv, loadDotenv, parseDotenv, resolveEnvFiles } from "../src/dotenv.js";
 
 test("runtime reads the latest project rules", () => {
   const text = readLatestRules();
@@ -109,12 +108,12 @@ test("env loader reads OPENAI_* and rejects secret leakage into output", async (
 });
 
 test("mode arbitration respects source priority", async () => {
-  const { resolveMode } = await import("../src/mode.js");
-  assert.equal(resolveMode({ command: "lite", env: "full", config: "ultra" }).mode, "lite");
-  assert.equal(resolveMode({ env: "lite", config: "ultra" }).mode, "lite");
-  assert.equal(resolveMode({ config: "lite" }).mode, "lite");
-  assert.equal(resolveMode({}).mode, "full");
-  assert.equal(resolveMode({}, "lite").mode, "lite");
+  const { arbitrateMode } = await import("../src/core.js");
+  assert.equal(arbitrateMode({ command: "lite", env: "full", config: "ultra" }).mode, "lite");
+  assert.equal(arbitrateMode({ env: "lite", config: "ultra" }).mode, "lite");
+  assert.equal(arbitrateMode({ config: "lite" }).mode, "lite");
+  assert.equal(arbitrateMode({}).mode, "full");
+  assert.equal(arbitrateMode({}, "lite").mode, "lite");
 });
 
 test("lifecycle decisions are isolated per phase", async () => {

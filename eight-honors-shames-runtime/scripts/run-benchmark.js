@@ -1,6 +1,6 @@
 import { runBenchmark, writeBenchmarkReport, summarizeReport } from "../src/benchmark.js";
 import { resolveEnvFiles, loadEnvFiles, requiredKeysPresent, secretSummary } from "../src/env.js";
-import { rulesVersion, rulesPath } from "../src/config.js";
+import { rulesVersion, rulesPath } from "../src/core.js";
 import fs from "node:fs";
 import path from "node:path";
 

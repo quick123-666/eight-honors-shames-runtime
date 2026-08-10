@@ -1,12 +1,10 @@
 import { lifecycleConfigSync, sessionStartInjection, agentStartInjection, toolCallInjection, subagentInheritanceMode } from "../src/lifecycle.js";
-import { createAcceptanceState, loadState, resolveSessionMode, saveState } from "../src/state.js";
+import { createAcceptanceState, loadState, resolveSessionMode, saveState } from "../src/acceptance.js";
 import { acceptanceReport } from "../src/acceptance.js";
 import { auditRepository } from "../src/audit.js";
-import { resolveMode as arbitrateMode } from "../src/mode.js";
-import { loadEnvFiles, resolveEnvFiles, rejectIfSecretsInText } from "../src/env.js";
-import { withSecret } from "../src/secrets.js";
-import { buildInstructions, fullInstructions, summarize, DEFAULT_MODE, normalizeMode } from "../src/rules.js";
-import { getDefaultMode, writeDefaultMode, rulesVersion, rulesPath } from "../src/config.js";
+import { arbitrateMode } from "../src/core.js";
+import { loadEnvFiles, resolveEnvFiles, rejectIfSecretsInText, withSecret } from "../src/env.js";
+import { buildInstructions, fullInstructions, summarize, DEFAULT_MODE, normalizeMode, getDefaultMode, writeDefaultMode, rulesVersion, rulesPath } from "../src/core.js";
 
 loadEnvFiles(resolveEnvFiles());
 

@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { summarize, fullInstructions } from "./rules.js";
+import { summarize, fullInstructions } from "./core.js";
 
 const DEFAULTS = Object.freeze({
   sessionStartFull: true,

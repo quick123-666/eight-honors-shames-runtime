@@ -1,4 +1,4 @@
-import { fullInstructions, summarize } from "../src/rules.js";
+import { fullInstructions, summarize } from "../src/core.js";
 
 function roughTokens(text) {
   if (!text) return 0;
