@@ -179,4 +179,4 @@ skills/            5 个技能（review/audit/acceptance/benchmark/annotation）
 
 ---
 
-*MIT · 八荣八耻 Runtime v0.2.0 · 规则来源: ../RULES.md (20 条准则)*
+*MIT · 八荣八耻 Runtime v0.2.1 · 规则来源: ../RULES.md (20 条准则)*
