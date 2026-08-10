@@ -1,0 +1,4 @@
+[rules-benchmark]
+name = "rules-benchmark"
+description = "运行 /rules benchmark 动作（benchmark 语义见 skills/eight-rules-benchmark）"
+usage = "/rules benchmark"

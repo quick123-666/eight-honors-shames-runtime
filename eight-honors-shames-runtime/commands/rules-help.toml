@@ -1,0 +1,4 @@
+[rules-help]
+name = "rules-help"
+description = "运行 /rules help 动作（help 语义见 skills/eight-rules-help）"
+usage = "/rules help"
