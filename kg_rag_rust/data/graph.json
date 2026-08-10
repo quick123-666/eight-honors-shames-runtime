@@ -1,0 +1,695 @@
+{
+  "nodes": {
+    "Claude Code": {
+      "etype": "tool",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 2",
+          "text": "Anthropic 的 agentic coding tool, 33 tools, v2.1.222 (主报告 § 2)"
+        }
+      ]
+    },
+    "Anthropic": {
+      "etype": "company",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 2",
+          "text": "Claude Code 开发者, 内部论文 2412.05449 (主报告 § 2)"
+        }
+      ]
+    },
+    "MCP": {
+      "etype": "protocol",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 13.1",
+          "text": "Model Context Protocol, stdio JSON-RPC, Claude Code 是 client (主报告 § 13.1)"
+        }
+      ]
+    },
+    "SendMessage": {
+      "etype": "mechanism",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 2.2",
+          "text": "Claude Code agent-to-agent 寻址通信 (name/agentId/taskId) (主报告 § 2.2)"
+        }
+      ]
+    },
+    "Worktree": {
+      "etype": "mechanism",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 2.2",
+          "text": "git worktree 物理隔离 (EnterWorktreeInput/ExitWorktreeInput) (主报告 § 2.2)"
+        }
+      ]
+    },
+    "Workflow": {
+      "etype": "mechanism",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 2.2",
+          "text": "script 编排 (agent/parallel/pipeline/phase + resumeFromRunId) (主报告 § 2.2)"
+        }
+      ]
+    },
+    "AgentNexus": {
+      "etype": "open_source_project",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 11.3",
+          "text": "DID + Relay + 证据交换 + Agent Society 框架, 9 stars (主报告 § 11.3)"
+        }
+      ]
+    },
+    "orchestra": {
+      "etype": "open_source_project",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 11.4",
+          "text": "designer/executor/monitor 三层 agent + TUI, 41 stars (主报告 § 11.4)"
+        }
+      ]
+    },
+    "repowire": {
+      "etype": "open_source_project",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 11.5",
+          "text": "5 runtime (Claude Code/Opencode/Codex/Antigravity/Pi) 跨机器 mesh, 247 stars (主报告 § 11.5)"
+        }
+      ]
+    },
+    "arxiv:2412.05449": {
+      "etype": "paper",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 5.1",
+          "text": "Anthropic 内部 - Towards Effective GenAI Multi-Agent Collaboration (主报告 § 5.1)"
+        }
+      ]
+    },
+    "arxiv:2510.25595": {
+      "etype": "paper",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 5.2",
+          "text": "Communication and Verification in LLM Agents (主报告 § 5.2)"
+        }
+      ]
+    },
+    "arxiv:2510.26352": {
+      "etype": "paper",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 5.3",
+          "text": "The Geometry of Dialogue (图论建模) (主报告 § 5.3)"
+        }
+      ]
+    },
+    "arxiv:2508.08322": {
+      "etype": "paper",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 5.4",
+          "text": "Context Engineering for Multi-Agent LLM Code Assistants (主报告 § 5.4)"
+        }
+      ]
+    },
+    "arxiv:2511.15755": {
+      "etype": "paper",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 5.5",
+          "text": "MyAntFarm.ai - 348 controlled trials, 80x/140x improvement (主报告 § 5.5)"
+        }
+      ]
+    },
+    "arxiv:2602.03128": {
+      "etype": "paper",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 5.6",
+          "text": "Understanding Multi-Agent LLM Frameworks (综述) (主报告 § 5.6)"
+        }
+      ]
+    },
+    "Issue#1770": {
+      "etype": "github_issue",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 3.3",
+          "text": "Parent-Child Agent Communication, 14 comments (主报告 § 3.3)"
+        }
+      ]
+    },
+    "Issue#14859": {
+      "etype": "github_issue",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 11.1",
+          "text": "Hook events 共享 session_id, linked from #1770 (主报告 § 11.1)"
+        }
+      ]
+    },
+    "Issue#80036": {
+      "etype": "github_issue_bug",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 3.3",
+          "text": "Subagent tool stripped in nested calls (主报告 § 3.3)"
+        }
+      ]
+    },
+    "Issue#80082": {
+      "etype": "github_issue_bug",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 3.3",
+          "text": "Subagent concurrent-running cap undocumented (主报告 § 3.3)"
+        }
+      ]
+    },
+    "Issue#84118": {
+      "etype": "github_issue_bug",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 3.3",
+          "text": "Subagent enumeration incomplete (42/4) (主报告 § 3.3)"
+        }
+      ]
+    },
+    "Issue#85230": {
+      "etype": "github_issue_bug",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 3.3",
+          "text": "Background subagents lose MCP resources (主报告 § 3.3)"
+        }
+      ]
+    },
+    "Issue#85307": {
+      "etype": "github_issue_bug",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 3.3",
+          "text": "MCP instructions routing inverted (主报告 § 3.3)"
+        }
+      ]
+    },
+    "sub-agent": {
+      "etype": "concept",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 2.2",
+          "text": "Claude Code AgentTool 启动的子 agent (主报告 § 2.2)"
+        }
+      ]
+    },
+    "background-agent": {
+      "etype": "concept",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 3.1",
+          "text": "2.1.198 起 default, AgentOutput.async_launched (主报告 § 3.1)"
+        }
+      ]
+    },
+    "worktree-isolation": {
+      "etype": "concept",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 2.2",
+          "text": "isolation: 'worktree' 模式 (主报告 § 2.2)"
+        }
+      ]
+    },
+    "remote-agent": {
+      "etype": "concept",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 2.2",
+          "text": "isolation: 'remote' 模式 (CCR 云端) (主报告 § 2.2)"
+        }
+      ]
+    },
+    "agent-hierarchy": {
+      "etype": "concept",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 11.1",
+          "text": "parent_agent_id, Issue #14859 提案 (主报告 § 11.1)"
+        }
+      ]
+    },
+    "evidence-exchange": {
+      "etype": "concept",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 11.3",
+          "text": "AgentNexus 哲学: 框架标准化证据交换 (主报告 § 11.3)"
+        }
+      ]
+    },
+    "DID": {
+      "etype": "concept",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 11.3",
+          "text": "Decentralized Identifier, AgentNexus 持久 agent 身份 (主报告 § 11.3)"
+        }
+      ]
+    },
+    "Relay": {
+      "etype": "concept",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 11.3",
+          "text": "AgentNexus 监控/消息转发 (主报告 § 11.3)"
+        }
+      ]
+    },
+    "designer-agent": {
+      "etype": "pattern",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 11.4",
+          "text": "orchestra 角色: 拆分任务 (主报告 § 11.4)"
+        }
+      ]
+    },
+    "executor-agent": {
+      "etype": "pattern",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 11.4",
+          "text": "orchestra 角色: 执行任务 (主报告 § 11.4)"
+        }
+      ]
+    },
+    "monitor-agent": {
+      "etype": "pattern",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 11.4",
+          "text": "orchestra 角色: 监控 + 自动 nudge (主报告 § 11.4)"
+        }
+      ]
+    },
+    "sender-search": {
+      "etype": "concept",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 5.1",
+          "text": "Anthropic 内部论文 70% goal success 提升 (主报告 § 5.1)"
+        }
+      ]
+    },
+    "payload-referencing": {
+      "etype": "concept",
+      "mentions": [
+        {
+          "document": "claude-code-agent-research.md § 5.1",
+          "text": "Anthropic 内部论文 23% code-intensive 提升 (主报告 § 5.1)"
+        }
+      ]
+    }
+  },
+  "rels": [
+    {
+      "src": "Claude Code",
+      "rel": "publishedBy",
+      "dst": "Anthropic",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 2",
+          "text": "Claude Code publishedBy Anthropic (主报告 § 2)"
+        }
+      ]
+    },
+    {
+      "src": "Claude Code",
+      "rel": "uses",
+      "dst": "MCP",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 13.1",
+          "text": "McpInput 完全开放"
+        }
+      ]
+    },
+    {
+      "src": "Claude Code",
+      "rel": "hasMechanism",
+      "dst": "SendMessage",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 2.2",
+          "text": "寻址通信 name/agentId/taskId"
+        }
+      ]
+    },
+    {
+      "src": "Claude Code",
+      "rel": "hasMechanism",
+      "dst": "Worktree",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 2.2",
+          "text": "git worktree 物理隔离"
+        }
+      ]
+    },
+    {
+      "src": "Claude Code",
+      "rel": "hasMechanism",
+      "dst": "Workflow",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 2.2",
+          "text": "script 编排 + resumeFromRunId"
+        }
+      ]
+    },
+    {
+      "src": "Claude Code",
+      "rel": "hasConcept",
+      "dst": "sub-agent",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 2.2",
+          "text": "Claude Code hasConcept sub-agent (主报告 § 2.2)"
+        }
+      ]
+    },
+    {
+      "src": "Claude Code",
+      "rel": "hasConcept",
+      "dst": "background-agent",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 3.1",
+          "text": "2.1.198 起 default"
+        }
+      ]
+    },
+    {
+      "src": "Claude Code",
+      "rel": "hasConcept",
+      "dst": "worktree-isolation",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 2.2",
+          "text": "Claude Code hasConcept worktree-isolation (主报告 § 2.2)"
+        }
+      ]
+    },
+    {
+      "src": "Claude Code",
+      "rel": "hasConcept",
+      "dst": "remote-agent",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 2.2",
+          "text": "Claude Code hasConcept remote-agent (主报告 § 2.2)"
+        }
+      ]
+    },
+    {
+      "src": "Claude Code",
+      "rel": "hasIssue",
+      "dst": "Issue#1770",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 3.3",
+          "text": "14 comments"
+        }
+      ]
+    },
+    {
+      "src": "Claude Code",
+      "rel": "hasIssue",
+      "dst": "Issue#14859",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 11.1",
+          "text": "linked from #1770"
+        }
+      ]
+    },
+    {
+      "src": "Claude Code",
+      "rel": "hasIssue",
+      "dst": "Issue#80036",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 3.3",
+          "text": "Claude Code hasIssue Issue#80036 (主报告 § 3.3)"
+        }
+      ]
+    },
+    {
+      "src": "Claude Code",
+      "rel": "hasIssue",
+      "dst": "Issue#80082",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 3.3",
+          "text": "Claude Code hasIssue Issue#80082 (主报告 § 3.3)"
+        }
+      ]
+    },
+    {
+      "src": "Claude Code",
+      "rel": "hasIssue",
+      "dst": "Issue#84118",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 3.3",
+          "text": "Claude Code hasIssue Issue#84118 (主报告 § 3.3)"
+        }
+      ]
+    },
+    {
+      "src": "Claude Code",
+      "rel": "hasIssue",
+      "dst": "Issue#85230",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 3.3",
+          "text": "Claude Code hasIssue Issue#85230 (主报告 § 3.3)"
+        }
+      ]
+    },
+    {
+      "src": "Claude Code",
+      "rel": "hasIssue",
+      "dst": "Issue#85307",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 3.3",
+          "text": "Claude Code hasIssue Issue#85307 (主报告 § 3.3)"
+        }
+      ]
+    },
+    {
+      "src": "Issue#1770",
+      "rel": "linkedTo",
+      "dst": "Issue#14859",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 11.1",
+          "text": "tuanardouin 评论"
+        }
+      ]
+    },
+    {
+      "src": "Anthropic",
+      "rel": "published",
+      "dst": "arxiv:2412.05449",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 5.1",
+          "text": "Raphael Shu, Nilaksh Das, Michelle Yuan"
+        }
+      ]
+    },
+    {
+      "src": "arxiv:2412.05449",
+      "rel": "proves",
+      "dst": "sender-search",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 5.1",
+          "text": "70% goal success"
+        }
+      ]
+    },
+    {
+      "src": "arxiv:2412.05449",
+      "rel": "proves",
+      "dst": "payload-referencing",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 5.1",
+          "text": "23% code-intensive"
+        }
+      ]
+    },
+    {
+      "src": "arxiv:2511.15755",
+      "rel": "proves",
+      "dst": "multi-agent-orchestration",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 5.5",
+          "text": "80x / 140x / 100% vs 1.7%"
+        }
+      ]
+    },
+    {
+      "src": "Issue#1770",
+      "rel": "proposedAt",
+      "dst": "AgentNexus",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 11.3",
+          "text": "kevinkaylie 评论"
+        }
+      ]
+    },
+    {
+      "src": "Issue#1770",
+      "rel": "proposedAt",
+      "dst": "orchestra",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 11.4",
+          "text": "Uzay-G 评论"
+        }
+      ]
+    },
+    {
+      "src": "Issue#1770",
+      "rel": "proposedAt",
+      "dst": "repowire",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 11.5",
+          "text": "prassanna-ravishankar 评论"
+        }
+      ]
+    },
+    {
+      "src": "AgentNexus",
+      "rel": "proposes",
+      "dst": "evidence-exchange",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 11.3",
+          "text": "核心哲学"
+        }
+      ]
+    },
+    {
+      "src": "AgentNexus",
+      "rel": "uses",
+      "dst": "DID",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 11.3",
+          "text": "AgentNexus uses DID (主报告 § 11.3)"
+        }
+      ]
+    },
+    {
+      "src": "AgentNexus",
+      "rel": "uses",
+      "dst": "Relay",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 11.3",
+          "text": "AgentNexus uses Relay (主报告 § 11.3)"
+        }
+      ]
+    },
+    {
+      "src": "orchestra",
+      "rel": "usesPattern",
+      "dst": "designer-agent",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 11.4",
+          "text": "orchestra usesPattern designer-agent (主报告 § 11.4)"
+        }
+      ]
+    },
+    {
+      "src": "orchestra",
+      "rel": "usesPattern",
+      "dst": "executor-agent",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 11.4",
+          "text": "orchestra usesPattern executor-agent (主报告 § 11.4)"
+        }
+      ]
+    },
+    {
+      "src": "orchestra",
+      "rel": "usesPattern",
+      "dst": "monitor-agent",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 11.4",
+          "text": "orchestra usesPattern monitor-agent (主报告 § 11.4)"
+        }
+      ]
+    },
+    {
+      "src": "orchestra",
+      "rel": "implements",
+      "dst": "Issue#1770",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 11.4",
+          "text": "完整实现 提的 API"
+        }
+      ]
+    },
+    {
+      "src": "repowire",
+      "rel": "implements",
+      "dst": "Issue#1770",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 11.5",
+          "text": "5 runtime 跨机器 mesh"
+        }
+      ]
+    },
+    {
+      "src": "repowire",
+      "rel": "implements",
+      "dst": "Issue#14859",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 11.5",
+          "text": "mid-run intervention + scheduled check-in"
+        }
+      ]
+    },
+    {
+      "src": "arxiv:2508.08322",
+      "rel": "uses",
+      "dst": "Claude Code",
+      "evidence": [
+        {
+          "document": "claude-code-agent-research.md § 5.4",
+          "text": "Context Engineering with Claude Code"
+        }
+      ]
+    }
+  ]
+}
