@@ -1,0 +1,4 @@
+[rules-audit]
+name = "rules-audit"
+description = "运行 /rules audit 动作（audit 语义见 skills/eight-rules-audit）"
+usage = "/rules audit"

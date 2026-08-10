@@ -1,0 +1,4 @@
+[rules-accept]
+name = "rules-accept"
+description = "运行 /rules accept 动作（accept 语义见 skills/eight-rules-accept）"
+usage = "/rules accept"

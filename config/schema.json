@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Eight Rules Runtime Configuration",
+  "type": "object",
+  "properties": {
+    "secrets": {
+      "type": "object",
+      "description": "凭据。值通过 EIGHT_RULES_SECRETS_PATH 指向的文件或 .env 加载，本文件不存储明文。",
+      "properties": {
+        "openaiKey": { "type": "string", "sensitive": true, "description": "OpenAI 兼容端点 key，运行时仅以摘要形式可见" },
+        "openaiBase": { "type": "string", "sensitive": false, "description": "默认 https://api.deepseek.com/v1" },
+        "openaiModel": { "type": "string", "sensitive": false, "description": "默认 deepseek-chat" }
+      }
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["lite", "full", "ultra", "off"],
+      "description": "默认规则模式。被 /rules 命令和环境变量 EIGHT_RULES_DEFAULT_MODE 覆盖。",
+      "default": "full"
+    },
+    "lifecycle": {
+      "type": "object",
+      "description": "注入边界。",
+      "properties": {
+        "sessionStartFull": { "type": "boolean", "default": true, "description": "session_start 是否注入完整规则" },
+        "agentStartSummary": { "type": "boolean", "default": true, "description": "before_agent_start 是否注入摘要" },
+        "toolCallInject": { "type": "boolean", "default": false, "description": "before_tool_call 是否注入" },
+        "subagentInherit": { "type": "boolean", "default": false, "description": "subagent 是否继承当前模式" },
+        "nestedOff": { "type": "boolean", "default": true, "description": "嵌套 subagent 默认 off，避免上下文膨胀" }
+      }
+    },
+    "benchmarks": {
+      "type": "object",
+      "description": "真实 benchmark 边界。",
+      "properties": {
+        "realRoot": { "type": "string", "default": "benchmarks/real" },
+        "reportsDir": { "type": "string", "default": "benchmarks/real/reports" },
+        "scratchRoot": { "type": "string", "default": "benchmarks/real/scratch" }
+      }
+    }
+  }
+}

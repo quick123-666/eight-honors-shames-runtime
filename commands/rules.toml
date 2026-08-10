@@ -1,0 +1,9 @@
+# /rules 命令入口
+# 对标 ponytail commands/。各宿主按自身格式读取（Claude Code 用 .md, OpenCode 用 .md, Codex 用技能）
+# 这里用统一 .toml 描述语义，供宿主适配器转换。
+
+[rules]
+name = "rules"
+description = "管理八荣八耻运行时：设置/查询规则模式"
+usage = "/rules [lite|full|ultra|off|status|default <mode>]"
+args_schema = { mode = { type = "string", enum = ["lite", "full", "ultra", "off", "status", "default"], description = "目标模式或动作" } }

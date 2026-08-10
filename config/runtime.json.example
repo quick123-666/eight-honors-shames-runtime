@@ -1,0 +1,15 @@
+{
+  "mode": "full",
+  "lifecycle": {
+    "sessionStartFull": true,
+    "agentStartSummary": true,
+    "toolCallInject": false,
+    "subagentInherit": false,
+    "nestedOff": true
+  },
+  "benchmarks": {
+    "realRoot": "benchmarks/real",
+    "reportsDir": "benchmarks/real/reports",
+    "scratchRoot": "benchmarks/real/scratch"
+  }
+}
