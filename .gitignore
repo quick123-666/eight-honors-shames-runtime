@@ -7,3 +7,10 @@ benchmarks/reports/*.json
 *.local
 benchmarks/real/fake-express-app/
 benchmarks/real/scratch/
+
+# v1.0.1 增量:临时/草稿文件(避免误入仓)
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+docs/.drafts/

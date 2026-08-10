@@ -8,7 +8,7 @@
 
 **21 principles · cross-project core values · 81%+ token saved on rule injection · ready for 8+ AI tools**
 
-[![Version](https://img.shields.io/badge/version-v1.0.0-blue)](./package.json)
+[![Version](https://img.shields.io/badge/version-v1.0.1-blue)](./package.json)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 [![Tests](https://img.shields.io/badge/tests-27%20passed-brightgreen)](./tests)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-green)](./package.json)
@@ -219,6 +219,7 @@ SCENARIO=reuse-existing MODE=lite node scripts/run-toolenv-smoke.js
 | [`docs/lifecycle.md`](docs/lifecycle.md) | lifecycle hooks |
 | [`docs/rule-sync.md`](docs/rule-sync.md) | single-source sync mechanism |
 | [`docs/audit-2026-08-10.md`](docs/audit-2026-08-10.md) | interpretation audit (AI hallucination self-check) |
+| [`docs/THINKING_FORMAT.md`](docs/THINKING_FORMAT.md) | **v1.0.1+** Thinking stage annotation format (makes discipline visible & auditable) |
 
 ---
 

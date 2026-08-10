@@ -8,7 +8,7 @@
 
 **21 条准则 · 跨项目核心价值观 · 规则注入省 81%+ token · 8+ AI 工具即装即用**
 
-[![Version](https://img.shields.io/badge/version-v1.0.0-blue)](./package.json)
+[![Version](https://img.shields.io/badge/version-v1.0.1-blue)](./package.json)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 [![Tests](https://img.shields.io/badge/tests-27%20passed-brightgreen)](./tests)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-green)](./package.json)
@@ -224,6 +224,7 @@ SCENARIO=reuse-existing MODE=lite node scripts/run-toolenv-smoke.js
 | [`docs/lifecycle.md`](docs/lifecycle.md) | 生命周期钩子 |
 | [`docs/rule-sync.md`](docs/rule-sync.md) | 单一来源同步机制 |
 | [`docs/audit-2026-08-10.md`](docs/audit-2026-08-10.md) | 解释审计报告（AI 幻觉自查）|
+| [`docs/THINKING_FORMAT.md`](docs/THINKING_FORMAT.md) | **v1.0.1+** Thinking 阶段标格式规约(让协作纪律可见可审计) |
 
 ---
 
