@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
 import { fullInstructions, summarize, rulesVersion, rulesPath } from "../src/core.js";
 import { loadEnvFiles, resolveEnvFiles, secretSummary, requiredKeysPresent, rejectIfSecretsInText } from "../src/env.js";
 import { withSecret, reportSecrets } from "../src/env.js";
@@ -54,23 +53,33 @@ function callOpenaiCompatible({ base, model, prompt, timeoutMs = 60000 }) {
     if (!apiKey) throw new LlmError("OPENAI_API_KEY is not set", { code: "missing_api_key" });
     const url = `${base.replace(/\/$/, "")}/chat/completions`;
     const body = JSON.stringify({ model, messages: [{ role: "user", content: prompt }], temperature: 0 });
-    const r = spawnSync("curl", ["-sS", "-w", "\n__HTTP_STATUS__%{http_code}", "-X", "POST", url, "-H", `Authorization: Bearer ${apiKey}`, "-H", "Content-Type: application/json", "--max-time", String(Math.ceil(timeoutMs / 1000)), "-d", body], { encoding: "utf8", timeout: timeoutMs + 5000 });
-    if (r.error) throw new LlmError(`curl transport error: ${r.error.message}`, { code: "transport_error" });
-    if (r.signal) throw new LlmError(`curl aborted: signal=${r.signal}`, { code: "aborted" });
-    const stdout = r.stdout || "";
-    const [rawBody, statusLine] = stdout.split("__HTTP_STATUS__");
-    const httpStatus = Number(statusLine?.trim());
-    if (!Number.isFinite(httpStatus)) throw new LlmError("missing HTTP status from curl", { code: "no_status", body: stdout });
-    let parsed;
-    try { parsed = JSON.parse(rawBody); } catch { throw new LlmError(`non-JSON response (HTTP ${httpStatus})`, { status: httpStatus, code: "non_json", body: rawBody.slice(0, 500) }); }
-    if (httpStatus < 200 || httpStatus >= 300) {
-      const message = parsed?.error?.message || `HTTP ${httpStatus}`;
-      throw new LlmError(`LLM HTTP ${httpStatus}: ${message}`, { status: httpStatus, code: parsed?.error?.type || "http_error", body: JSON.stringify(parsed).slice(0, 500) });
-    }
-    if (parsed?.error) throw new LlmError(`LLM error: ${parsed.error.message || "unknown"}`, { status: httpStatus, code: parsed.error.type || "api_error", body: JSON.stringify(parsed).slice(0, 500) });
-    const choice = parsed.choices?.[0];
-    if (!choice) throw new LlmError("LLM returned no choices", { status: httpStatus, code: "no_choices", body: JSON.stringify(parsed).slice(0, 500) });
-    return { content: choice.message?.content || "", usage: parsed.usage || { prompt_tokens: roughTokens(prompt), completion_tokens: 0 }, httpStatus };
+    // 用 node 原生 fetch（不用 curl）—— 避免 Windows Git Bash 管道把 UTF-8 中文转成 GBK 乱码
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    return fetch(url, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body,
+      signal: controller.signal
+    }).then(async (resp) => {
+      clearTimeout(timer);
+      const httpStatus = resp.status;
+      const raw = await resp.text();
+      let parsed;
+      try { parsed = JSON.parse(raw); } catch { throw new LlmError(`non-JSON response (HTTP ${httpStatus})`, { status: httpStatus, code: "non_json", body: raw.slice(0, 500) }); }
+      if (httpStatus < 200 || httpStatus >= 300) {
+        const message = parsed?.error?.message || `HTTP ${httpStatus}`;
+        throw new LlmError(`LLM HTTP ${httpStatus}: ${message}`, { status: httpStatus, code: parsed?.error?.type || "http_error", body: JSON.stringify(parsed).slice(0, 500) });
+      }
+      if (parsed?.error) throw new LlmError(`LLM error: ${parsed.error.message || "unknown"}`, { status: httpStatus, code: parsed.error.type || "api_error", body: JSON.stringify(parsed).slice(0, 500) });
+      const choice = parsed.choices?.[0];
+      if (!choice) throw new LlmError("LLM returned no choices", { status: httpStatus, code: "no_choices", body: JSON.stringify(parsed).slice(0, 500) });
+      return { content: choice.message?.content || "", usage: parsed.usage || { prompt_tokens: roughTokens(prompt), completion_tokens: 0 }, httpStatus };
+    }).catch((err) => {
+      clearTimeout(timer);
+      if (err?.name === "AbortError") throw new LlmError(`request aborted after ${timeoutMs}ms`, { code: "timeout" });
+      throw err instanceof LlmError ? err : new LlmError(`fetch transport error: ${err.message}`, { code: "transport_error" });
+    });
   });
 }
 
@@ -172,7 +181,7 @@ async function executeScenario(scenario, mode) {
     if (!env.present) return { scenario: scenario.id, category: scenario.category, mode, ruleSize, score: null, violations: [], output: "", usage: null, provider: `openai:${process.env.OPENAI_MODEL || "gpt-4o-mini"}`, status: "error", error: { name: "LlmError", message: `missing env: ${env.missing.join(", ")}`, code: "missing_env" }, at: nowIso() };
     const startedAt = Date.now();
     try {
-      const { content, usage, httpStatus } = callOpenaiCompatible({ base: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1", model: process.env.OPENAI_MODEL || "gpt-4o-mini", prompt });
+      const { content, usage, httpStatus } = await callOpenaiCompatible({ base: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1", model: process.env.OPENAI_MODEL || "gpt-4o-mini", prompt });
       return { scenario: scenario.id, category: scenario.category, mode, ruleSize, score: null, violations: [], output: content, usage, provider: `openai:${process.env.OPENAI_MODEL || "gpt-4o-mini"}`, httpStatus, status: "ok", durationMs: Date.now() - startedAt, at: nowIso() };
     } catch (error) {
       return { scenario: scenario.id, category: scenario.category, mode, ruleSize, score: null, violations: [], output: "", usage: null, provider: `openai:${process.env.OPENAI_MODEL || "gpt-4o-mini"}`, status: "error", error: { name: error.name, message: error.message, code: error.code, httpStatus: error.status }, durationMs: Date.now() - startedAt, at: nowIso() };
