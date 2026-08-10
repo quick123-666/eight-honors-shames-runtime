@@ -512,10 +512,167 @@ alvinycheung / ivg-design / damianpdr / ErpandoMuito / KennyDizi / paulbettner /
 5. **复现 sub-agent 欺骗场景**: 按 #1770 描述的 10-agent parallel research 测试,验证实际行为
 6. **看 #14859**: 关联 issue, 可能含相关讨论
 
+## 11. 增量研究 v0.3 (Issue #14859 + 3 仓库深挖)
+
+### 11.1 Issue #14859 (linked from #1770)
+
+**GitHub**: https://github.com/anthropics/claude-code/issues/14859
+
+**标题**: [FEATURE] 1. Agent Hierarchy in Hook Events, 2. Intermediate Text Output Hook, 3. SubagentStart Hook
+
+**核心问题**: Hook events **共享同一 session_id**, 无法区分是哪个 agent 触发:
+1. **标识 agent 生成的 event** — 3 agent 并行 → 50+ event 无法归属
+2. **跟踪 sub-agent start** — 只有 `SubagentStop`, **没有 `SubagentStart`**
+3. **捕获 intermediate text output** — Claude 在 tool call 间的解释不暴露给 hook
+
+**提议 API**:
+```typescript
+interface HookEvent {
+  // Existing fields
+  session_id: string;
+  hook_event_type: string;
+  // New fields
+  agent_id?: string;            // Unique ID of the agent
+  parent_agent_id?: string;     // Hierarchy
+  // ...
+}
+```
+
+**11 个 comments**: 3 个水评 + 8 个 +1/需求确认 (社区需求强烈)
+
+### 11.2 3 个开源项目完整对比
+
+| 项目 | Stars | 架构 | 核心定位 |
+|---|---|---|---|
+| **AgentNexus** (kevinkaylie) | 9 | Python 3.10+ | "面向独立 Agent 的可信协作框架" — DID + Relay + 证据交换 + Agent Society |
+| **orchestra** (fulcrumresearch) | 41 | Python 3.10+ | "Multi-agent coding system + UI" — designer/executor/monitor 三种 agent 角色 |
+| **repowire** (prassanna-ravishankar) | 247 | Python 3.10+ | "May the agents talk" — 跨 runtime/跨机器 agent 通信 mesh |
+
+### 11.3 AgentNexus 详细 (9 stars, 547 tests)
+
+**GitHub**: https://github.com/kevinkaylie/AgentNexus
+
+**研究定位**: AgentNexus 的研究重点从 **Agent Communication** 转向 **Agent Collaboration**, 长期探索 **Agent Society**。目标不是再发明一种 Agent 通信协议, 而是定义**陌生、独立运营的 Agent 如何发现彼此、建立身份、请求元数据、交换证据、协商能力与权限、建立 Session、协同完成任务并留下可审计记录**。
+
+**3 条边界哲学**:
+1. **定义表达, 不定义真理** (Define expression, not truth)
+2. **交换证据, 不替代决策** (Exchange evidence, don't replace decisions)
+3. **支持协作, 不接管传输和行业规则** (Support collaboration, don't take over transport)
+
+**最重要原则**: **框架标准化的是证据交换, 而不是信任结论** (Framework standardizes evidence exchange, not trust conclusions)
+
+**RFC 体系** (Draft v0.3):
+| RFC | 内容 | 状态 |
+|---|---|---|
+| RFC-000 | 宪法: 设计哲学 / Non-Goals / 核心对象关系 | Draft v0.3 |
+| RFC-001 | 独立 Agent Discovery + Identity Establishment | Draft |
+| RFC-002 | Metadata Requirements + Evidence Exchange | Draft |
+| RFC-003 | Capability Negotiation + Delegation | Draft |
+
+**核心组件** (参考实现, 不是协议真理): **DID, Relay, Gatekeeper, Enclave, Playbook, Objective Loop**
+
+**意义**: AgentNexus 是**学术界 + 开源**的"Agent Society"尝试, 不在实现新通信, 在定义**陌生 Agent 如何协作**。
+
+### 11.4 orchestra 详细 (41 stars)
+
+**GitHub**: https://github.com/fulcrumresearch/orchestra
+**Demo**: https://www.youtube.com/watch?v=jEMFEJIvGs0
+
+**核心**: Multi-agent system + interface, **让 coding agent 并行 + 互相通信 + 监控** + 接收用户反馈
+
+**工作流** (来自 README):
+1. **你描述**需求 + 设计 → **designer agent 拆任务** → 启 **executor agent** 并行
+2. **executor agent 可跟 designer 通信**(被 block 时)
+3. **你可以 jump in** 到 executor 执行, 看工作, **stage changes** 到 source 目录
+4. **monitoring agent 自动检查** executor 工作是否符合 spec, 不符合自动 nudge
+
+**安装**: `pip install orchestra-code` / `uv tool install orchestra-code`
+**依赖**: git, claude-code, tmux, python, docker
+
+**使用场景** (来自 Fulcrum Research):
+- 复杂 feature plan 迭代 + 拆子任务
+- 同时多个独立 features
+- best-of-n 实现 (多 agent 竞争)
+- 高信任度代码 review (orchestra monitor)
+
+**意义**: orchestra 实现了 **Issue #1770 提的完整功能**: designer/executor/monitor 三层 agent 架构 + 通信 + monitoring, 但**作为独立工具** (不依赖 Claude Code 内部 API)
+
+### 11.5 repowire 详细 (247 stars — 最成熟)
+
+**GitHub**: https://github.com/prassanna-ravishankar/repowire
+**Docs**: https://docs.repowire.io
+**PyPI**: https://pypi.org/project/repowire/
+
+**Slogan**: "May the agents talk"
+**描述**: "Let your coding agents talk to each other"
+
+**支持 agent runtime** (5 个, Claude Code 是其中之一):
+- **Claude Code**
+- **Opencode**
+- **Codex**
+- **Antigravity**
+- **Pi**
+
+**架构** (3 层):
+- 跨 **repo** (一个 repo agent 向另一个 repo 提问)
+- 跨 **机器** (本地 daemon + 可选 hosted relay)
+- 跨 **UI** (浏览器 dashboard + Telegram 手机)
+
+**核心能力**:
+- 给 agent 名字
+- **互相 send messages**, 无需复制粘贴
+- **local control layer** for multi-agent work
+- 提问 / 发送更新 / 调度提醒 / 协调者 session
+- **mid-run intervention** (nudge 在跑 agent)
+- **scheduled check-in** (session 自我唤醒)
+
+**安装**:
+```bash
+curl -sSf https://raw.githubusercontent.com/prassanna-ravishankar/repowire/main/install.sh | sh
+repowire setup
+```
+
+**要求**: macOS / Linux, Python 3.10+, tmux
+
+**运行模式** (来自 README):
+```bash
+# tmux window 1
+cd ~/projects/project-a && claude
+# tmux window 2
+cd ~/projects/project-b && codex
+# repowire 让两个 agent 互相通信
+```
+
+**网络**:
+- **local daemon** (本机) 默认
+- **hosted relay** (可选) 用 outbound connection for remote dashboard + 跨机器 mesh
+
+**意义**: repowire 是**最成熟**的跨 agent 通信方案 (247 stars vs 9/41), **Claude Code + Codex + Pi + Opencode + Antigravity 5 个 runtime 都支持**, 跟 Issue #1770 + #14859 需求完全契合
+
+### 11.6 3 仓库综合对照
+
+| 维度 | AgentNexus | orchestra | repowire |
+|---|---|---|---|
+| **定位** | 学术 + RFC 框架 | 工具 + UI | 成熟跨 runtime mesh |
+| **成熟度** | 早期 (9 stars) | 中 (41 stars) | **成熟 (247 stars)** |
+| **Claude Code 集成** | MCP 12 tools | 替代 / 外部 | hook + 集成 |
+| **跨 runtime** | 否 | 否 | **是 (5 个 runtime)** |
+| **跨机器** | 否 | 否 | **是 (hosted relay)** |
+| **协议** | RFC-000/001/002/003 (DID/Relay) | 自研 | 自研 mesh |
+| **UI** | 无 (CLI) | **有 (designer + executor)** | **有 (dashboard + Telegram)** |
+| **监控** | Relay (理论) | **monitoring agent** | **live state stream** |
+| **可审计** | **证据交换 (核心)** | 弱 | 中 |
+
+**给 lsx 的启发** (按 **准则 18(帮助解难)+ 准则 19(联系全文)·自指**):
+- 不需要自己实现通信协议, **直接 MCP 接 repowire 风格的能力** 即可
+- lsx 当前 `mcp_client.rs` 是 MCP client, 完美适配 AgentNexus 12 tools
+- 跨 session 通信可参考 orchestra 的 designer/executor/monitor 模式
+- 跨 runtime 不需考虑 (lsx 是单 runtime), 但**证据交换**(AgentNexus 哲学) 适合加到 lsx 的方法树
+
 ---
 
-*本报告基于 2026-08-10 公开数据, Claude Code v2.1.222 (用户安装) + GitHub master (2026-08-10) + arxiv 6 篇论文 + Issue #1770 14 comments 全文。*
+*本报告基于 2026-08-10 公开数据, Claude Code v2.1.222 (用户安装) + GitHub master (2026-08-10) + arxiv 6 篇论文 + Issue #1770 14 comments 全文 + Issue #14859 11 comments + AgentNexus/orchestra/repowire 3 仓库完整调研。*
 
-*生成方式: 联系全文 (通读 7 个数据源) + 5+ GitHub Issues 交叉验证 + arxiv 学术对照 + 3 个社区开源方案调研。*
+*生成方式: 联系全文 (通读 10 个数据源) + 6+ GitHub Issues 交叉验证 + arxiv 学术对照 + 3 个社区开源方案深挖。*
 
-*局限性: Claude Code 核心 native binary 不可见, SendMessage / Worktree / CCR 内部协议纯反推。Issue #14859 未深挖。*
+*局限性: Claude Code 核心 native binary 不可见, SendMessage / Worktree / CCR 内部协议纯反推。3 仓库未实际运行 (只读 README + 元信息), 需本地验证。*
