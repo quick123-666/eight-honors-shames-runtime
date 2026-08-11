@@ -8,7 +8,7 @@
 
 **21 principles · cross-project core values · 81%+ token saved on rule injection · ready for 8+ AI tools**
 
-[![Version](https://img.shields.io/badge/version-v1.1.0-blue)](./package.json)
+[![Version](https://img.shields.io/badge/version-v1.1.1-blue)](./package.json)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 [![Tests](https://img.shields.io/badge/tests-27%20passed-brightgreen)](./tests)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-green)](./package.json)
