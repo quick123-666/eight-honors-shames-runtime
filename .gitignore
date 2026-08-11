@@ -14,3 +14,11 @@ benchmarks/real/scratch/
 .DS_Store
 Thumbs.db
 docs/.drafts/
+/docs/release-notes/
+/docs/release-notes/*
+/docs/release-notes/**
+docs/release-notes/v1.0.1.md
+# 以上 4 条全是为“GitHub Release 草稿不入仓”写的多规则兏底(Windows + Git Bash 下不同 shell 路径展开不一致)
+
+# 本地回收站(临时目录,不进 git)
+_recycle_bin/
