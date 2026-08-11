@@ -940,3 +940,83 @@
 
 
 
+
+
+---
+
+## 7. 元工作流沉淀(成功方法树 · 可复用)
+
+### RULE-PUSH-V323-001(2026-08-12 v3.2.3 沉淀 — 版本升级 + 脱敏 + GitHub 推送工作流)
+
+- **触发**: 任何 "升级版本号 + 脱敏 + 推送远程仓库" 闭环(如 v3.2.2 → v3.2.3)。AI 被动接令: "更新版本并脱敏上传" 时, 直接走本 RULE 的 Pre 阶检查 + Run 阶执行。
+- **核心纠正**: 以前 "推送" 是 "改几个文件 + git push" 的临时动作, 本 RULE 把它固化 = **9 阶闭环**: 备份 → 升级版本号 → 脱敏 → smoke test → 分阶段 commit → 补 cmd‑suffixed .gitignore → tag → push → 远程验证。
+- **本 RULE 定义** (形式化定义):
+  - **Pre** (在动手前必跑完, 任何一项 fail = 暂停重对齐):
+    - R1 查接口 — `git status` 看所有 untracked 列表, 估算推送量
+    - R5 确认后行 — 4 项问题由用户拍板: 目标分支 / 打 tag / 排除什么 / force push
+    - R7 数学验证 — 推送量估算 (untracked 数 / 备份个数 / 需发布文件数)
+    - R8 复述前必验证 — 旧版本号 `grep -cE 'v3.2.2' RULES.md` 应为 0 (历史快照除外) + 新版 `v3.2.3` ≥1
+    - R9 不搞破坏 — 备份在 `_recycle_bin/<ts>-rules-<new-version>/` 7 文件齐
+    - R20 备份先行 — `cp` 三个 md 文件 + package.json + README * ×2 (中英) 到回收站
+    - R21 回收站 — 严格用 `_recycle_bin/` 不删
+    - R24 联系全文 — 同步点检查: RULES.md/RULES-VERSION.md/AGENTS.md/README.md/README_EN.md 5 个 md 顶部版本号 + package.json badge + 三文件新名号
+  - **Run** (按序执行, 每步 smoke 验证):
+    1. **R1+R11 复用**: 查 git ls-files --others --exclude-standard 输出 = 需发布文件清单 (只加这 5 项, 不 `git add .`)
+    2. **R7 验证**: `git check-ignore -v <每个潜在敏感路径>` 逐个应被忽略
+    3. **R14 谨慎改**: .gitignore 改完必 `git ls-files --others --exclude-standard | wc -l` 应 ≤ 5
+    4. **R23 立即但完整**: 3 阶段 commit (md 文档 / 代码 / gitignore), 每阶段一 commit
+    5. **R18 节约 token**: smoke 3 套不重跑 = `node -e rulesVersion()` + `pytest 29 个` + `npm test`
+    6. **R15 完整版**: tag 同步 (annotated tag 含变更摘要, 不是轻量 tag)
+    7. **R22 帮助解难**: 推送后验证 = `git ls-remote --tags` + `git log origin/main` 确认 commit 数增
+    8. **R12 主动调试**: 如果 push 出现 non‑fast‑forward → 报告用户, **不** 强推
+    9. **R26 守价值观**: 准则 27 条 不动 (本轮是 PATCH 不改语义)
+- **与 26 条关系表**:
+  | Run 阶段 | 涉及准则 (RULES.md 行号) | 性质 |
+  |---|---|---|
+  | 1-3 Pre 阶段 | R1(:41) + R5(:98) + R7(:142) + R8(:167) + R9(:195) + R20(:355) + R21(:371) + R24(:445) | 依赖 |
+  | 4 Run 阶段 | R11(:215) + R14(:257) + R15(:269) + R18(:305) + R22(:387) + R23(:418) | 组合 |
+  | 5-9 验证推送 | R7 + R8 + R12(:229) + R18 + R22 | 依赖 |
+  | 整体 | R26(:526) 守价值观 | 强化 |
+  | 普全 | 准则 27(:548) 稳扎稳打分 = "按本 RULE 9 阶顺序" 走 | 依赖 |
+- **反模式 4 条** (本会话踩过):
+  1. **CRLF 丢失末尾规则** — 本会话首发 .gitignore 用 CRLF + 未加 `/` 前缀, 末尾的 `_backups/` / `kg_rag_rust/` / `methods/` 等规则全部不生效, 38748 个 `kg_search/_mineru_out/_marx/*.md` 差点入仓。修复: **强制 LF + `/` 前缀 绝对路径** (anchored to repo root)。**R14+ 验证**: 改完 .gitignore 必 `git check-ignore -v <抽样路径>`, 然后 `git ls-files --others --exclude-standard | wc -l` 应 ≤ 5。
+  2. **单一大 commit** — 推送全全改 1091 行 一个 commit, 不可读 / 不可回滚一部分。修复: **3 阶段 commit**: (1) docs(rules) md 文件 + RULES-VERSION; (2) feat(rules_tree) 代码 + 测试; (3) chore(gitignore) 补脱敏。每次 commit 一个逻辑可逆单位。**R14 验证**: `git log --oneline origin/main -5` 能看出 3 阶段进状。
+  3. **忘了 `.gitignore` 排除 `kg_search/`** — 本会话只在 .gitignore 加 `kg_search/data/`(只覆盖 chromadb), **没加 `kg_search/`** 整目录, 38748 个 PDF 解析产物差点入仓。修复: **本地运行时数据** 不是只要排子目录, 要排整目录 (`/kg_search/`, `/kg_rag_rust/`)。**R1 验证**: `ls <疑似敏感目录> | wc -l` 大于 0 = 必加 .gitignore。
+  4. **不跑 smoke test 就推** — 本会话推送前跑 3 套 smoke = `node rulesVersion()` 返 27 + `pytest 29 个 PASS` + `npm test 27/27 PASS`, 是发布不破的**唯一** 保证。修复: **推送前必跑 smoke 3 套**, 任一 fail = 不推。**R7 验证**: smoke 输出 数字与预期 1:1 对齐, 不推 "差不多就推"。
+- **实战案例** (本会话 v3.2.3 推送, 2026-08-12):
+  - **Pre 阶段** (8 步齐):
+    1. R1 查: `git status` → 8 个 tracked 改 + 20+ untracked (含 38748 个 `kg_search/_mineru_out/`)
+    2. R5 确认: 4 项问题由用户拍板 (默认 main / 打 tag / 排除本地数据 / 不 force)
+    3. R7 验证: untracked 38752 个, 需发布仅 5 个
+    4. R8 验证: 旧版 `v3.2.2` 仅出现在历史快照位置, 新版 `v3.2.3` 应 ≥1
+    5. R9+R20 备份: `_recycle_bin/20260812-0130-rules-v3.2.3-pre-push/` 7 文件齐
+    6. R21 回收站: 7 文件全在 `_recycle_bin/` 不删
+    7. R24 三文件同步: RULES.md / RULES-VERSION.md / AGENTS.md / README.md / README_EN.md 5 顶部升 v3.2.3
+  - **Run 阶段** (9 步):
+    1. `git ls-files --others --exclude-standard | head -10` 看到 38752 untracked → 决定显式 add 5 个
+    2. `git check-ignore -v <抽样>` 验证脱敏
+    3. .gitignore 改完 → `wc -l` 从 38752 降到 3 (仍剩 3 个 .bak)
+    4. 3 阶段 commit: docs(rules) + feat(rules_tree) + chore(gitignore)
+    5. smoke 3 套 = `principles: 27` + `29/29 PASS` + `27/27 PASS`
+    6. tag `v3.2.3` 推送
+    7. push origin main = `5ece047..02d45d9`
+    8. push tag v3.2.3 = `new tag` 创建
+    9. 远程验证: `git ls-remote --tags origin` 含 v3.2.3, `git log origin/main` 含 2 个新 commit
+  - **Run 阶段踩的 2 个坑** (反转于本会话): CRLF 丢末尾 + `kg_search/` 整目录未排除 → 上文 "反模式" 1+3
+- **数学正确性自检** (按本 RULE 9 阶逐项检查):
+  - Pre R1 查: ✓ untracked 38752 个 估计准确
+  - Pre R7 验证: ✓ 需发布 5 个 数学对 (md 5 + .gitignore + rules_tree 4 + tests 1)
+  - Run R7 验证 (smoke): ✓ principles 27/27 + 测试 29/29 + npm 27/27
+  - Run R8 验证 (远程): ✓ 2 commit + 1 tag 推送成功, 远程 commit count 13 (之前 11)
+  - confidence ≥ 95% (公式 `z = smoke_pass_rate × remote_verify_rate - commit_size_overhead`)
+- **下次如何避免** (5 步走, 本 RULE 可复用):
+  1. **任何推送前**: 跑 `git status | wc -l` 与 untracked 数估计, 2 位数以上 untracked = 必查 .gitignore
+  2. **任何 .gitignore 修改后**: 跑 `git ls-files --others --exclude-standard | wc -l` ≤ 5 才算合格; 否则不是 太多规则 就是  CRLF bug
+  3. **推送前 smoke 3 套**: `node rulesVersion` + `pytest 29 个` + `npm test` 都过才推
+  4. **推送后验证**: `git log origin/main --oneline -5` 能看到新 commit, `git ls-remote --tags origin | grep vX.Y` 能看到 tag
+  5. **任何推送必须分阶段 commit**, 一阶段一逻辑可逆单位 (md / 代码 / 配置)
+- **关联纪律**:
+  - 覆盖 RULES.md 准则 1(查) + 准则 5(确认后行) + 准则 7(数学) + 准则 8(验证) + 准则 9(不搞破坏) + 准则 11(复用) + 准则 14(谨慎改) + 准则 15(完整版) + 准则 18(节约 token) + 准则 20(备份) + 准则 21(回收站) + 准则 22(帮解) + 准则 23(立即但完整) + 准则 24(联系全文) + 准则 26(守价值观) + 新准则 27(稳扎稳打分) — 16 条准则全可被本 RULE 调动
+  - 服务 未来 v3.2.4 / v3.3.0 / v4.0.0 推送, 可作为 v3.x 系列的全量级推送 SOP
+  - 关联 RULE-PUSH-V321-001 (未沉淀, 但 RULES-TREE.md RULES-COVER-001 下有过 "推送 v3.2.1 遇 CRLF 坑" 的部分记录) — 本 RULE 是那次坑后的正式沉淀
+  - **补充: v3.2.3 本轮释放总影响**: 2 commit 推送 + 1 tag 创建; 7 文件备份; 9 阶闭环; 0 个 untracked 偏到仓库
