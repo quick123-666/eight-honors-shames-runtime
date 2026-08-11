@@ -62,6 +62,51 @@ def cmd_coverage(_):
     return 0
 
 
+def cmd_audit(args):
+    """算子使用率审计 — audit_text <text> 或 audit_rule <RULE-name>"""
+    if not args:
+        print("用法:")
+        print("  python -m rules_tree audit stdin   # 从 stdin 读取")
+        print("  python -m rules_tree audit rule RULE-PUSH-V323-001   # 从 RULES-TREE.md 提取")
+        return 2
+    sub = args[0]
+    if sub == "stdin":
+        text = sys.stdin.read()
+    elif sub == "rule":
+        from .audit import audit_text, format_report
+        import os
+        rule_name = args[1] if len(args) > 1 else "RULE-PUSH-V323-001"
+        rules_tree_path = os.path.join(os.path.dirname(__file__), "..", "RULES-TREE.md")
+        try:
+            with open(rules_tree_path, encoding="utf-8") as f:
+                content = f.read()
+        except FileNotFoundError:
+            print(f"❌ RULES-TREE.md 未找到: {rules_tree_path}")
+            return 1
+        # 提取 RULE 块
+        import re as _re
+        m = _re.search(rf"### {rule_name}.*?(?=\n### |\Z)", content, _re.DOTALL)
+        if not m:
+            print(f"❌ 找不到 RULE: {rule_name}")
+            return 1
+        text = m.group(0)
+    else:
+        print(f"❌ 未知 audit 子命令: {sub}")
+        return 2
+
+    from .audit import audit_text, format_report
+    audit = audit_text(text)
+    print(format_report(audit))
+    # 加总结
+    import rules_tree.operators as op
+    family = op.family_union()
+    used = set(audit["ruleset_hits"].keys())
+    activated_pre = sum(len(audit["operator_rule_evidence"][o]) for o in op.OPERATORS)
+    print()
+    print(f"算子家族总激活度: {activated_pre}/{len(family)} = {activated_pre/len(family):.1%}")
+    return 0
+
+
 def cmd_math_check(_):
     """4 个数学不变量检查"""
     import rules_tree.lln as lln
@@ -101,6 +146,7 @@ def main(argv):
         "operators": cmd_operators,
         "coverage": cmd_coverage,
         "math-check": cmd_math_check,
+        "audit": cmd_audit,
     }
     if sub not in table:
         print(f"❌ 未知子命令: {sub}\n可用: {', '.join(table)}")

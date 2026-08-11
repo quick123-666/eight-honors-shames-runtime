@@ -193,6 +193,27 @@ def t18():
     assert len(all_six) == 27
 
 
+@test("audit.py 可对 RULE 文本跑算子使用率审计")
+def t18b():
+    import os, re as _re
+    rules_tree_path = os.path.join(os.path.dirname(_OP_SNAP["__file__"]), "..", "RULES-TREE.md")
+    with open(rules_tree_path, encoding="utf-8") as f:
+        content = f.read()
+    # 提取 RULE-PUSH-V323-001
+    m = _re.search(r"### RULE-PUSH-V323-001.*?(?=\n### |\Z)", content, _re.DOTALL)
+    assert m, "RULE-PUSH-V323-001 应存在于 RULES-TREE.md"
+    from rules_tree.audit import audit_text
+    audit = audit_text(m.group(0))
+    # 1. 所有 6 算子应至少激活 1 个 Pre 准则 (不出现休眠算子)
+    for op_name, evidence in audit["operator_rule_evidence"].items():
+        assert len(evidence) > 0, f"算子 {op_name} 应被本次 RULE 激活, 但 Pre 集 0 命中"
+    # 2. 总激活度 >= 50% (RULE-PUSH-V323-001 覆盖 16 条准则, 总去重 27, 比例应高)
+    import rules_tree.operators as op
+    total = sum(len(audit["operator_rule_evidence"][o]) for o in op.OPERATORS)
+    coverage = total / len(op.family_union())
+    assert coverage >= 0.5, f"算子家族总激活度 {coverage:.1%} 应 ≥ 50%"
+
+
 @test("∧ 组合: RUN-THROUGH ∪ DEBUG = 12 条")
 def t19():
     s = _OP_SNAP["union"]("RUN-THROUGH", "DEBUG")
