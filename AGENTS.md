@@ -42,3 +42,17 @@
 - 修改规则核心时同步检查文档、模式、技能和基准场景。
 - 删除必须可恢复;大改前建立快照。
 - 命令输出简洁、结构化,并提供明确退出状态。
+
+## v1.1.1 升级(2026-08-11)
+
+- **核心合并**:把 lsx-mp-rust v2.2 体系的八荣八耻固化条款引入(RULES-TREE §3.5)
+- **7 条新 RULE 沉淀**:
+  - RULE-METHODTREE-QUALITY-001:method_tree 5 段必须非空
+  - RULE-DELIVERABLE-001:deliverable 必须落盘到指定路径
+  - RULE-FAIL-DIAG-001:失败诊断必须沉淀到 §6.7.5
+  - RULE-DOC-VS-CODE-001:文档级规则必须配套源码级实现
+  - RULE-ANCHOR-GUARD-001:ANCHOR 保护必须源码级拦截
+  - RULE-MR-UPGRADE-001:升级计划文档化
+  - RULE-MR-SUCCESS-MEANING-001:mr 工单 success 字段语义定义
+- **v1.1.0 → v1.1.1 实质改动**:从「同步基线」升级为「合并 lsx 八荣八耻固化」
+- **commit 信息**:v1.1.1 真实产生(不再被 rebase drop)

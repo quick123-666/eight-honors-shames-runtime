@@ -424,3 +424,22 @@
 
 *来源:社区一线 AI 编程踩坑总结(八耻八荣 · 原创整理于 2026-08-08)*
 *引入本项目:2026-08-09*
+---
+
+## v1.1.1 升级记录(2026-08-11)
+
+### 升级目标
+把 lsx-mp-rust 体系(RULES-TREE v2.2 + METHOD-TREE v2.2)的八荣八耻固化条款**合并**进脱敏版 RULES.md。
+
+### 7 条新 RULE(来源:RULES-TREE §3.5)
+1. **RULE-METHODTREE-QUALITY-001** —— method_tree 5 段必须非空(steps / 关键细节 / 问题 / skill / 经验)
+2. **RULE-DELIVERABLE-001** —— deliverable 必须落盘到指定路径(不是 stdout)
+3. **RULE-FAIL-DIAG-001** —— 失败诊断必须沉淀到失败诊断表(下次同类问题 30 秒内可定位)
+4. **RULE-DOC-VS-CODE-001** —— 文档级规则必须配套源码级实现(防「改文档不实现」)
+5. **RULE-ANCHOR-GUARD-001** —— ANCHOR 保护必须源码级拦截(防止「规则只在文档里没人执行」)
+6. **RULE-MR-UPGRADE-001** —— 升级计划文档化(每次发现问题必写 docs/upgrade-plan-YYYY-MM.md)
+7. **RULE-MR-SUCCESS-MEANING-001** —— mr 工单 success 字段语义定义(仅表示任务闭环,非实际目标成功)
+
+### 关键澄清
+- v1.1.0 → v1.1.1 不再是空升级(被 rebase drop),而是带 7 条新 RULE 的实质升级
+- badge v1.1.1 由  的 version 字段自动生成
