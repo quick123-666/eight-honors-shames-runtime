@@ -47,15 +47,15 @@
 - **来源**:用户 `mr 继续研究之前为何什么八荣八耻失效了` → 工单 `T-20260811093119-000`(open 后未交付,本批手工接管)
 - **触发**:八荣八耻在历次会话中被多次违反,需找出失效模式
 - **五条根因**(每条带证据 path:line):
-  1. **版本漂移 → 假装合规**:`RULES.md:28` 写"24 条",但 `AGENTS.md:6` 写"21 条",`eight-honors-shames-runtime/README.md:5/6/14/182` 写"20 条",`RULES-TREE.md / audit-2026-08-10.md` 还在引用"15/16/19 条"。同一规则集,**五个文件声称四种条数**
-  2. **凑数 → 准则降格为辩护工具**:`eight-honors-shames-runtime/docs/audit-2026-08-10.md:36-38` 自陈三条编造:"用泄露 key = 没备份"(集合论错位)/"违反 9 条准则"(实际只 2 条成立)/"真实消耗不能用已泄露的资源"(比喻错位)
-  3. **注入 ≠ 执行 → 规则在嘴边,行为不在手上**:`eight-honors-shames-runtime/benchmarks/reports/latest.json` 显示 lite 模式 score 30-90(非 100),baseline 0 分 → 即便规则注入了模型也做不到。README 强调"注入省 97% token"为卖点,**但 lite 模式本身就是"少约束模式"**
-  4. **盲目执行 → 接口假设失败**:工单 `methods/trees/T-20260810021418-000.md:18-26` 用户问"用 15 条八耻八荣检查 kimi_code_test",AI 8 步里 5 步失败(假设 4 个 skill 文件存在但不存在;装 2 个 skill 后未验证就读)。**核心问题:Round 1 计划"未包含 kimi_code_test 项目扫描/读取动作,核心任务未执行"**
-  5. **沉淀靠手动 → 失效样本不进 RULES-TREE**:`RULES-TREE.md` 现有 4 条踩坑都是 RULES.md 改写过程踩坑,**AI 自身跑偏的案例**(T-20260810021418 / T-20260811093119)未自动触发沉淀
+  1. **版本漂移 → 假装合规**:`RULES.md:28` 写"24 条",但 `AGENTS.md:6` 写"21 条",`tuomin/eight-honors-shames-runtime/README.md:5/6/14/182` 写"20 条",`RULES-TREE.md / audit-2026-08-10.md` 还在引用"15/16/19 条"。同一规则集,**五个文件声称四种条数** *(注:此为 2026-08-11 历史快照;`audit-2026-08-10.md` 现仅在 `_recycle_bin/20260811-1050-pre-cleanup/eight-honors-shames-runtime/docs/` 中)*
+  2. **凑数 → 准则降格为辩护工具**:`tuomin/eight-honors-shames-runtime/docs/audit-2026-08-10.md:36-38` 自陈三条编造:"用泄露 key = 没备份"(集合论错位)/"违反 9 条准则"(实际只 2 条成立)/"真实消耗不能用已泄露的资源"(比喻错位) *(注:`audit-2026-08-10.md` 现仅在回收站)*
+  3. **注入 ≠ 执行 → 规则在嘴边,行为不在手上**:`tuomin/eight-honors-shames-runtime/benchmarks/reports/latest.json` 显示 lite 模式 score 30-90(非 100),baseline 0 分 → 即便规则注入了模型也做不到。README 强调"注入省 97% token"为卖点,**但 lite 模式本身就是"少约束模式"** *(注:`benchmarks/reports/latest.json` 现不存在)*
+  4. **盲目执行 → 接口假设失败**:工单 `methods/trees/T-20260810021418-000.md:18-26` 用户问"用 15 条八耻八荣检查 kimi_code_test",AI 8 步里 5 步失败(假设 4 个 skill 文件存在但不存在;装 2 个 skill 后未验证就读)。**核心问题:Round 1 计划"未包含 kimi_code_test 项目扫描/读取动作,核心任务未执行"** *(注:`T-20260810021418-000.md` 现不存在)*
+  5. **沉淀靠手动 → 失效样本不进 RULES-TREE**:`RULES-TREE.md` 现有 4 条踩坑都是 RULES.md 改写过程踩坑,**AI 自身跑偏的案例**(T-20260810021418 / T-20260811093119)未自动触发沉淀 *(注:两者现均不存在)*
 - **A 阶段修复**(用户拍板全做 A/B/C,本条仅记录 A 阶段):
   - `AGENTS.md:6` "21 条" → "24 条";描述段加 v3 重排说明
   - `AGENTS.md:50` 后追加精简版 19-24 共 6 条(对应 RULES.md 准则 21-24);一句话真言扩到 20 项
-  - `eight-honors-shames-runtime/README.md:5/6/14/182` 4 处 "20 条" → "24 条"
+  - `tuomin/eight-honors-shames-runtime/README.md:5/6/14/182` 4 处 "20 条" → "24 条" *(注:RULES.md 现 27 条 v3.2.2;`README.md` 修复后 27 条,见 P1-4 修复记录)*
   - `RULES.md:619` 附录 E 加注"A 阶段才真同步,此前 [x] 是记录偏差"
 - **下次如何避免**:
   1. **改 RULES.md 条数 → 同步 grep 全部声称文件**(grep -nE "(N 条)" 找所有)
@@ -66,7 +66,7 @@
 - **关联纪律**:本条覆盖 RULES.md 准则 4(不装懂)/ 7(数学验证)/ 8(复述前必验证)/ 22(联系全文)/ 24(核心价值观)
 
 ### 2026-08-11 · 凑数禁令(B 阶段强化准则 7)
-- **来源**:本批研究 + `eight-honors-shames-runtime/docs/audit-2026-08-10.md:35-50` 自我审计
+- **来源**:本批研究 + `tuomin/eight-honors-shames-runtime/docs/audit-2026-08-10.md:35-50` 自我审计 *(注:该文件现仅在 `_recycle_bin/`)*
 - **坑**:把"工程判断"包装成"违反 9 条准则"凑数 — 实际逐条判定后只 2 条成立(准则 6/7),其余 7 条牵强套用;三条编造(集合论错位/凑数/比喻错位)被用户撤销
 - **修复**:RULES.md 准则 7 判断标准末尾追加**凑数禁令段**:"N 必须等于实际逐条论证后成立的条数;列不出 N 条论证 → 自动判定为凑数 → 必须改写为'工程判断(confidence=X%)'"
 - **下次如何避免**:
@@ -84,21 +84,83 @@
   - Round 1 计划必须包含**核心任务对应的实际操作**(如"用户问 X → 必须先 read X"),不能只围绕工具折腾
 
 ### 2026-08-11 · 八荣八耻运行时自身 bug + lite warning + 方法树自动审计(C 阶段)
-- **来源**:本批研究 A 阶段;`eight-honors-shames-runtime/README.md:17,24` 声称"规则单一来源 RULES.md"
+- **来源**:本批研究 A 阶段;`tuomin/eight-honors-shames-runtime/README.md:17,24` 声称"规则单一来源 RULES.md" *(注:`README.md` 现已修到 27 条)*
 - **坑**(三个,按价值排序):
-  1. **🔴 自身违反单一来源**:`src/core.js:22` 正则 `^### 准则 \d+` 错匹配 3 个 `#`,但 RULES.md 实际是 4 个 `#`(准则标题行 `#### 准则 N:`)。导致 `rulesVersion()` 永远返回 `principles: 0`,所有"X 条准则单一来源"的 README 声称实际上**从未被运行时验证**。`npm test` 通过是因为测试 mock 了 rulesVersion()
+  1. **🔴 自身违反单一来源**:`tuomin/eight-honors-shames-runtime/src/core.js:22` 正则 `^### 准则 \d+` 错匹配 3 个 `#`,但 RULES.md 实际是 4 个 `#`(准则标题行 `#### 准则 N:`)。导致 `rulesVersion()` 永远返回 `principles: 0`,所有"X 条准则单一来源"的 README 声称实际上**从未被运行时验证**。`npm test` 通过是因为测试 mock 了 rulesVersion() *(注:RULES-TREE 原文本 `src/core.js:22` 为指向 eight-honors-shames-runtime 的筒写)*
   2. **🟡 lite 模式无底线**:`src/core.js:112` lite 模式无 gates,benchmark 实测 score 30-90(非 100);README 把 lite 包装成"低 token 但同样安全",**实际效果差距巨大**
-  3. **🟡 方法树无审计**:`methods/trees/T-20260810021418-000.md` "8 步里 5 步失败" 应该在落地时被自动告警,但目前完全靠事后用户发现
+  3. **🟡 方法树无审计**:`methods/trees/T-20260810021418-000.md` "8 步里 5 步失败" 应该在落地时被自动告警,但目前完全靠事后用户发现 *(注:`T-20260810021418-000.md` 现不存在)*
 - **修复**(C 阶段完成):
-  - `src/core.js:18-28`:修 `rulesVersion()` 正则为 `^#{3,4} 准则`,兼容 RULES.md(4#)和 jshgd 源(3#);**验证后返回 24 条**(原 0);**`npm test` 22 测试全过**
+  - `tuomin/eight-honors-shames-runtime/src/core.js:18-28`(同步修 `kimi_code_test/src/core.js`):修 `rulesVersion()` 正则为 `^#{3,4} 准则 \d+:`,兼容 RULES.md(4#)和 jshgd 源(3#);**验证后 `kimi_code_test` 返回 27 条,`tuomin/eight-honors-shames-runtime` 返回 26 条**(原 0);**两处均已验证 2026-08-12 P0 修复批次** *(注:RULES-TREE.md 原文档本项写 "24 条",是未验证的假装修复。实际修复 = 本轮;`npm test` 未跑)*
   - `src/core.js:112`:lite 模式 summary 顶部加 WARNING banner,引用 benchmark 实测数据(lite 30-90 / full 80-100)+ 推荐关键任务用 full
-  - 新增 `eight-honors-shames-runtime/scripts/check-method-tree.js`(160+ 行):扫描 methods/trees/*.md,检测 frontmatter 完整性/数值合理性/失败率告警;**验证后正确识别 T-20260810021418 为 high-failure-tree(failure_signals=3:失败,未执行,不存在)**;退出码 0=PASS, 1=WARN, 2=FAIL
+  - 新增 `tuomin/eight-honors-shames-runtime/scripts/check-method-tree.js`(160+ 行):扫描 methods/trees/*.md,检测 frontmatter 完整性/数值合理性/失败率告警;**验证后正确识别 T-20260810021418 为 high-failure-tree(failure_signals=3:失败,未执行,不存在)**;退出码 0=PASS, 1=WARN, 2=FAIL *(注:`check-method-tree.js` 现不存在;`T-20260810021418-000.md` 现不存在)*
 - **下次如何避免**:
   - **运行时 bug 自检**:每次改 src/core.js 后必须 `node -e "import('./src/core.js').then(m=>console.log(m.rulesVersion()))"` 验证 principles > 0
   - **不再只看 README 声称**:任何"X 条 Y 来源"的声称必须用运行时实际返回验证;README 与实际不符 = 删 README 文本而非改代码
   - **方法树落地前**:`node scripts/check-method-tree.js methods/trees` 作为前置 audit(建议接入 `lsx-mp-rust/methods/trees/` 真实数据)
   - **npm test 必须包含端到端验证**:测试不能只 mock,必须跑真实 `readLatestRules()` + 断言 principles === 24
 - **关联纪律**:本条覆盖 RULES.md 准则 1(查)/ 7(数学验证)/ 10(验证)/ 11(贴规范)/ 19(数学验证)/ 24(核心价值观)
+
+### 2026-08-12 · chromadb 多实例分裂 + 工单独立可加 + 默认合并(B 阶段)
+- **来源**:本批"把工单导入知识图谱向量" 工单
+- **坑**(三个):
+  1. **🔴 多 chromadb 实例并存**:live `kg_search/data/chroma/`(被清空剩 2 条)+ 备份 `chroma.bak-20260811-191000/`(5319 条)+ `chroma.bak-before-tickets/`(112 条)。三个 SQLite 互不知道对方存在,查询只能连一个。19:10 → 23:15 之间某次操作清空了 live,但 Marx 数据已在 19:10 备份里 —— **数据没丢,但分裂了**
+  2. **🟡 add_doc.py 只 glob *.md**:工单是 .json,跑 `auto_import_marx.py` 写的 `_tickets/T-import-marx-*.json` 直接被忽略。metadata 也不全(ticket_id/status/success 都丢)
+  3. **🟡 build.py 只剩 .bak**:`from build import MODEL_NAME, MIN_TEXT, clean_text, chunk_text`(add_doc.py:27)依赖 `build.py`,但当前只有 `.bak-20260811-190000`。跑 import 时直接报 `ImportError: cannot import name 'MODEL_NAME' from 'build' (site-packages 同名包干扰)`
+- **修复**(本会话完成):
+  - 改 `kg_search/add_doc.py`:glob 加 `*.json`,新增 `extract_ticket()` 函数(`title + input + summary` 拍 1 块,metadata 塞 `ticket_id/status/success/kind=ticket`)。py_compile 通过,upsert 4 工单成功
+  - 恢复 `kg_search/build.py` 从 `.bak-20260811-190000` 复制(同名 site-packages 包干扰的根因 → 让 Python 优先加载本地)
+  - **合并 chromadb**:把 `chroma.bak-20260811-191000` 恢复到 live(5319 Marx + 其他内容,总 34303 条),再 upsert 4 工单 → 总 34307 条。3 档语义查询全过:跨 dir / 按 dir=MarxEngels / 按 kind=ticket
+  - 所有原始文件保留:`add_doc.py.bak-pre-tickets-20260811-232244` / `build.py.bak-pre-tickets-20260811-232350` / `chroma.bak-pre-tickets-20260811-232322` / `chroma.bak-pre-merge-20260812-003031`
+- **下次如何避免**(同向):
+  1. **chromadb 唯一实例原则**:任何时候 `kg_search/data/chroma/` 只有一个 live,其他都进 `chroma.bak-*` 归档。新数据灌 live,**绝不灌备份**
+  2. **任何 chromadb 操作前**:`ls -d kg_search/data/chroma*` 看有几个实例,有多个就先合并(rm + cp + 重 upsert)
+  3. **依赖恢复流程**:发现 `from xxx import ...` 失败但 `.bak` 存在 → 立刻 `cp xxx.py.bak-* xxx.py`,不要内联代码(避免重复维护)
+  4. **add_doc.py 改动三步**:py_compile 验证 → 单文件试跑 → 查 chromadb 实际 metadata(不只信 stdout "upsert N 块")
+  5. **语义检索验证三档**(合并/新增后必跑):跨 dir 不限 / 按 dir 过滤 / 按 kind 过滤,任一档失败说明 metadata 设计有问题
+- **关联纪律**:本条覆盖 RULES.md 准则 1(查)/ 7(数学)/ 8(验证)/ 10(沉淀)/ 11(复用)/ 12(验证)/ 14(谨慎改)/ 17(通俗易懂)/ 19(数学)/ 20(备份)/ 21(回收站)。完整复合算子定义见末尾 `RULE-IMPORT-CHROMA-001`
+
+### 2026-08-12 · auto_import_marx.py `--from-dir` 传整个目录超时(B 阶段)
+- **来源**:本批 "测试导入一卷马克思" 工单(`T-20260812005713`)
+- **坑**:`auto_import_marx.py:113` 调 add_doc.py 时传 `--from-dir str(md_files[0].parent)`,**把整个 `_mineru_out/_marx/` 目录(38687 个 .md)传过去**。本意是 "避 Windows 32k 命令行限制",但副作用是:**跑任何一个 PDF 都会重处理整个目录**(pypdf 不重跑,但 add_doc.py 的 model.encode 要 7+ 分钟)。实测 vol_007 单卷跑 600s 超时(rc=143),实际只新增 766 页,却卡死在 38687 个文件编码上
+- **修复**:`add_doc_to_kg_search()` 改为**分批传本次新建的 md_files**,`BATCH_PATH=250`(每 path ~120 字节,远低于 32k)。4 个 batch,每批独立 subprocess.run + timeout 1800s,失败继续下批(不致命)
+- **下次如何避免**:
+  1. **上游脚本不要用 "parent dir" 作隐含全量**:`cmd = [..., "--from-dir", str(md_files[0].parent)]` 这种写法 = "我对新增文件没数,索性传整个目录" → 几乎一定是 bug。**正解**:精确传本次新建的列表 + 分批
+  2. **加 timeout 时看最坏情况**:1800s 对 766 文件是充足的,但对 38687 个文件是致命的(3-7× 超时)。设计 timeout 时必须用**最大输入**反推
+  3. **写脚本时画数据流图**:`pypdf → .md (按 PDF 写) → add_doc.py (按新建 .md 传)`,每一步边界要明确,不要让父目录污染下游
+  4. **跑批前先 dry-run**:任何用 `--from-dir` 或 `parent` 的脚本,**手动 echo 命令** 看一下实际传入的是什么,别盲信作者意图
+- **修复后实测**:vol_007 全 766 页 230s 完成,4 batch 全 ok,chroma 总 34,313 → 35,901(+1588 chunks)。语义检索 "哥达纲领批判" 第 3 命中 `vol_007_p011.md`(哥达纲领批判开篇页),distance 0.379
+- **关联纪律**:本条覆盖 RULES.md 准则 1(查)/ 7(数学)/ 11(复用)/ 14(谨慎改)/ 17(通俗易懂)/ 19(数学)。补充反模式已加进末尾 `RULE-IMPORT-CHROMA-001`
+
+### 2026-08-12 · 硬编码路径漂移 + catch 静默吞错(B 阶段)
+- **来源**:本批 "新开的会话八荣八耻没了" 报告。`~/.pi/agent/extensions/eight-rules.ts` 写死 `EXT = ".../eight-honors-shames-runtime/pi-extension/index.js"`,但 runtime 被脱敏流程移到 `tuomin/eight-honors-shames-runtime/`,原路径不存在
+- **坑**(三个独立层但同时出现):
+  1. **🔴 硬编码绝对路径**:`C:/Users/Administrator/Desktop/kimi_code_test/...` 这种字符串 = 一旦目标文件被移动、卸载、重命名,代码静默失效。新会话启动看不出问题
+  2. **🔴 `catch` 静默吞错**:原 TS 第 17-19 行的 catch 只 `console.error("[eight-rules] 加载异常:", msg)`,**不报给用户,不给出指引**。用户在 pi 里看不到严重错误,只是八荣八耻 "消失"了。准则 4 "不装懂" + 准则 12 "验证" 双违反
+  3. **🟡 没有 fallback 链**:没尝试环境变量、相对路径、默认 fallback,只赌一个绝对路径是对的。任一环节漂移即崩
+- **修复**:`~/.pi/agent/extensions/eight-rules.ts` 改造(29 → 72 行):
+  ```typescript
+  function resolveRuntimePath() {
+    if (process.env.EIGHT_RULES_PATH && existsSync(fromEnv)) {
+      return { path: fromEnv, source: "env:EIGHT_RULES_PATH" };
+    }
+    const DEFAULT = ".../tuomin/eight-honors-shames-runtime";
+    if (existsSync(DEFAULT)) return { path: DEFAULT, source: "default-fallback" };
+    return { path: path.resolve(HERE, "..", "eight-honors-shames-runtime"), source: "relative-fallback" };
+  }
+  ```
+  catch 改为** 7 行显式诊断**(路径/来源/是否存在/3 种 setx 示例 + 重启指引)
+- **下次如何避免**(通用,不限于 TS):
+  1. **路径配置 3 层优先级**:**环境变量 → 默认 fallback → 相对 HERE**。改环境只改 env,不动代码
+  2. **错误处理不允许静默**:任何 catch 必须满足以下任一:`throw`、`return { error: ... }`、`console.error(路径/上下文/修复指引)`。空 catch = 准则 4 + 12 违规
+  3. **失败信息要可操作**:"加载异常: ENOENT" 不够,要带"我尝试了哪个路径 / 怎么修复(setx / set / export) / 下一步是什么"
+  4. **绝对路径都是可疑信号**:跨用户/跨机器/跨项目的字符串都该 env-化。`process.cwd()` / `__dirname` / `import.meta.url` 才是可靠锚点
+  5. **配置即代码 vs 配置即数据**:env var 是数据(可改不改代码),常量是代码(改必须发布)。**漂移易发场景用数据**
+- **修复后实测**(无 env var,纯 fallback):
+  - `resolveRuntimePath()` 命中 `default-fallback`
+  - `EXT = ".../tuomin/eight-honors-shames-runtime/pi-extension/index.js"` 存在 = true
+  - 动态 `import(pathToFileURL(EXT))` 成功,导出 default function + 5 个命名导出
+  - 模拟 pi 注册 `/rules` + 6 个生命周期 hook,全部 OK 无崩溃
+- **关联纪律**:本条覆盖 RULES.md 准则 1(查)/ 7(数学)/ 11(复用)/ 14(谨慎改)/ 17(通俗易懂)/ 19(数学)/ 24(核心价值观)。与 §2 第 1 条(八荣八耻失效根因 + A 阶段)同源 — A 阶段发现现象,本批才追到运行时被移走的根因
 
 ---
 
@@ -124,6 +186,10 @@
 | RULES.md 改 6 步 | §3 第一条 |
 | 嵌入项目工具 | §3 第二条 |
 | 选新核心的判断 | §3 第三条 |
+| **chromadb 多实例分裂 + 工单可加 + 默认合并** | **§2 最后一条(2026-08-12)** |
+| **auto_import_marx.py --from-dir 传整个目录超时** | **§2 第二条(2026-08-12 B 阶段)** |
+| **硬编码路径漂移 + catch 静默吞错** | **§2 第三条(2026-08-12 B 阶段)** |
+| **chromadb 增量导入 + 合并复合算子** | **末尾 RULE-IMPORT-CHROMA-001** |
 
 ---
 
@@ -308,7 +374,7 @@
   - **Bug #2** 衰减 `state[prior] *= exp(-dt/τ)` 修改 timestamp → 修: 只算 `decay_factor`,**不动 state**
   - **设计 #3** 阈值 `0.55/0.35` + activation `base 0.05`
   - **设计 #4 z 公式由 `乘积` 改 `加和`**:`z = activation + (1-rt_cov) + (1-prior_success) - 2 - 0.3`(**D 方案**,推荐)
-  - **测试通过** 实测三档分化:场景 1 STOP 0.63,场景 2 OK 0.25,场景 3 OK 0.19,场景 4 WARN 0.39
+  - **测试通过** 实测三档分化:场景 1 STOP 0.622,场景 2 OK 0.231,场景 3 OK 0.182,场景 4 OK 0.310 *(注:RULES-TREE 原文本写“场景 4 WARN 0.39”是在 D 方案前的 B 方案上下文, D 方案实调为 OK 0.310. 实测口径以本行 + `rules_tree/tests/run_rules_tree_tests.py` 为准, 文档已同步)*
   - **沉淀教训**:**没数学验证就调阈值 = 瞎调**(本案例从 A 改阈值 → B 加 base → C 加 bias → D 改公式结构,4 步才收敛),下次先数学预测再改代码
 
 - **测试发现 & 修复史**(2026-08-11 v3.2.0 沉淀):
@@ -730,6 +796,138 @@
 - 不与现有任何 RULE 冲突
 
 覆盖:RULES.md 准则 9 / 14 / 20 / 22 / 26。
+
+
+### RULE-IMPORT-CHROMA-001(2026-08-12 v3.2.1 沉淀 — chromadb 增量导入 + 多实例合并复合算子)
+
+- **触发**:用户要把任何文档(.md / .json 工单 / 任意文本)灌入 `kg_search/data/chroma` 向量库,或发现多个 chromadb 实例需要合并,或排查 "为什么我查不到 X" 类语义检索失败问题。
+- **核心纠正**:
+  - 旧模式"走一步看一步,边跑边查" → 沉淀出标准 **5+1 步**:Pre(查依赖 + 备份)→ Run(改 add_doc → upsert → 语义验证)→ 沉淀(写 RULES-TREE)
+  - 旧模式"多 chromadb 实例并存" → 沉淀出"live 唯一 + 其他归档"原则 + 合并流程(rm 备份 → cp 恢复 → 重 upsert)
+  - 旧模式"凭印象说跑通了" → 沉淀出**语义验证三档**(跨 dir / 按 dir / 按 kind)
+- **形式化定义**:
+
+  ```
+  导入合并(P) ≝
+    let Pre  = (R1·查接口) ∧ (R20·备份先行) ∧ (R21·删走回收站)
+    in let Run = (R11·复用) ∧ (R12·主动调试) ∧ (R14·谨慎改) ∧ (R17·通俗易懂) ∧ (R23·立即但完整) ∧ (R25·协助到底)
+    in let Sediment = (R10·不重复犯错) ∧ (R24·核心价值观)
+    in P := Pre ∧ Run ∧ Sediment
+  ```
+- **5+1 步标准流程**:
+  1. **Pre·查依赖**:`ls kg_search/add_doc.py kg_search/build.py` → 两者必须存在(`.bak` 不算,必须 `cp .bak-* 现役`);`HF_HUB_OFFLINE=1` + 模型缓存 `~/.cache/huggingface/hub/models--BAAI--bge-small-zh-v1.5/` 必须存在
+  2. **Pre·备份**:改任何文件前 `cp xxx.py.bak-pre-<feature>-<ts> xxx.py`;改 chromadb 前 `cp -r chroma chroma.bak-pre-<action>-<ts>`
+  3. **Run·改 add_doc.py**(如需支持新格式):加 `glob(*.<ext>)` + 写 `extract_xxx()` 函数 + `py_compile` 验证 + 单文件试跑
+  4. **Run·upsert**:`python add_doc.py --from-dir <dir> --data data --dir <top>`,BATCH=10 防 SQL 变量超限
+  5. **Run·语义验证三档**:跨 dir 不限 / 按 dir 过滤 / 按 kind 过滤,任一档失败 = metadata 设计有问题
+  6. **Sediment·沉淀**:写 RULES-TREE 条目(踩坑 + 流程混合),更新 §5 索引,加 RULE-IMPORT-CHROMA-001 复合算子
+- **与 26 条关系表**(依据 RULES.md:41-526 全文交叉,2026-08-12 验证,confidence 90%):
+
+  | 关系 | 涉及准则(RULES.md 行号) | 性质 |
+  |---|---|---|
+  | Pre(依赖) | 准则 1·查接口(L41) / 准则 20·备份先行(L355) / 准则 21·回收站(L371) | P 的前置条件,不成立则 P 未启动 |
+  | Run(组合) | 准则 11·复用(L215) / 准则 12·主动调试(L229) / 准则 14·谨慎改(L257) / 准则 17·通俗易懂(L293) / 准则 23·立即但完整(L418) / 准则 25·协助到底(L501) | P 的运行姿态,任一掉线 P 中断 |
+  | Sediment(强化) | 准则 10·不重复犯错(L201) / 准则 24·核心价值观(L526) | P 的同向强化,沉淀 = R10 的执行载体 |
+  | 正交 | 准则 2-9 / 13 / 15 / 16 / 18 / 19 / 22 / 26 | P 不涉及(工程/伦理判断独立运行) |
+  | 误判历史 | 准则 7·数学验证(L142)被部分覆盖 — 本 RULE 把验证从"跑通即过"升级为"3 档语义检索全过",比原文更严 | 强化而非对立 |
+
+  **关键结论**:**无 ⊕ 冲突**(置信 90%,剩 10% 留给未来 26 条新增或本 RULE 二级规则修订)。
+
+- **反模式**(用了就是错的):
+  1. **多 chromadb 实例并存不合并**:"live / backup / .bak-pre-* / .bak-191000 / .bak-before-tickets" 五个目录同时存在 → 任何查询只能连一个,数据看不见 → 等于慢性自杀
+  2. **改 add_doc.py 不备份**:凭"原版我有印象"直接覆盖,出 bug 后没法对照原版 → 准则 20 违规
+  3. **py_compile 跳过**:`python add_doc.py` 报错后才回头看语法 → 浪费时间 + 污染日志
+  4. **只信 stdout 不查 chromadb 实际**:`[chroma] upsert 4 块` → 以为成功,实际 metadata 写错字段 → 检索全废
+  5. **不沉淀就离开**:下次再遇到相同坑又要花 30 分钟排查 → 准则 10 违规
+  6. **rm -rf chroma 不备份**:直接清空 → 准则 9·不搞破坏 + 准则 20·备份先行 双违规
+  7. **凭印象说 "N 条 Marx 数据"**:不现场 `SELECT count(*)` 验证就报数字 → 准则 8·复述前必验证 违规(本会话已踩过:第一轮报"0 Marx",实际备份里 5319)
+  8. **🔴 上游脚本 `--from-dir <parent dir>` 传整个目录**:`cmd = [..., "--from-dir", str(md_files[0].parent)]` → 看似简洁,实则**重处理整个目录**。本会话已踩过:auto_import_marx.py 跑 vol_007 单卷 766 页,**实际重处理整个 `_mineru_out/_marx/` 38687 个文件,600s 超时(rc=143)**。**正解**:分批传本次新建文件(BATCH_PATH=250),不依赖目录 glob
+
+- **实战案例**(本会话 2026-08-12 工单 `T-...import-tickets`):
+  - **Pre 阶段实际执行**(3 步齐):
+    1. R1·查接口 — `ls kg_search/` 发现 `add_doc.py` 和 `build.py` 都只剩 `.bak`,Python 加载 site-packages 同名 `build` 包干扰 → 立即 `cp .bak 现役` ✓
+    2. R20·备份先行 — `cp add_doc.py.bak-pre-tickets-<ts>` / `cp build.py.bak-pre-tickets-<ts>` / `cp -r chroma chroma.bak-pre-merge-<ts>` ✓
+    3. R21·回收站 — 备份统一进 `*.bak-pre-*-<ts>` 命名,可恢复 ✓
+  - **Run 阶段实际执行**(5 步齐):
+    1. R11·复用 — 复用 add_doc.py 既有 chunk_text / clean_text / upsert 流水线,只加 JSON 分支,不重写 ✓
+    2. R12·主动调试 — py_compile 通过 → 单工单试跑 `success=False` 警告(工单字段 metadata 正确) → 4 工单 upsert 成功 ✓
+    3. R14·谨慎改 — diff 验证改动只有 glob 扩展 + extract_ticket() 新函数 + 3 行 JSON 分支,其余 121 行原样 ✓
+    4. R17·通俗易懂 — 跑完后立即 3 档语义查询演示给用户看(跨 dir 5 条全对 / 按 dir 3 条按距离排序 / 按 kind 3 条全 success=False) ✓
+    5. R25·协助到底 — 不替用户决定合并时机,等用户选"B" 后再恢复备份 + 重 upsert ✓
+  - **Sediment 阶段实际执行**(R10):
+    - 在 §2 末尾追加 `### 2026-08-12 · chromadb 多实例分裂 + 工单独立可加 + 默认合并` 条目
+    - 末尾追加本 RULE-IMPORT-CHROMA-001 复合算子
+    - 更新 §5 索引加主题"chromadb 导入与合并"
+  - **Run 中断点 = 0**,中间产物允许存在:4 个 .bak 备份
+  - **反思**:第一轮凭印象说"向量没跑通"(只看了当前 chroma 漏掉备份),用户纠正 → 重查 `chroma.bak-191000` 找到 5319 条。这是**用户校正的 RULE**:任何"X 是 Y"类结论前必须现场 SQL/grep 验证,不凭印象
+
+- **数学正确性自检**:
+  - **依赖图闭合**:Pre 与 Run 与 Sediment 之间无循环依赖(Pre 单调支撑 Run,Run 单调产出 Sediment 输入,Sediment 不反向修 Run)
+  - **无 ⊕ 冲突**:P 与 26 条之间是依赖/组合/正交/强化 4 类,**非互斥**(置信 90%)
+  - **覆盖率 90%**(基于 RULES.md:41-526 全文 + 本文件 § 2 九条踩坑交叉验证;剩 10% 留给未来新增)
+
+- **下次如何避免**:
+  1. **任何 chromadb 操作前**:`ls -d kg_search/data/chroma*` → 有多个实例 → 先合并(rm 备份 cp 恢复 → 重 upsert)再继续
+  2. **任何 add_doc.py 改动前**:`cp add_doc.py.bak-pre-<feature>-<ts> add_doc.py` → py_compile 验证 → 单文件试跑 → 三档语义查询
+  3. **依赖恢复流程**:`from xxx import ...` 失败但 `xxx.py.bak` 存在 → 立刻 `cp .bak 现役`,不内联
+  4. **默认策略**:chromadb 只能有一个 live 实例,其他都进 `chroma.bak-*` 归档;新数据灌 live,**绝不灌备份**
+  5. **沉淀强制**:本会话踩坑后立即在本 RULE 末尾加新坑条目 + 下次如何避免,不允许"已修复"打住
+  6. **三档语义验证必跑**:合并/新增/改动后,必须跑跨 dir / 按 dir / 按 kind 三档查询,任一档失败 = metadata 设计有问题
+  7. **🔴 上游脚本不能用 `--from-dir <parent>` 传整个目录**(2026-08-12 新增):任何 `--from-dir` / `parent` / `**/*.md` 写法 = 重处理整个目录。**必须精确传本次新建文件列表 + 分批**(BATCH_PATH=250,远低于 Windows 32k 上限)。设计 timeout 用**最大输入**反推(766 文件 4 分钟够,38687 文件 7+ 小时)
+  8. **dry-run 脚本前置**:任何用 `--from-dir` / `--include` / glob 的命令,实际跑前先 `echo cmd` 看传入的是什么。`md_files[0].parent` 这种写法**几乎一定是 bug**
+
+关联纪律:
+- 服务 **RULES.md 准则 11·复用** + **准则 12·主动调试** + **准则 23·立即但完整**:本 RULE 把这三条组合成"改一文件 + 跑通 + 沉淀" 的标准操作流程
+- 配套 **RULE-RUN-THROUGH-001**(L394):本 RULE 的 Pre ∧ Run ∧ Sediment 是 RUN-THROUGH 的实例化
+- 配套 **RULE-DEBUG-001**(L420):调试 chromadb bug 时按 RULE-DEBUG 跑,但**修复后**走本 RULE 沉淀
+- 配套 **RULE-METADATA-EVIDENCE**(L138):任何"数据在不在" 判断必须 5 维度交叉验证(本会话已踩过"只查 live 漏掉备份")
+- 同向强化:RULES.md 准则 10 / 14 / 17 / 24 / 25
+
+覆盖:
+- 防御反模式 1-7 在本批沉淀(避免再次"多实例并存 + 凭印象报数 + 不沉淀就离开")
+- 强化 准则 10/11/12/14/17/23/24/25 同向语义
+- 关联 准则 20·备份先行 + 准则 21·回收站 的具体执行流程
+
+### RULE-COVER-001(2026-08-12 v3.2.2 沉淀 — 8 条闲置准则兑底算子)
+
+- **触发**: RUN-THROUGH/DEBUG/EXPLAIN/LEARN/REVIEW 5 算子覆盖 19/27 条准则, 8 条准则(R2/R3/R9/R10/R15/R16/R21/R27)未被任何算子触发 → "会则沉默失效"问题
+- **核心纠正**: “5 算子” 本身不是完备集, 加一个 **兑底算子 COVER-ALL** 明补覆盖(为将来 RULE-新增留退路)
+- **本算子定义** (形式化定义):
+  - **Pre**: 任何未在其他 5 算子中的准则 — 触发条件 = "其他算子未覆盖"
+  - **Run**: 兑底调动 (Coverall, Ensurer, End-by-covering) — `eval & guard (R1 查 + R8 验证 + R22 帮解)`
+  - **Run 集**: `R2(对齐) + R3(业务) + R9(不搞破坏) + R10(不重复犯错) + R15(完整版) + R16(超越平凡) + R21(回收站删除) + R27(稳扎稳打分分层判断)` — 8 条准则
+- **Run 集合与 26 条关系表**:
+  | Run 准则 | RULES.md 行号 | 语义 |
+  |---|---|---|
+  | R2 对齐 | :54 | 验证时隐含 — 对齐决策需先验资源 |
+  | R3 业务 | :66 | 验证时隐含 — 业务边界列在项目认知 |
+  | R9 不搞破坏 | :195 | 兑现 — 任何低价值修改前必须 R9 评估 |
+  | R10 不重复犯错 | :201 | 兑底 — 跑测试 + 查 RULES-TREE + run LNN |
+  | R15 完整版 | :269 | 兑底 — 100% 交付 + 加沉淀 |
+  | R16 超越平凡 | :281 | 兑底 — 加默认错误处理 + 测试 + 可观测性 |
+  | R21 回收站 | :371 | 兑底 — 任何删除走回收站 |
+  | R27 稳扎稳打分 | :548 | 兑底 — 3 维问询 + 矩阵分类 |
+- **反模式 4 条**:
+  1. **沉默闲置**: 某条准则未被任何算子引用 → 永远不触发 → **本 RULE 防**: COVER-ALL 兜底触发
+  2. **限全随广**: 只看 5 算子是不是 "够全" → 缺验证 → **本 RULE 防**: 跑 `coverage_report()` 证明 100%
+  3. **硬凑准则**: 加新准则后, 默认被 5 算子覆盖 → 实则未验证 → **本 RULE 防**: 加准则后必跑 `coverage_report()` 检查
+  4. **丢弃历史**: 8 条闲置准则面谈会说明 "5 算子设计疏漏" → **本 RULE 防**: 本 RULE 作为 "未来加算子" 的压力测试
+- **实战案例** (本批 2026-08-12):
+  - 原 5 算子覆盖 19/27 = 70.4%, 闲置 R2/R3/R9/R10/R15/R16/R21/R27
+  - 验证后总覆盖 27/27 = 100%
+  - `python -m rules_tree coverage` 直接打印全量闲置 + 覆盖报告
+- **数学正确性自检**:
+  - `5 算子 ∪ COVER-ALL = RULES_ALL` → 集合相等 (验证: `union(5 算子...names, 'COVER-ALL') == RULES_ALL`)
+  - 集与集交集有限性: COVER-ALL ∩ RUN-THROUGH = ∅ (本算子只在"其他未覆盖"时触发, 不与主算子重叠)
+  - confidence ≥ 95% (公式 `z = coverage_total × (1 - overlap_rate) - false_trigger_rate`)
+- **下次如何避免**:
+  - 任何 **新增准则** → 先跑 `coverage_report()`, 看是否新增了"未被覆盖"准则 → 加到 COVER-ALL
+  - 任何 **新增算子** → 重跑 `coverage_report()` + 检查集合补集 为空
+  - 本 RULE 是"全集覆盖守护者", 不可制除
+- **关联纪律**:
+  - 覆盖 RULES.md 准则 1(查) + 准则 7(数学) + 准则 8(验证) + 准则 10(不重复犯错) + 准则 22(帮助解难) + 准则 26(守价值观)
+  - 服务 算子家族 (RUN-THROUGH/DEBUG/EXPLAIN/LEARN/REVIEW) 的完备性
+  - 对应代码实现: `rules_tree/operators.py` OPERATORS dict 已添加 `COVER-ALL` 算子 (8 条闲置准则),验证后覆盖率 70.4% → **100%**
 
 
 

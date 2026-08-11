@@ -17,12 +17,12 @@ export function readLatestRules(file = rulesPath) {
 
 export function rulesVersion(text = readLatestRules()) {
   const source = text.match(/来源:\s*`?([^\n`]+)`?/i)?.[1]?.trim();
-  const count = (text.match(/^### 准则 \d+:/gm) || []).length;
+  const count = (text.match(/^#{3,4} 准则 \d+:/gm) || []).length;
   return { source: source || "unknown", principles: count, file: rulesPath };
 }
 
 export function extractPrinciples(text = readLatestRules()) {
-  return [...text.matchAll(/^### 准则 (\d+):([^\n]+)$/gm)].map((match) => ({ number: Number(match[1]), title: match[2].trim() }));
+  return [...text.matchAll(/^#{3,4} 准则 (\d+):([^\n]+)$/gm)].map((match) => ({ number: Number(match[1]), title: match[2].trim() }));
 }
 
 // ============ 模式基础（原 rules.js）============

@@ -1,24 +1,63 @@
-node_modules/
-coverage/
+# Git ignore — v3.2.3
+# LF 行终止符 (Windows + CRLF 会让末尾规则失效)
+
+# === v3.2.3 脱敏规则 (本地数据/二进制/历史) ===
+# 知识图谱运行时
+kg_rag_rust/
+kg_search/data/
+
+# 本地运行时数据/缓存
+ms_cache/
+_recycle_bin/
+_backups/
+_tickets/
+methods/
+llmwiki/
+TokenThrottle/
+tuomin/
+
+# 个人资源/笔记
+baidu_repos.json
+baidu_research.json
+owner_repos.json
+ultralytics_brief.md
+paddle_all.json
+paddle_ocr.json
+paddle_repos.json
+paddle_struct.json
+eight-honors-shames.bundle
+eight-honors-shames-tuomin-v1.1.1.bundle
+docs/yolo_ocr_screen_analysis.md
+docs/yolo_ocr_perf_analysis.md
+docs/sync_test_full_*.md
+docs/yolo_ocr_perf_summary.md
+docs/yolo_ocr_analysis_full*.md
+
+# === 通用 ===
+*.bundle
+*.tmp
+*.swp
 *.log
-benchmarks/reports/*.json
 .env
 .env.local
 *.local
-benchmarks/real/fake-express-app/
-benchmarks/real/scratch/
-
-# v1.0.1 增量:临时/草稿文件(避免误入仓)
-*.tmp
-*.swp
 .DS_Store
 Thumbs.db
+
+# 运行时缓存
+node_modules/
+coverage/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# 文档草稿
 docs/.drafts/
 /docs/release-notes/
 /docs/release-notes/*
 /docs/release-notes/**
-docs/release-notes/v1.0.1.md
-# 以上 4 条全是为“GitHub Release 草稿不入仓”写的多规则兏底(Windows + Git Bash 下不同 shell 路径展开不一致)
 
-# 本地回收站(临时目录,不进 git)
-_recycle_bin/
+# 基准测试产物
+benchmarks/reports/*.json
+benchmarks/real/fake-express-app/
+benchmarks/real/scratch/
