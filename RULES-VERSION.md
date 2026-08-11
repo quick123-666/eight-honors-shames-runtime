@@ -2,9 +2,25 @@
 
 > **作用**:固化八荣八耻(本项目 AI 工作准则)的**版本号命名规范**和**升级流程**,避免"v3+2.1" vs "v2.3" vs "2026-08-11 v2.3" 之类的命名混乱。
 > **维护触发**:任何新增原则 / 调优 / 反哺 / 大重构之前 + 之后
-> **当前版本**:**v3.2.2**(2026-08-11)
-> **上一版本**:v3.2.1
+> **当前版本**:**v3.2.3**(2026-08-12)
+> **上一版本**:v3.2.2
 > **关联文件**:RULES.md(完整版 **27 条**) / AGENTS.md(精简版 **27 条**) / RULES-TREE.md(方法论沉淀)
+
+## 六、 v3.2.3 变更摘要 (2026-08-12)
+
+- **本质**: PATCH 调优 — LNN D 方案 + 5 复合算子从 markdown 伪代码代码化为 Python `rules_tree` 包,覆盖率 70.4%→100%
+- **补全**:
+  - `rules_tree/lln.py` — LNN D 方案可调用实现 + 4 数学不变量
+  - `rules_tree/operators.py` — 5 算子 (RUN-THROUGH/DEBUG/EXPLAIN/LEARN/REVIEW) + **RULE-COVER-001 兑底算子 COVER-ALL** (覆盖 R2/R3/R9/R10/R15/R16/R21/R27)
+  - `rules_tree/__main__.py` — CLI 入口 (lln/operators/coverage/math-check)
+  - `tests/run_rules_tree_tests.py` — 手写 runner (不用 pytest, 规避 Python 3.14 严格模块加载 bug), 29/29 通过
+- **文档同步**:
+  - RULES-TREE.md 场景 4 漂移修正 (声称 0.39→WARN, 实测 0.310→OK)
+  - RULES-TREE.md 加 RULE-COVER-001 沉淀 (8 条闲置准则兑底)
+  - AGENTS.md / README.md / README_EN.md “21/24 条”→27 条同步
+  - src/core.js 正则修复 `^###` → `^#{3,4}` (原则6: 运行时 bug 自检)
+- **不动结构**: 26→27 条准则不变, 4 组不变, 准则编号不变
+- **回滚**: `cp _recycle_bin/20260812-0130-rules-v3.2.3-pre-push/<file> <原路径>`
 
 ---
 
@@ -101,4 +117,5 @@ v<MAJOR>.<MINOR>.<PATCH>
 | v3.1.0 | 2026-08-11 | + 准则 9 + 升级准则 6(L2) | `_recycle_bin/20260811-2250-rules-update-v3+1/` |
 | v3.2.0 | 2026-08-11 | + 准则 10 + RULE-METADATA-EVIDENCE(L2) | `_recycle_bin/20260811-20260811-2049-rules-update-v3+2/` |
 | v3.2.1 | 2026-08-11 | 算法调优反哺 + 三文件版本统一 + SemVer 规范化 | `_recycle_bin/20260811-2126-rules-semver/` |
-| **v3.2.2** | **2026-08-11** | **新增准则 27（稳扎稳打分分层判断）+ R25/R26 补齐到精简版 + 语义版本跳 MINOR** | **`_backups/RULES-TREE-pre-v3.2.2/`** |
+| v3.2.2 | 2026-08-11 | 新增准则 27(稳扎稳打分分层判断) + R25/R26 补齐到精简版 + 语义版本跳 MINOR | `_backups/RULES-TREE-pre-v3.2.2/` |
+| **v3.2.3** | **2026-08-12** | **PATCH: LNN D 方案 + 算子家族代码化为 Python 包 + COVER-ALL 兑底算子(覆盖率 70.4%→100%) + 29 个单测全过 + 文档漂移修正** | **`_recycle_bin/20260812-0130-rules-v3.2.3-pre-push/`** |

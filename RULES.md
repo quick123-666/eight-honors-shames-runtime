@@ -4,10 +4,12 @@
 >
 > pi 启动时**不会**自动加载本文件;agent 侧的精简命令式清单见 [`AGENTS.md`](./AGENTS.md)。
 >
-> 📌 **版本规范**:见 [`RULES-VERSION.md`](./RULES-VERSION.md) — 当前 **v3.2.1**;新增原则升 MINOR,调优升 PATCH,大重构升 MAJOR。
+> 📌 **版本规范**:见 [`RULES-VERSION.md`](./RULES-VERSION.md) — 当前 **v3.2.3**;新增原则升 MINOR,调优升 PATCH,大重构升 MAJOR。
 > **v3.0.0 重构说明(2026-08-11)**: 准则由 22 条扩展为 24 条,并按"执行前 / 执行中 / 执行后 / 价值观"4 组重排,组内重新编号 1-24。**旧编号 → 新编号映射见附录 D**;旧 commit / 文档中引用的准则编号在本次重排后已失效,请用新编号。
 > **v3.2.0 重构(v2.2,2026-08-11 同步本次)**:24→25→**26 条**;L2 第二次插入新原则"准则 10 · 不重复犯错"于第二组;原 10-25 全部 +1(→ 11-26)。v3 / v3.1.0 历史保留在附录 D。
 > **v3.2.1 调优(v2.3,2026-08-11 同步本次)**:26 条不变;**RULES-TREE.md RULE-10-ALGORITHM-001 调优闭环**(D 方案加和公式 + 三档阈值)反哺到 RULES.md 准则 10;调优史见 RULES-TREE.md:305。
+> **v3.2.2 重构(2026-08-11)**:26→**27 条**;L2 第三次插入新原则"准则 27 · 稳扎稳打分分层判断"于第二组末尾;原 27 调整后为 R26,新增 R27。
+> **v3.2.3 调优(2026-08-12)**:27 条不变;**LNN D 方案 + 5 复合算子代码化为 Python `rules_tree/` 包(覆盖率 70.4%→100%)**;`src/core.js` 正则 `^#{3,4}` 修复(运行时 `principles` 从 0→27);AGENTS.md/README.md 条数同步 21/24→27;RULES-TREE.md RULE-COVER-001 沉淀(8 条闲置准则兑底)。变更摘要见 RULES-VERSION.md。
 
 ---
 
@@ -49,7 +51,7 @@
   - 第三方 SDK / 库:查**官方源**(`context7`、官网 `/docs` 页面、官方 GitHub README),不依赖模型记忆里的版本
   - 拿不准时主动说"这个 API 我没查到/不熟,需要补充资料",不假装会用
   - 引用证据:`path:line` + 1-2 句摘要,不复制大段文档
-  - **接口假设必验**(2026-08-11 B 阶段加):动手前用 `ls` / `find` / `read` 验证**路径/接口/函数真实存在**;安装/创建/复制操作完成后**立即 `read` 验证结果**,不凭"返回 installed"字样即视为成功。失败案例:`methods/trees/T-20260810021418-000.md:18-26` 用户问"用 15 条八耻八荣检查 kimi_code_test",AI 假设 4 个 skill 文件存在全部失败(`~/.agents/skills/{git-workflow,testing,dependency-check,static-analysis}/SKILL.md` 均不存在),装 2 个 skill 后未 read 验证就读 = **5/8 步失败**;**核心问题**:Round 1 计划未包含 kimi_code_test 项目扫描,核心任务未执行
+  - **接口假设必验**(2026-08-11 B 阶段加):动手前用 `ls` / `find` / `read` 验证**路径/接口/函数真实存在**;安装/创建/复制操作完成后**立即 `read` 验证结果**,不凭"返回 installed"字样即视为成功。失败案例:`methods/trees/T-20260810021418-000.md:18-26` 用户问"用 15 条八耻八荣检查 kimi_code_test",AI 假设 4 个 skill 文件存在全部失败(`~/.agents/skills/{git-workflow,testing,dependency-check,static-analysis}/SKILL.md` 均不存在),装 2 个 skill 后未 read 验证就读 = **5/8 步失败**;**核心问题**:Round 1 计划未包含 kimi_code_test 项目扫描,核心任务未执行 *(注:`T-20260810021418-000.md` 现不存在;该案例仍是有效踩坑,证据保留)*
 
 #### 准则 2:以模糊执行为耻,以多方验证为荣
 
