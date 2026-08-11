@@ -8,7 +8,7 @@
 
 **21 条准则 · 跨项目核心价值观 · 规则注入省 81%+ token · 8+ AI 工具即装即用**
 
-[![Version](https://img.shields.io/badge/version-v1.0.1-blue)](./package.json)
+[![Version](https://img.shields.io/badge/version-v1.1.0-blue)](./package.json)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 [![Tests](https://img.shields.io/badge/tests-27%20passed-brightgreen)](./tests)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-green)](./package.json)

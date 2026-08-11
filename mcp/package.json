@@ -1,7 +1,7 @@
 {
   "name": "eight-honors-shames-mcp",
   "version": "1.1.0",
-  "description": "八荣八耻 MCP server：向 MCP 宿主暴露规则查询工具（只读）",
+  "description": "八荣八耻 MCP server:对 MCP 宿主暴露 21 条准则查询工具(只读,跨项目核心价值观)",
   "type": "module",
   "private": true,
   "bin": {
