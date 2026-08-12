@@ -1789,3 +1789,27 @@
   - 任何 match_score 算法修改必考虑 min_confidence 阈值(0.3)
   - 任何规则修改必跑完整 pytest 验证 100%
 - **本会话 2026-08-13 落地清单**: 用户选 MessageRouter 实测 → 12 query 路由分布 → 发现 word_count bug → 加长词 patterns → pytest 100% → commit MiniCog → 沉淀本 RULE → commit kimi_code_test
+
+---
+
+### RULE-MINICOG-007-v2(2026-08-13 增量 — match_score 算法阈值修复 + server daemon 重启 SOP)
+
+- **触发场景**: 任何 router.py 阈值修改 / rules.py 修改后必读本 RULE
+- **本会话 2026-08-13 增量修复**(路由阈值 0.3 → 0.15):
+  - **bug**:`router.py:175` `rule_result.get("confidence", 0) >= 0.3` 让"多少字"等短 query 失败(0.167 < 0.3)
+  - **修复**:`0.3` → `0.15`(让 score 0.167 也能 matched)
+  - **验证**:7 query 实测,pytest 1514/1514 = 100%
+- **2 个常见陷阱**:
+  1. **改错位置**:本会话第一次 sed 改的是 `server/api.py`(没有 0.3),真正的阈值在 `router.py:175`
+  2. **daemon 进程不自动 reload .py**:server 是后台 daemon 进程,改完 .py 后**必须 kill + 重启**让新代码生效
+- **4 步修复 SOP 完整版**:
+  1. **找正确位置**:`grep -n "confidence.*0\.3\|>= 0.3" minicog/ -r --exclude-dir=__pycache__`(找所有候选位置)
+  2. **备份文件**:`cp <file> _recycle_bin/<时间戳>-bk.py`
+  3. **sed 改**:`sed -i 's|老字符串|新字符串|' <file>` + `grep -n "新字符串" <file>` 验证
+  4. **重启 daemon**:`powershell -c "Stop-Process -Id <PID> -Force"` + `nohup python start_server.py &` + 验证 `/health` 看 uptime
+- **下次如何避免**:
+  - 改任何阈值前**先 grep 找位置**(可能多个文件,选真正的)
+  - 改 .py 后**必重启 daemon 进程**(不能假设自动 reload)
+  - pytest 通过 ≠ server 已生效(必须 `/health` 验证 uptime_seconds 接近 0)
+  - daemon 进程用 PowerShell 精确杀(不用 taskkill //IM python.exe,会误杀其他 python)
+- **本会话 2026-08-13 落地清单**: 用户选修 match_score 算法 → 找 router.py:175 0.3 → sed 改 0.15 → 备份 router.py → 重启 server(PowerShell 杀 PID 94580 + nohup 启动)→ pytest 100% + 7 query 实测全部修复 → 沉淀本 RULE → commit MiniCog (89838c7 + 899b912 两 commit) → kimi_code_test 待 commit+push
