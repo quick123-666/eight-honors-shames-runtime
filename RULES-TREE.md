@@ -190,6 +190,27 @@
 | **auto_import_marx.py --from-dir 传整个目录超时** | **§2 第二条(2026-08-12 B 阶段)** |
 | **硬编码路径漂移 + catch 静默吞错** | **§2 第三条(2026-08-12 B 阶段)** |
 | **chromadb 增量导入 + 合并复合算子** | **末尾 RULE-IMPORT-CHROMA-001** |
+| **pi 会话卡死循环诊断(备份脚本读错源 + 钩子失效 + mark 无幂等)** | **末尾 RULE-DEADLOCK-001 (2026-08-12)** |
+| **向量图谱节点 description 去重(README 头被错填)** | **末尾 RULE-VECTOR-DESC-DUP-001 (2026-08-12)** |
+
+### 2026-08-12 · 向量图谱搜索实战方法树(kg_rag_kuzu)
+
+- **场景**:接手 awesome-llm-apps 改造的 KG-RAG,933 节点 / 1170 边 / BGE 512 维 / FAISS IndexFlatIP
+- **4 步必查路径**(本会话 90 分钟实战立):
+  1. **加载一致性**:`faiss.read_index + pickle.load + networkx.read_gpickle` → 验证 `ntotal == len(idmap) == graph.number_of_nodes()`
+  2. **embedding 文本包含 entity_type**:`{name} ({type}): {desc[:200]}`(避免"神经网络" → README 头类节点)
+  3. **description 去重检测**:同 desc[:200] 长文本出现 ≥2 次 = 抽取 bug,用本会话 RULE-VECTOR-DESC-DUP-001 §2 脚本扫
+  4. **改完必回填**:`rm vector_index.faiss + rm vector_idmap.pkl && python backfill_vectors.py`(**改 description 后忘记重建索引 = 改了个寂寞**)
+- **3 性能基线**(实测):
+  - Backfill 933 节点冷启动 28s,缓存后 0.01s
+  - faiss.search top-5:**0.0002-0.0003s**
+  - encode 冷启动 9.07s,缓存后 0.01s
+- **3 类污染根因**(避免重蹈):
+  - **抽取时拿到 README 头**:`source_doc = "eight_honors_runtime"`,节点名是适配文件(错填)
+  - **多个文件引用同一 README**:GEMINI.md / MIT 等节点 desc 几乎完全相同(去重检测可发现)
+  - **embedding 文本不含 type**:纯字面匹配,BGE 把"神经网络"排到 GEMINI.md 第一
+- **回滚标准动作**:`graph_data.pkl.bak-YYYYMMDD-HHMM` + `cp .../vector_index.faiss.bak-YYYYMMDD-HHMM .../vector_index.faiss` + 重新 backfill
+- **关联教程**:`jshgd/kg_rag_kuzu-向量图谱教程-v0.1.md`(9 节,290 行,数字实测)
 
 ---
 
@@ -1697,3 +1718,74 @@
   - **edit 工具 bug 必看 RULE-EDIT-CATASTROPHE-001**
   - **缓存模式必看 RULE-MINICOG-005**(60s 经验值)
 - **本会话 2026-08-13 落地清单**: 用户选 P2 → 接 goal_engine → cat >> 误追加类外 → 修复移到类内 → active_goals 0→1 → pytest 100% → 沉淀本 RULE → MiniCog 待 commit → kimi_code_test 待 commit+push
+
+---
+
+### RULE-MINICOG-007(2026-08-13 沉淀 — MessageRouter 4 级路由实测 + word_count bug 修复 SOP)
+
+- **触发场景**: 任何 MiniCog rules.py 修改 / MessageRouter 4 级路由理解 / 关键词模糊匹配 bug 修复必读本 RULE
+- **本会话 2026-08-13 实测**(12 query 路由分布):
+  - **Level 1 RULES_ENGINE (50%)**:`你好`/`hi`/`你能做什么`/`现在几点了`/`谢谢`/`再见` 6 query
+   - `hybrid` 决策 = 规则 + emotion 触发的"你还好吗?"后缀
+  - **Level 3 NEED_DEEP_REASON (42%)**:`RFC-001 是什么?`/`1+1=?`/`P0 原则是什么?`/`给我讲个故事`/`这段文字多少字: hello world` 5 query
+   - `plan_methods_think` 预制 5 Why 模板 / `plan_reasoner` 1+1 简单推理
+  - **Level 3.5 plan_weather (8%)**:`今天天气怎么样` 928ms(调外部 wttr.in,P1 明确例外)
+- **word_count rule bug + 修复**:
+  - **bug**:`"这段文字多少字: hello world"` 走 `plan_methods_think` 而非 `word_count`(`多少字` 匹配得分 0.258 < 阈值 0.3)
+  - **修复**(`5bfc9ac` 后第二 commit):加长词 patterns `["几个词", "几个单词", "字符数", "词数", "count words", "how many words"]`(不加短词避免误匹配)
+  - **验证**:pytest 1514/1514 = 100% + `test_no_match` 通过(避免短词误匹配)
+  - **仍存限制**(P-7 不粉饰):`"这段文字多少字: hello world"` 因"文字"同时被 greeting 模糊匹配,平手 0.167 < 0.3,fallback 走 greeting——是 match_score 算法 + min_confidence 阈值的已知限制
+- **4 级路由完整逻辑**(`minicog/router.py:115-200`):
+  ```
+  user_message
+   ↓
+  0. 记忆召回 (recall_fn)
+   ↓
+  1. RULES_ENGINE (Level 1, score ≥ 0.3)
+     ├── 6 内置 rules: greeting / self_introduction / time_query / word_count / thanks / goodbye
+     └── 5 工具: echo / get_time / count_words / self_intro / capability_list
+   ↓
+  2. PSI_ONLY (Level 2, 短+强情感)
+   └── is_psi_only_fn(user_message, snapshot) 判定
+   ↓
+  3. NEED_DEEP_REASON (Level 3, 默认兜底)
+     ├── plan_methods_think (5 Why 模板)
+     ├── plan_reasoner (本地推理)
+     └── plan_weather (外部 wttr.in, P1 例外)
+   ↓
+  4. ERROR (Level 4, 兜底)
+  ```
+- **Rule.match_score 算法**(`minicog/rules.py:61-86`):
+  - base = 0.08
+  - ratio = matched_patterns / total_patterns × 0.4
+  - density = matched_chars / text_len × 0.4
+  - short_bonus = 0.05 if has_short_match
+  - score = base + ratio + density + short_bonus(阈值 0.3)
+- **6 内置 rules 完整清单**(`minicog/rules.py:260+`):
+  | Rule | patterns | 工具 | output_template |
+  |---|---|---|---|
+  | greeting | 你好/hi/hello/嗨/您/您好 | echo("你好！我是 MiniCog。") | {greeting} |
+  | self_introduction | 你能做什么/你是什么/自我介绍/介绍一下/what can you do | self_intro + capability_list | {intro}\n{caps} |
+  | time_query | 几点/时间/现在/today/time | get_time | 当前时间: {time} |
+  | **word_count** | **多少字/几个字/字数/word count/length/几个词/几个单词/字符数/词数/count words/how many words** | echo({input}) + count_words({text}) | **输入包含 {count} 个词** |
+  | thanks | 谢谢/感谢/thanks/thank you/thx | echo("不客气！随时为您服务。") | {reply} |
+  | goodbye | 再见/bye/goodbye/拜拜/88/下次见 | echo("再见！期待下次与你对话。") | {reply} |
+- **5 工具**(`minicog/rules.py:227-242`):
+  | 工具 | 签名 | 说明 |
+  |---|---|---|
+  | echo | echo(text) | 回显文本 |
+  | get_time | get_time() | datetime.now() |
+  | count_words | count_words(text) | len(text.split()) |
+  | self_intro | self_intro() | "我是 MiniCog —— 一个零 LLM 认知引擎..." |
+  | capability_list | capability_list() | 列出 self.tools.list() |
+- **4 步 bug 修复 SOP**:
+  1. **备份**:`cp minicog/rules.py _recycle_bin/<时间戳>-bk.py`
+  2. **加 patterns 优先长词**(避免短词误匹配)
+  3. **测多种 query**(含原失败 + 短 query 边界)
+  4. **跑 pytest 100%** + **commit MiniCog**(无 remote,本地 commit)
+- **下次如何避免**:
+  - 任何 rules.py 修改前必 `grep -A 1 "name=..." <新 rule>` 看 patterns
+  - 任何 word_count 类(关键词模糊匹配)修改必跑 `test_no_match` 防误匹配
+  - 任何 match_score 算法修改必考虑 min_confidence 阈值(0.3)
+  - 任何规则修改必跑完整 pytest 验证 100%
+- **本会话 2026-08-13 落地清单**: 用户选 MessageRouter 实测 → 12 query 路由分布 → 发现 word_count bug → 加长词 patterns → pytest 100% → commit MiniCog → 沉淀本 RULE → commit kimi_code_test
