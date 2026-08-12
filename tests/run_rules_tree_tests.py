@@ -14,6 +14,18 @@ import traceback
 
 sys.path.insert(0, ".")
 
+# Windows GBK 控制台不能输出 emoji (✅❌➖), 强制重定向到 UTF-8
+import io as _io
+try:
+    sys.stdout = _io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = _io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+except Exception:
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 import rules_tree.lln as lln_mod
 import rules_tree.operators as op_mod
 
@@ -160,8 +172,8 @@ def t16():
     for k in ("total_rules", "covered_rules", "coverage_pct",
               "unused_rules", "operator_sizes"):
         assert k in rep
-    assert rep["total_rules"] == 27
-    assert rep["covered_rules"] == 27  # COVER-ALL 后 100%
+    assert rep["total_rules"] == 28
+    assert rep["covered_rules"] == 28  # COVER-ALL 后 100%
     assert rep["coverage_pct"] == 100.0
     assert rep["unused_rules"] == []   # 不再有闲置
 
@@ -190,7 +202,7 @@ def t18():
     union = _OP_SNAP["union"]
     all_six = union("RUN-THROUGH", "DEBUG", "EXPLAIN", "LEARN", "REVIEW", "COVER-ALL")
     assert all_six == RULES_ALL
-    assert len(all_six) == 27
+    assert len(all_six) == 28
 
 
 @test("audit.py 可对 RULE 文本跑算子使用率审计")
@@ -222,7 +234,7 @@ def t19():
 
 @test("家族并集 = 27 条 (含 COVER-ALL)")
 def t20():
-    assert len(_OP_SNAP["family_union"]()) == 27
+    assert len(_OP_SNAP["family_union"]()) == 28
 
 
 @test("反向索引: R22 → 4 算子")
@@ -314,6 +326,103 @@ def t28():
 def t29():
     import rules_tree.__main__ as cli
     rc = cli.main(["lln", "1.0"])
+    assert rc == 2
+
+
+# ──────────── COVER-ALL 兑底算子测试 (t30-t35) ────────────
+
+
+@test("COVER-ALL: CoverAllContext 默认值 (R9/R21 n/a, 其他 y)")
+def t30():
+    ctx = _OP_SNAP["CoverAllContext"]()
+    assert ctx.R2_alignment == "y"
+    assert ctx.R3_business == "y"
+    assert ctx.R9_no_destroy == "n/a"
+    assert ctx.R10_no_repeat == "y"
+    assert ctx.R15_complete == "y"
+    assert ctx.R16_extraordinary == "y"
+    assert ctx.R21_recycle == "n/a"
+    assert ctx.R27_score3d == "y"
+
+
+@test("COVER-ALL: parse_cover_token 三状态 (y/n/n/a)")
+def t31():
+    parse = _OP_SNAP["parse_cover_token"]
+    assert parse("y") == "✅"
+    assert parse("YES") == "✅"
+    assert parse("✅") == "✅"
+    assert parse("n") == "❌"
+    assert parse("NO") == "❌"
+    assert parse("n/a") == "➖"
+    assert parse("-") == "➖"
+    try:
+        parse("bogus")
+        assert False, "should raise"
+    except ValueError:
+        pass
+
+
+@test("COVER-ALL: check_cover_all 全 y (含 R9/R21) 返回 8 个 ✅")
+def t32():
+    ctx = _OP_SNAP["CoverAllContext"](R9_no_destroy="y", R21_recycle="y")
+    items = _OP_SNAP["check_cover_all"](ctx)
+    assert len(items) == 8
+    assert all(it.status == "✅" for it in items), f"got: {items}"
+    rules = [it.rule for it in items]
+    assert rules == ["R2", "R3", "R9", "R10", "R15", "R16", "R21", "R27"]
+
+
+@test("COVER-ALL: check_cover_all 一个 ❌ 不影响其他 7 项")
+def t33():
+    ctx = _OP_SNAP["CoverAllContext"](R15_complete="n")
+    items = _OP_SNAP["check_cover_all"](ctx)
+    r15 = [it for it in items if it.rule == "R15"][0]
+    assert r15.status == "❌"
+    r2 = [it for it in items if it.rule == "R2"][0]
+    assert r2.status == "✅"
+
+
+@test("COVER-ALL: render_cover_all 含 [COVER-ALL] 头 + 8 行")
+def t34():
+    ctx = _OP_SNAP["CoverAllContext"](R9_no_destroy="n")
+    items = _OP_SNAP["check_cover_all"](ctx)
+    out = _OP_SNAP["render_cover_all"](items)
+    lines = out.split("\n")
+    assert lines[0] == "[COVER-ALL]"
+    assert len(lines) == 9
+    # 检查某行格式
+    assert any("R9·不搞破坏" in line and line.startswith("❌") for line in lines)
+
+
+@test("CLI: cover-all 跑通 rc=0 输出 [COVER-ALL]")
+def t35():
+    import io, contextlib
+    import rules_tree.__main__ as cli
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = cli.main([
+            "cover-all", "--R2", "y", "--R3", "y", "--R9", "n/a",
+            "--R10", "y", "--R15", "n", "--R16", "y", "--R21", "n/a",
+            "--R27", "y",
+        ])
+    out = buf.getvalue()
+    assert rc == 0
+    assert "[COVER-ALL]" in out
+    assert "R15·完整版" in out and "❌ R15·完整版" in out
+    assert "R9·不搞破坏" in out and "➖ R9·不搞破坏" in out
+
+
+@test("CLI: cover-all 缺值 rc=2")
+def t36():
+    import rules_tree.__main__ as cli
+    rc = cli.main(["cover-all", "--R2"])
+    assert rc == 2
+
+
+@test("CLI: cover-all 未知准则 rc=2")
+def t37():
+    import rules_tree.__main__ as cli
+    rc = cli.main(["cover-all", "--R99", "y"])
     assert rc == 2
 
 

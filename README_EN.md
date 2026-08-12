@@ -6,7 +6,7 @@
 
 ### Engineering AI collaboration discipline: single source · injectable · auditable · benchmarkable · acceptable
 
-**27 principles · cross-project core values · 81%+ token saved on rule injection · ready for 8+ AI tools**
+**28 principles · cross-project core values · 81%+ token saved on rule injection · ready for 8+ AI tools**
 
 [![Version](https://img.shields.io/badge/version-v1.1.1-blue)](./package.json)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
@@ -96,7 +96,7 @@ After installation, ask your AI tool:
 
 > **"What are the 8-honors-8-shames principles?"**
 
-- ✅ Working: it lists the 27 principles (look first, align, reuse, verify, full version, accompany to completion…)
+- ✅ Working: it lists the 28 principles (look first, align, reuse, verify, full version, accompany to completion…)
 - ❌ Not working: vague answer → check the file placement against the table above.
 
 ---
@@ -128,7 +128,7 @@ off   injection off, safety floor kept
 
 ### Injection cost (measured locally)
 
-RULES.md (27 principles) is 13,196 bytes. Old design injected the full text every turn vs new design (once per session + summary per turn):
+RULES.md (28 principles) is 13,196 bytes. Old design injected the full text every turn vs new design (once per session + summary per turn):
 
 | Mode | Per-turn | 12-turn cumulative | Saved | 100-turn cumulative | Saved |
 |---|---:|---:|---:|---:|---:|
@@ -152,7 +152,7 @@ RULES.md (27 principles) is 13,196 bytes. Old design injected the full text ever
 ## 🏗️ Architecture
 
 ```text
-Rules → single source RULES.md (27 principles)
+Rules → single source RULES.md (28 principles)
    ↓ injection layers
 session_start full text once + per-turn summary + gates
    ↓ tooling
@@ -201,7 +201,7 @@ SCENARIO=reuse-existing MODE=lite node scripts/run-toolenv-smoke.js
 ## Hard Constraints
 
 ```text
-1. No minimalism: the 27 principles are never trimmed
+1. No minimalism: the 28 principles are never trimmed
 2. Single source = RULES.md: no adapter embeds the full text
 3. Credentials only via env vars / platform stores, never plain .env
 4. Deletions must be recoverable; snapshot before large changes
