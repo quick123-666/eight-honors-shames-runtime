@@ -1637,3 +1637,63 @@
   | local_llm | introspect 不变(只 health check) | **0.001ms(缓存后)** |
   | **pytest** | — | **1514/1514 = 100%** |
 - **本会话 2026-08-13 落地清单**: 用户选 P1 → 接入 4 模块 → pytest 100% → 性能 13.95ms → debug → 缓存修复 → pytest 100% + 2.69ms → 沉淀本 RULE(用 cat >> 安全方式,防 edit 工具 bug 复发)→ commit 待授权
+
+---
+
+### RULE-MINICOG-006(2026-08-13 沉淀 — MiniCog 14 孤儿完整接入 + 排除 SOP + 9 模块到位)
+
+- **触发场景**: 任何 MiniCog 9 孤儿接入项目后续 / desire_engine 类疑似废弃判断必读本 RULE
+- **本会话 2026-08-13 完整接入实测**(按 22 现场):
+  - **P0 首批 3 模块**(commit `76317e2` 后):htn_planner / internal_world / personality
+  - **P1 4 模块**(commit `d5fd4c2` 后):subconscious / methods_ab / liquid_autonomous / local_llm + 60s 缓存
+  - **P2 1 模块**(本次):goal_engine ← **总计 8 模块接入**
+  - **真正孤儿**:**0 个**(desire_engine 1 引用疑似废弃,已排除)
+- **desire_engine 排除理由**(按 22):
+  - 引用计数:**1 次**(在 consciousness.py:_default_desire_engine,仅初始化加载)
+  - 启动 introspect:`desires` 字段已存在(`desires: {updates: 0, triggers: {...}, current: {...}}`)
+  - 实际作用:被 `_handle_phase_5_desires` 替代(已用 psi.needs)
+  - **结论**:**疑似废弃**,功能已被 desires 覆盖,接入不增加价值
+- **8 模块接入完整状态**:
+  | 模块 | commit | introspect | think 后变 | 性能 |
+  |---|---|---|---|---|
+  | htn_planner | P0 | ✅ | plans_created 0→2 | <0.01ms |
+  | internal_world | P0 | ✅ | simulations 0→2 | <0.01ms |
+  | personality | P0 | ✅ | curiosity 0.5→0.6 | <0.01ms |
+  | subconscious | P1 | ✅ | intuitions_count 0→4 | 0.00ms |
+  | methods_ab | P1 | ✅ | total_runs 0→4 | 0.01ms |
+  | liquid_autonomous | P1 | ✅ | 不变(tick 无任务) | 0.01ms |
+  | local_llm | P1 | ✅ | 不变(只 health) | 0.001ms(60s 缓存) |
+  | **goal_engine** | **P2** | **✅** | **active_goals 0→1** | **<0.01ms** |
+  | **总计** | — | **8/8** | **6/8 实际行为变** | **think 2.69ms** |
+  | **pytest** | — | — | — | **1514/1514 = 100%** |
+- **9 孤儿完整度**:
+  - RFC-003 视图说"14 孤儿"→ **实际只有 9 个真孤儿**(hebbian/self_model/attachment 已接,personality 真孤儿但本会话补)
+  - **本会话补 8 个**(P0 3 + P1 4 + P2 1)
+  - **剩余 1 个**= desire_engine(排除)
+  - **真正 100% 完成**= 8/8 接入
+- **5 步接入 SOP**(综合 RULE-MINICOG-004/005/006):
+  1. **备份** `consciousness.py` 到 `_recycle_bin/`
+  2. **API 摸底**:`grep -nE "def (update|adjust|tick|create|...)" <module>.py` 找方法
+  3. **复制 hebbian 模板**:`_handle_phase_5_xxx` + try/except + `hasattr` 防御
+  4. **b2.subscribe 注册**:**在 consciousness.py 类内, 不在类外函数内**(本会话 P2 教训)
+  5. **cat >> 追加** 而非 edit 替换(防 RULE-EDIT-CATASTROPHE-001 bug)
+- **3 调试坑综合**(本会话真实遇到):
+  1. **学习率缩放**:`Personality.adjust(delta=0.01)` 内部 scaled=delta*0.05+阈值 0.001 过滤 → 需 delta≥0.02
+  2. **健康检查缓存**:`local_llm.health()` 每次 8.45ms → 60s 缓存降 8450 倍
+  3. **类内 vs 类外**:`cat >>` 必须追加到类内(本会话 P2 误追加到 `create_consciousness_system` 函数体内,在 `return` 之后 unreachable)
+- **Pre 阶(判断孤儿是否真接入)**:
+  1. introspect() 查得到 → 1 维满足
+  2. b2.subscribe 注册 → 1 维满足
+  3. think 后输出差异(实际行为变)→ 1 维满足
+  4. **3 维全满足才算接入**
+- **Run 阶(desire_engine 类疑似废弃判断 SOP)**:
+  1. **引用计数 < 3** → 疑似废弃
+  2. **功能被其他模块覆盖** → 废弃
+  3. **CHANGELOG 无新功能** → 废弃
+  4. **3 条件全满足 → 排除,标 P4 归档**
+- **下次如何避免**:
+  - **任何孤儿接入前必查"3 维全满足"**(introspect + b2.subscribe + 输出差异)
+  - **任何 cat >> 追加前必 `grep "<class" <file> | tail` 找类结束位置**,确保追加在类内
+  - **edit 工具 bug 必看 RULE-EDIT-CATASTROPHE-001**
+  - **缓存模式必看 RULE-MINICOG-005**(60s 经验值)
+- **本会话 2026-08-13 落地清单**: 用户选 P2 → 接 goal_engine → cat >> 误追加类外 → 修复移到类内 → active_goals 0→1 → pytest 100% → 沉淀本 RULE → MiniCog 待 commit → kimi_code_test 待 commit+push
