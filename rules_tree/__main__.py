@@ -4,6 +4,7 @@
     lln <act> <rt> <prior>   评估 LNN D 方案
     operators                 列出 5 算子 + 覆盖率
     coverage                  打印闲置准则清单
+    cover-all --R2 y ...     跑 8 项 COVER-ALL 会话结尾自检
     math-check                跑数学不变量验证
 
 设计: 每个 cmd 函数内延迟 import, 避开 Python 3.11+ 在
@@ -32,6 +33,47 @@ def cmd_lln(args):
     print(f"  P(sigmoid)   = {r.p:.3f}")
     print(f"  阈值         = STOP>{lln.LNN_THRESHOLDS['STOP']}, WARN>{lln.LNN_THRESHOLDS['WARN']}")
     print(f"  决策         = {r.decision}")
+    return 0
+
+
+def cmd_cover_all(args):
+    """跑 COVER-ALL 兑底 8 项自检
+
+    用法: python -m rules_tree cover-all --R2 y --R3 y --R9 n/a --R10 y --R15 y --R16 y --R21 n/a --R27 y
+    token: y=✅ / n=❌ / n/a=➖
+    缺省值: R2/R3/R10/R15/R16/R27 = y, R9/R21 = n/a
+    """
+    import rules_tree.operators as op
+    kwargs: dict[str, str] = {}
+    i = 0
+    while i < len(args):
+        a = args[i]
+        if not a.startswith("--"):
+            print(f"❌ 未知参数: {a} (需 --KEY val 形式)")
+            return 2
+        if i + 1 >= len(args):
+            print(f"❌ {a} 缺少值")
+            return 2
+        key = a[2:]
+        if key not in {
+            "R2", "R3", "R9", "R10", "R15", "R16", "R21", "R27"
+        }:
+            print(f"❌ 未知准则: {key} (合法: R2/R3/R9/R10/R15/R16/R21/R27)")
+            return 2
+        kwargs[key] = args[i + 1]
+        i += 2
+    ctx = op.CoverAllContext(
+        R2_alignment=kwargs.get("R2", "y"),
+        R3_business=kwargs.get("R3", "y"),
+        R9_no_destroy=kwargs.get("R9", "n/a"),
+        R10_no_repeat=kwargs.get("R10", "y"),
+        R15_complete=kwargs.get("R15", "y"),
+        R16_extraordinary=kwargs.get("R16", "y"),
+        R21_recycle=kwargs.get("R21", "n/a"),
+        R27_score3d=kwargs.get("R27", "y"),
+    )
+    items = op.check_cover_all(ctx)
+    print(op.render_cover_all(items))
     return 0
 
 
@@ -94,13 +136,11 @@ def cmd_audit(args):
         print(f"❌ 未知 audit 子命令: {sub}")
         return 2
 
-    from .audit import audit_text, format_report
     audit = audit_text(text)
     print(format_report(audit))
     # 加总结
     import rules_tree.operators as op
     family = op.family_union()
-    used = set(audit["ruleset_hits"].keys())
     activated_pre = sum(len(audit["operator_rule_evidence"][o]) for o in op.OPERATORS)
     print()
     print(f"算子家族总激活度: {activated_pre}/{len(family)} = {activated_pre/len(family):.1%}")
@@ -145,6 +185,7 @@ def main(argv):
         "lln": cmd_lln,
         "operators": cmd_operators,
         "coverage": cmd_coverage,
+        "cover-all": cmd_cover_all,
         "math-check": cmd_math_check,
         "audit": cmd_audit,
     }
