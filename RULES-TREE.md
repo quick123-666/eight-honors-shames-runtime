@@ -1813,3 +1813,44 @@
   - pytest 通过 ≠ server 已生效(必须 `/health` 验证 uptime_seconds 接近 0)
   - daemon 进程用 PowerShell 精确杀(不用 taskkill //IM python.exe,会误杀其他 python)
 - **本会话 2026-08-13 落地清单**: 用户选修 match_score 算法 → 找 router.py:175 0.3 → sed 改 0.15 → 备份 router.py → 重启 server(PowerShell 杀 PID 94580 + nohup 启动)→ pytest 100% + 7 query 实测全部修复 → 沉淀本 RULE → commit MiniCog (89838c7 + 899b912 两 commit) → kimi_code_test 待 commit+push
+
+---
+
+### RULE-MINICOG-008(2026-08-13 沉淀 — MiniCog 项目专用长工单:chat 端点改直连意识模块)
+
+- **触发场景**: 任何用户问"我能不能直接和 MiniCog 意识模块对话" / 任何"chat 端点绕过模板"任务必读本 RULE
+- **本会话 2026-08-13 实证**(12 query 路由分布):
+  - **当前**:`/v1/chat/completions` → state.bus.route() → MessageRouter 4 级路由 → **50% 预制 5 Why 模板**(plan_methods_think)
+  - **期望**:`/v1/think` 直接调 c.think() → 8 真认知模块(hebbian/goal_engine/htn_planner/internal_world/subconscious/methods_ab/personality/attachment)→ 13/20 introspect 字段真实变化
+- **长工单目标**:`T-20260813<time>-000` (MiniCog-v2-chat)
+  1. **P0 核心**:加 `/v1/think` (POST) - 直接调 c.think(),返回真实 insights dict
+  2. **P0 核心**:加 `/v1/reflect` (POST) - 调 c.reflect()
+  3. **P0 核心**:加集成测试 `test_think_endpoint_integration.py` (≥ 4 个测试)
+  4. **P1 增强**:加 `/v1/chat_v2` (POST) - 改走 think 路径而非 plan_methods_think
+  5. **P1 增强**:保留旧 `/v1/chat/completions` (向后兼容)
+  6. **P2 文档**:写 `docs/MiniCog-chat-api.md` + RULE-MINICOG-008 SOP
+- **估时**:6 h (1 人) / 3 h (2 人)
+- **依赖**:router.py 4 级路由已有 / consciousness.py think/reflect 已有 / pytest 100% baseline
+- **4 类关联**:
+  - 依赖: RULE-MINICOG-001 (启动) / 002 (健康) / 003 (测试) / 007 (4 级路由)
+  - 组合: RULE-MINICOG-004 (接入 SOP) / 005 (缓存) / 006 (完整接入) / 007-v2 (算法阈值)
+  - 正交: 全部 27 条八荣八耻
+  - 强化: P-7 不粉饰(保留 disclaimer,chat ≠ 认知的真相)
+- **本次对话沉淀 8 条 RULE-MINICOG-XXX**:
+  | # | 主题 | 关键洞察 |
+  |---|---|---|
+  | 001 | 启动 | start_server.py / talk_consciousness.py / pytest |
+  | 002 | 健康 | intropsect 20 字段 baseline |
+  | 003 | 测试修复 | import 路径 |
+  | 004 | 接入 SOP | 14 孤儿项目 |
+  | 005 | 健康检查缓存 | local_llm 60s 缓存 |
+  | 006 | 完整接入 | 8/8 + desire_engine 排除 |
+  | 007 | 4 级路由 | 12 query 实测 |
+  | 007-v2 | 算法阈值 | 0.3→0.15 + daemon 重启 |
+  | **008** | **chat vs think 端点** | **本工单目标**(新建) |
+- **下次如何避免**:
+  - 任何"chat ≠ 认知"问题先看 RULE-MINICOG-002 disclaimer + 008 长工单
+  - 任何 daemon 进程代码修改必重启(`ps + kill + nohup + /health` 验证)
+  - 任何算法阈值修改前必 grep 找位置(`grep -n "0\.3" minicog/ -r --exclude-dir=__pycache__`)
+  - 任何 pytest fail 必看"改错文件 vs daemon 未重启 vs .pyc 缓存"3 个常见坑
+- **本会话 2026-08-13 落地清单**: 用户选收工 → 我开项目专用长工单(${TID}) → 沉淀 RULE-MINICOG-008 → 等待下次会话执行
