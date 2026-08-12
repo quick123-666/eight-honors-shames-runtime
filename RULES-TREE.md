@@ -1443,3 +1443,39 @@
   - RFC 状态检查: `grep "状态:" RFC-*.md`,看是不是 proposed
   - pytest 全跑前先看 collection error,跳过 known issue 文件
 - **本会话 2026-08-13 落地清单**: 用户 A B C D 全部要 → AI 跑完 4 件事 → 沉淀本 RULE → commit 即将落地
+
+---
+
+### RULE-MINICOG-003(2026-08-13 沉淀 — MiniCog 测试修复 SOP)
+
+- **触发场景**: 任何 MiniCog pytest collection error 或性能测试 fail 必读本 RULE
+- **本会话 2026-08-13 实测数据**(按 22 现场):
+  - **修复前**: 1510 passed, **1 failed**, 1 collection error(import 错), 6 skipped, 58.23s
+  - **修复后**: **1514 passed, 0 failed, 0 collection error**, 6 skipped, 42.73s
+  - **通过率提升**: 99.87% → **100%**
+- **修复内容**:
+  - 文件:`MiniCog/tests/test_v1140_j1_per_phase_bench.py` L8
+  - 改前:`from tests.bench_phase import (PHASE_THRESHOLDS_MS, _bench_phase, generate_perf_report,)`
+  - 改后:`from bench_phase import (PHASE_THRESHOLDS_MS, _bench_phase, generate_perf_report,)`
+  - 根因:`bench_phase.py` 在 `tests/` 目录**同级**(不是 `tests.bench_phase` 包),应 `from bench_phase` 而非 `from tests.bench_phase`
+- **4 类关联**:
+  - 依赖: R1 查接口(`python -c "import ..."` 现场验证) / R7 数学验证(通过率 100%)
+  - 组合: RULE-MINICOG-001(启动信息)/ RULE-MINICOG-002(项目健康快照)
+  - 正交: 全部 27 条八荣八耻
+  - 强化: P-7 不粉饰(test_think_under_10ms 失败原因可能是 Windows 冷启动,重跑即过,不要急于调阈值)
+  - 无 ⊕ 冲突 ✓
+- **Pre 阶(判断 pytest 失败)**:
+  1. 看到 collection error → 先看具体 ModuleNotFoundError 的模块名
+  2. 看 import 行: 是 `from X.Y import Z` 还是 `from X import Y`(包 vs 文件)
+  3. 性能测试 fail → 先重跑一次(可能是冷启动)
+- **Run 阶(测试修复 5 步)**:
+  1. 备份被改文件到 `MiniCog/_recycle_bin/<时间戳>-tests-fix-bk/`
+  2. 看完整源文件 + 报错堆栈(不要凭错误信息猜)
+  3. 改前单独跑目标文件看 collect 错误
+  4. 改后单独跑目标文件看修复效果
+  5. 跑完整 `pytest tests/ --no-header -q` 看总通过率
+- **下次如何避免**:
+  - 任何 pytest collection error → 必先看完整 import 路径,再决定是 "包" 还是 "文件"
+  - 性能测试 fail 不要急于调阈值,先重跑一次(Windows 冷启动慢)
+  - 修复后必跑**完整 pytest** 确认通过率提升
+- **本会话 2026-08-13 落地清单**: 用户 A B C D 选 → 修 1 行 import → pytest 99.87% → 100% → 沉淀本 RULE → commit 即将落地
