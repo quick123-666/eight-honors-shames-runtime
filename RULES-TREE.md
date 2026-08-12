@@ -1385,3 +1385,61 @@
   - RULES.md 27 条历史上 "组" 标题是 v3.0.0 重构引入,本会话 v3.4.0 移除
   - 引用 "执行前/中/后" 字面前,先 grep 源文件确认
 - **本会话 2026-08-13 落地清单**: 用户主张 "所有规则不分阶段" → AI 现场验证源文件平铺 → 删除 RULES.md 4 个组标题 → 修订章首 + 历史注记 → 修订 RULES-VERSION.md → 沉淀本 RULE → commit + push
+
+---
+
+### RULE-MINICOG-002(2026-08-13 沉淀 — MiniCog 项目健康快照 v1.4.x)
+
+- **触发场景**: 任何 MiniCog 项目健康评估 / 路线图校准 / 投资决策 / "MiniCog 能跑吗" 类问题必读本 RULE
+- **本会话 2026-08-13 实测数据**(按 22 现场跑):
+  - **真实模块数**: 22(主流程引用 22 / **孤儿 14**: self_model / goal_engine / desire_engine / subconscious / attachment / personality / safety / htn_planner / hebbian / internal_world / methods_ab / liquid_autonomous / governor / local_llm)
+  - **启动**: A1 验证 `talk_consciousness.py` 启动 OK, banner + `<ConsciousnessSystem modules=[psi, emotion, metacog, conscious, consciousness_level, quale, causal, analogical]>` 8 子模块
+  - **introspect**(idle 状态):
+    - `consciousness_level.level = 0.1`("Low functional complexity")
+    - `emergence_index = 0.932`("Fully emergent functional")
+    - `metacog_state.total = 18195` / `failed 3512 == unknown_acknowledged 3512`(诚实说"不知道")
+    - `personality = warm_companion`(默认预设,不是学出来的)
+  - **think() 动态**(5 think + 1 reflect):
+    - `hebbian.connections 0 → 10`(第一次 think) → 15(后续 4 次 think)
+    - `emotion.valence 0.513 → 0.563`(持续单调上升)
+    - `metacog.total 18196 → 18201`(+5 think + 1 reflect)
+    - `stats(): think_count=5 / reflect_count=1 / introspect_count=7 / errors=0`
+  - **pytest** 实测(按 C 跳过失败文件):
+    - **1510 passed, 1 failed, 6 skipped, 14 warnings, 58.23s**
+    - 失败 1:`test_consciousness_system.py::TestPerformance::test_think_under_10ms`(性能测试失败)
+    - 跳过 1 文件:`test_v1140_j1_per_phase_bench.py`(import error,缺 `from bench_phase` 而非 `from tests.bench_phase`)
+  - **RFC 状态**(按 B 全部现场读):
+    - RFC-001 local-models: **proposed, P0 例外 3 项 checklist 全未批**
+    - RFC-002 voice-perception: **proposed**, speech.py/embed.py **占位未实现**(MINI-001 卡这里)
+    - RFC-003 orphan-integration: **proposed**, 14 孤儿渐进接入 v1.9.0→v1.11.0,**未开工**
+    - RFC-004 PR-ticket: **proposed → 部分实施 v1**
+    - RFC-005 realtime-sync: **proposed**, RFC-004 扩展
+    - RFC-009 user-model: **proposed**, **MiniCog 最大缺口**,借鉴 LAAP 16000 行→600 行极简
+  - **路线图 vs 实际**(按 D 校准):
+    - v1.5.x 目标 30+ 模块,**实际 22 + 14 孤儿**, M1 目标 2025-01 已过 **18 个月** 🔴
+    - v1.6.0 LNN 数学理论写了,**代码未动** 🟡
+    - v1.8.0 语音接入 RFC-002 proposed,**speech.py 0 行** 🟡
+    - v1.16.0 LAAP 18/19→19/19,**4 缺口未动** 🟢 接近完成
+- **4 类关联**(借鉴 RULE-FP-001):
+  - 依赖: R7 数学验证(实测数字) / R14 谨慎改(不凭 README 推测)
+  - 组合: RULE-MINICOG-001(启动信息)/ RULE-FP-USAGE-001(枚举前先问为什么)
+  - 正交: 全部 27 条八荣八耻
+  - 强化: P-7 不粉饰(MiniCog 自己 disclaimer = "FUNCTIONAL 模拟, NOT true consciousness")
+  - 无 ⊕ 冲突 ✓
+- **Pre 阶(判断 MiniCog 决策失守)**:
+  1. 提到 "v1.5.x 已完成"时,先查本 RULE + introspect
+  2. 提到 "MINI-001 可跑"时,先确认 RFC-001 是否批
+  3. 提到 "pytest 全过"时,先看 collection error 是否被忽略
+  4. 提到 "MiniCog 整体完成度"时,先做本 RULE 的 5 步实测
+- **Run 阶(健康评估 5 步)**:
+  1. 启动: `python talk_consciousness.py`(或 start_server.py / import)
+  2. introspect(idle 状态基线)
+  3. think × 5 + reflect(测学习机制)
+  4. pytest --ignore=已知失败文件(测实际通过率)
+  5. 报告含 disclaimer (P-7 不粉饰)+ 本 RULE 数据对照
+- **下次如何避免**:
+  - 不要凭 README 推测 MiniCog 状态,必跑实测(本次会话 5 次实测发现 README 与实际差距)
+  - 路线图校准 = 实测 + 路线图 双向对照, 不靠记忆
+  - RFC 状态检查: `grep "状态:" RFC-*.md`,看是不是 proposed
+  - pytest 全跑前先看 collection error,跳过 known issue 文件
+- **本会话 2026-08-13 落地清单**: 用户 A B C D 全部要 → AI 跑完 4 件事 → 沉淀本 RULE → commit 即将落地
