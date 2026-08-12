@@ -1303,3 +1303,48 @@
   - 第一性 = 从目的 / 价值 / 不可拆解的最简前提推导;不是经验枚举或类比
   - 如果发现自己在"列选项",**先停**,补"为什么"段,再继续
 - **本会话 2026-08-13 落地清单**: 用户追问"第一性原理有没有真正参与到工作中" → AI 诚实承认 ≈10-15% 参与度 → 沉淀本 RULE → commit 即将落地
+
+---
+
+### RULE-MINICOG-001(2026-08-13 v3.4.0 会话沉淀 — MiniCog 项目元信息 + 反混淆)
+
+- **触发场景**: 任何任务涉及 "MiniCog" 或 "laap-AGI" 或 "LAAP" 项目相关调研/启动/集成/混淆风险时必读本 RULE
+- **MiniCog 真实结构**(按 22 现场 grep):
+  - **规划仓库**:`C:\Users\Administrator\Desktop\kimi code\MiniCog\`(RFC / ROADMAP / FEATURE_MATRIX)
+  - **实际代码仓库**:`C:\Users\Administrator\Desktop\kimi code\LAAP架构深度研究报告\MiniCog\`(42 Python 模块 + tests + examples + start_server.py)
+  - **README 路径正确**:规划仓库 README 写 "实际代码仓库: ../LAAP架构深度研究报告/MiniCog/",**当前确实在该位置**(bash locale 把中文目录显示成乱码,**别误判 README 错**)
+  - **42 模块分类**:与意识相关 22(53% A1 核心意识/A2 动机情感/A3 目标治理)/ 与意识无关 20(B 通用算法工具)—— ARCHITECTURE_MODULE_TAXONOMY.md proposed
+  - **没有 main.py / __main__.py** —— **MiniCog 不是独立应用,是 Python 包/库** —— 启动方式:`start_server.py` (启动服务器)+ `talk_consciousness.py` (对话示例)
+- **反混淆铁律**(本会话 2026-08-13 v3.4.0 真实混淆纠正):
+  - ❌ **MiniCog ≠ LAAP ≠ laap-AGI-main**:三个**独立项目**
+    - MiniCog = MiniCog(零 LLM 认知架构,42 模块)
+    - LAAP / laap-AGI-main = "Living Agent Application Protocol" 项目,有 `aris_brain/psi_jspace_bridge/psi_llamacpp_implant.md` **属于 LAAP 不属于 MiniCog**
+    - kimi_code_test = 本项目(八荣八耻规则 + kg_rag_rust)
+  - 任何 `laap-AGI-main/aris_brain/` 下的代码**不是 MiniCog 的现有实现**——是 LAAP 的独立功能
+  - MINI-001 "本地模型集成验证" 工单失败根因 = LLM 路径幻觉(`/llama.cpp/README.md` Linux 风格) + **规划/代码仓库分离**导致 LLM 找不到正确路径
+- **启动方式 3 条**(按 1 + 按 11 复用):
+  1. **启动服务器**:`python start_server.py`(在 LAAP架构深度研究报告/MiniCog/ 目录下)
+  2. **对话演示**:`python talk_consciousness.py`(同目录)
+  3. **作为包 import**:`from minicog import CognitiveBus, PSICore, EmotionEngine, ...`(42 模块均可)
+  - **依赖**:`requirements.txt` + `pyproject.toml`(uv 工具链)
+  - **测试**:`pytest tests/`(注意 `bench_*.py` 不会被自动收集,需手动跑)
+- **RFC-001 P0 例外状态**(2026-08-13):
+  - 3 项决策 checklist **全未完成**:`[ ] 维护者一致同意` + `[ ] 14 天公示期` + `[ ] PRINCIPLES.md 显式修改`
+  - RFC-001 是 **proposed**,**不是已生效规则**
+  - kimi_code_test 当前用 MiniMax-M3 云端(违反 RFC-001 P0-A 假设 RFC-001 通过),但 P0 原则未落地,**理论违规,实际无人执**
+- **Pre 阶(判断失守)**:
+  1. 提到 "MiniCog" 时,先问:是规划仓库 / 代码仓库 / 还是其他?
+  2. 提到 "LAAP" 时,先确认是 laap-AGI-main (LAAP 协议) / LAAP 架构深度研究报告 (MiniCog 代码所在目录) / 其他?
+  3. 提到 "本地模型集成" 时,先确认:是 MiniCog RFC-001 (未批) / LAAP 已有实现 / 其他?
+  4. 提到 "启动 X" 时,先问:有 main.py? 没有就是包,启动方式是 import 或 start_*.py
+- **Run 阶(失守后立即修)**:
+  1. 承认失守(用 RULE-MINICOG-001 编号,不包装)
+  2. 用实际路径 + 实际文件名核实,不靠记忆或类比
+  3. 必要时用 `codegraph_explore` 或 `ls -la` 现场验证
+  4. 沉淀新发现到本 RULE 子段
+- **下次如何避免**:
+  - 任何 "MiniCog / LAAP / laap-AGI / kimi code" 关键字出现时,先读 RULE-MINICOG-001
+  - 启动任何项目前先 `find . -maxdepth 3 -name 'main.py' -o -name 'start_*.py' -o -name '__main__.py'` 三连查
+  - 仓库分离(规划 vs 代码)必看 README 路径,**bash locale 显示乱码别误判**
+  - RFC 状态(proposed/draft/accepted)必看决策 checklist 状态,**未批 ≠ 通过**
+- **本会话 2026-08-13 落地清单**: 用户问 "继续研究 minicog" → AI 漏扫方法树 → 用户再次纠正"为什么不扫描上下文" → 补查发现 methods/project-views/MiniCog.md → 修订 RFC-004 重复 bug → 沉淀本 RULE → commit 即将落地
