@@ -1092,7 +1092,7 @@
   4. R15 完整版: 变更摘要含 **本会话内真实沉淀**(R8/R19 互引 / COVER-ALL 实装 / AGENTS.md F hook / RULE-MR-DIAG-001)
   5. R7 数学: 本次升级完整度 z = activation + (1 - rt_cov) + (1 - prior_success) - 2 - 0.3 应在 BLOCK 阈值(0.35)以下, 反之需补外滩手续
   6. R10 不重复: 检查 RULE-PUSH-V323-001 是否已含本变更,有则合并不新建
-- **Run 阶(8 步)**:
+- **Run 阶(9 步 · v3.3.1 PATCH 补漏)**:
   1. 备份 8 个文件 → `_recycle_bin/<ts>-rules-v3.3.0/`
   2. 改 RULES-VERSION.md(主 + 运行时): 顶部 v3.2.x → v3.3.0, 对照表插入 v3.2.2/v3.2.3 行 + v3.3.0 行 + 历史表追加
   3. 改 RULES-TREE.md:1 顶部指针 → v3.3.0
@@ -1101,6 +1101,7 @@
   6. 改 README.md: badge 版本号
   7. 重建索引(如需): `python -m rules_tree coverage` 验证 100%
   8. 本 RULE 沉淀到 RULES-TREE.md 末尾(R15 完整版闭环)
+  9. **git add + git commit + git log 验证**(2026-08-13 v3.3.1 补漏:本次升级改完 8 文件但漏 commit,漂移到 v3.3.1 才在 commit `5c8a17e` 补提交;**强制**: 改完必须 `git add <files> && git commit -m "..." && git log -1 --oneline` 验证 commit 落地,否则不算升级闭环 — R10 不重复犯错 关键防线)
 - **Run 阶踩过的坑** (本会话 2026-08-12 v3.3.0 推送):
   - R24 违反自相矛盾: 主项目顶部 v3.2.3 + 对照表 v3.2.1 "当前最新" 本会议之前一直存在
   - 运行时/主项目版本漂移: 运行时 v3.2.1 + 主 v3.2.3 差别 2 个小版本 — 本轮合并对齐
