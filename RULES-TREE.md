@@ -1479,3 +1479,46 @@
   - 性能测试 fail 不要急于调阈值,先重跑一次(Windows 冷启动慢)
   - 修复后必跑**完整 pytest** 确认通过率提升
 - **本会话 2026-08-13 落地清单**: 用户 A B C D 选 → 修 1 行 import → pytest 99.87% → 100% → 沉淀本 RULE → commit 即将落地
+
+---
+
+### RULE-MINICOG-004(2026-08-13 沉淀 — MiniCog 9 孤儿接入 SOP + 调试坑)
+
+- **触发场景**: 任何 MiniCog 9 孤儿接入项目(或其他模块接入主流程)必读本 RULE
+- **本会话 2026-08-13 P0 首批接入实测**(3 模块:htn_planner / internal_world / personality):
+  - **改前**: 9 真孤儿(introspect 有 + b2.subscribe 未注册 + think 后不变)
+  - **P0 接入后**: 3/3 验证 think 后有输出差异
+    - htn_planner: `plans_created 0 → 2`(2 次 think)
+    - internal_world: `simulations 0 → 2`
+    - personality: `curiosity 0.5 → 0.6`(需 user_message > 30 字符)
+  - **pytest 100%**: 1514 passed, 6 skipped(未引入任何 regression)
+- **接入 SOP 5 步**:
+  1. 备份 `consciousness.py` 到 `_recycle_bin/<时间戳>-xxx-bk/`
+  2. 复制 hebbian 模板(L674-687, 含 try/except + `hasattr` 防御)
+  3. 改 handler 调用对应模块的方法(看 API 头部确认)
+  4. 在 L405-416 b2.subscribe 区加一行
+  5. **跑 pytest + introspect 双重验证**(not just one!)
+- **3 个调试坑**(本会话 P0 真实遇到):
+  1. **学习率缩放**:`Personality.adjust(trait, delta)` 内部 `scaled = delta * self.learning_rate`(默认 0.05)+ 阈值 `> 0.001` 过滤 → **delta 需 ≥ 0.02** 才能触发(否则 0.01 * 0.05 = 0.0005 < 0.001 不触发)
+  2. **字符长度阈值**:user_message 需 > 30 字符才调整 personality(短消息不调整)
+  3. **dimensions 是 dict 不是 method**:`c.personality.dimensions()` 会 TypeError,应 `c.personality.dimensions`(属性访问)
+- **Pre 阶(判断失守)**:
+  1. 接入后**必须**跑 pytest 100% + introspect 字段变化双重验证
+  2. 字段不变时:**先看 adjust 等方法内部是否有学习率/阈值过滤**(grep `learning_rate` `threshold` `abs(.*) >`)
+  3. 字段不变时:**试 3 种 user_message 长度**(< 10 / 10-30 / > 30 字符)
+- **Run 阶**:
+  1. 调试失败时用 monkey patch 验证 handler 是否被调(本会话已用)
+  2. 不变时调 1 次模块方法(直接调,绕过 think)确认模块方法本身工作
+  3. 调试成功后再 verify 3 个 user_message 长度
+- **4 类关联**:
+  - 依赖: R1 查接口(看 API 头部) / R7 数学验证(实际数字)
+  - 组合: RULE-MINICOG-001/002/003(启动/健康/测试修复)
+  - 正交: 全部 27 条八荣八耻
+  - 强化: P-7 不粉饰(introspect 字段与实际状态可能差异,需实测)
+- **下次如何避免**:
+  - 任何 `adjust` / `tick` / `update` 类方法先 grep `learning_rate` / `threshold` / `abs(.*) >` 确认有缩放/过滤
+  - 调试时**直接调模块方法** + **monkey patch 验证 handler 被调** 双管齐下
+  - 接入后必跑**完整 pytest**(不只 introspect)
+- **P1 4 模块待接入**(用户授权后):subconscious / methods_ab / liquid_autonomous / local_llm
+- **P2 2 模块待接入**(疑似废弃不接):desire_engine(1 引用,疑似废弃) / goal_engine(10 引用,真接入待评估)
+- **本会话 2026-08-13 落地清单**: 用户选分批 P0 → 接入 3 模块 → pytest 100% + introspect 验证(调试 personality 阈值 2 次)→ 沉淀本 RULE → commit MiniCog 待授权 → P1/P2 待授权
