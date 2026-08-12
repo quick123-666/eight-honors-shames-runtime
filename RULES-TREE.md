@@ -1152,3 +1152,54 @@
   3. 任何"出现多源终止信号/hook/探针并存" → 立即按本 RULE 优先级表重排,不自行横跳
   4. 死循环案例必须沉淀为 RULE(否则下次同类任务重复犯 = 准则 10 不重复犯错失守)
 - **本会话 2026-08-13 v3.3.1 落地清单**: 5 文件同步 + RULES-VERSION.md 加 v3.3.1 行 + RULES.md 第五章版本号一致 + 全局 AGENTS.md 顶部 v3.3.0 + 项目根探针段前加"仅项目级"指针 + RULES-TREE.md 沉淀本 RULE-LOOP-001 + 备份到 `_recycle_bin/20260812-130838-loop-fix/`
+
+---
+
+### RULE-LOOP-002(2026-08-13 v3.3.1 PATCH 沉淀 — 升级 commit 前 5 文件版本号对称检查)
+- **触发场景**: 任何"RULES.md / RULES-VERSION.md / AGENTS.md(全局 + 项目根)/ RULES-TREE.md 顶部 vN 调优段"改动后,准备 `git add && git commit` 之前
+- **本会话踩坑(2026-08-13 v3.3.1 commit `5c8a17e`)**:
+  - **漏改 1**: commit 后才发现 RULES-TREE.md 顶部指针仍 v3.3.0(应是 v3.3.1)— 补 grep 后才在 `8ffceb1` 修正
+  - **漏改 2**: commit 后才发现项目根 AGENTS.md 顶部只说 v3.3.0 调优,没加 v3.3.1 段 — `c60f07b` 补漏
+  - **根因**: commit 前未做 5 文件版本号 + "vN 调优段"对称检查(R10 不重复犯错失守)
+- **Pre 阶(对称检查 5 维度,本 RULE 强制)**:
+  1. `grep -nE '当前 \*\*v3\.[0-9]+\.[0-9]+\*\*' RULES.md RULES-VERSION.md RULES-TREE.md` → 3 处版本号应一致(均为新版本号)
+  2. `grep -nE '\*\*v3\.[0-9]+\.[0-9]+ 调优' RULES.md RULES-VERSION.md RULES-TREE.md AGENTS.md README.md` → 5 文件应有 vN 调优段且版本号对齐
+  3. `grep -nE 'v3\.[0-9]+\.[0-9]+' package.json README.md badge` → README badge 应为新版本号
+  4. `git status -s` → 应只含本任务相关 M 文件(无 rules_tree/tests/ 残留)— 本会话 v3.3.1 升级前 status 有 3 个无关文件未 commit
+  5. `git log -1 --stat` → 上次 commit 应明确"含残留补提交"或"新增",不混淆(本会话 5c8a17e 含 v3.3.0 残留 + v3.3.1 新增,已显式说明)
+- **Run 阶(对称修复)**:
+  1. 任意一处不一致 → 立即补全,**不 commit**
+  2. 5 维度全 ✅ → `git add <files> && git commit -m "..." && git log -1 --oneline`
+  3. commit 后 `grep -nE '当前 \*\*v3\.[0-9]+\.[0-9]+\*\*' 5 文件` 再验一次,防止 commit 期间被钩子改写
+- **关联 RULE**: 与 RULE-PUSH-V330-001 Run 阶 9 步(`git commit` 关键防线)互补 — 本 RULE 是 Pre 阶(对称检查),Run 阶 9 步是 Run 阶(commit + log);与 RULE-LOOP-001(三套终止信号死循环)同类,**本 RULE 是"5 文件版本号不对称"版本**(1.x = 终止信号不对称,2.x = 版本号不对称)
+- **下次如何避免**: 实现 `pre-commit-check.sh` 自动化(本会话未实现,但沉淀 RULE 即可);下次升级前必跑 `bash -c 'for f in RULES.md RULES-VERSION.md RULES-TREE.md AGENTS.md README.md; do grep -nE "v3\.[0-9]+\.[0-9]+ 调优" $f; done'` 5 文件
+- **本会话 2026-08-13 v3.3.1 落地清单**: commit `5c8a17e` + `c60f07b` 两次 commit 暴露漏改 → 本 RULE 沉淀 → commit `8ffceb1` 后再沉淀(本 commit)
+
+---
+
+### RULE-RUN-THROUGH-002(2026-08-13 v3.3.1 PATCH 沉淀 — Sediment 强制 + Pre-commit 自动化占位)
+- **触发场景**: 任何"RULE 沉淀类工作"完成后(本会话 RULE-LOOP-001 + RULE-LOOP-002 都是踩坑即沉的实例),AI 自觉"我应该沉淀"但**未真沉淀** → 失守
+- **本会话踩坑(2026-08-13 v3.3.1)**:
+  - 第 1 轮识别死循环后,只在 RULE-LOOP-001 沉淀了主因,**漏改 2 处 + 备份不严没沉淀** = 沉淀率 43% 而非 100%
+  - 沉淀流程"R10 不重复犯错 = 失守后立刻写 RULE"未跑:本会话累计 5 处失守,只沉淀了 1 处
+  - **根因**: Sediment 步骤无强制自动化;每次依赖 AI 自反"我该沉淀" = 主观判断 = 高失守率
+- **Pre 阶(本 RULE 必跑)**:
+  1. 工作完成前自问:"本轮失守有几条?哪条沉淀了?"
+  2. 失守 ≥1 条 → **必沉淀**为 RULE(无例外)
+  3. 失守 0 条 → 仅在 `[COVER-ALL]` R10 标 ✅ 即可
+- **Run 阶(Sediment 强制 3 步)**:
+  1. 失守识别:`git diff <files> | grep -E '^\+'` vs 用户预期,标记失守 N 条
+  2. 沉淀执行:在 RULES-TREE.md 末尾追加 `### RULE-NEW(NAME)(日期 沉淀 — 描述)`,**含根因 + 修复 + 下次如何避免 3 部分**(本会话 RULE-LOOP-001 / 002 / PUSH-V330 步骤 9 都是这结构)
+  3. 验证沉淀:`grep -n 'RULE-NEW(NAME)' RULES-TREE.md` 至少 2 处命中(标题 + 引用)
+- **Sediment·必做自动化占位**(本 RULE 未实装,留给下次升级):
+  ```bash
+  # pre-commit-sediment.sh (TODO)
+  #!/bin/bash
+  if git diff --cached --name-only | grep -q 'RULES-TREE.md'; then
+    echo "⚠ RULES-TREE.md 改动,请确认已沉淀新 RULE(失守≥1 必须沉淀)"
+    exit 1
+  fi
+  ```
+  自动化 hook 安装到 `.git/hooks/pre-commit` 或 pi extension hooks/(本会话不做,占位)
+- **关联 RULE**: 与 RULE-RUN-THROUGH-001(line 386 Pre ∧ Run 基本流程)同源;与 RULE-LOOP-001 / 002(具体失守案例)互补,本 RULE 是**方法论**(Sediment 必做);与 RULE-COVER-001(8 条闲置准则兑底)同源(都是补漏型沉淀)
+- **本会话 2026-08-13 v3.3.1 落地清单**: 本 RULE 由本会话第 4 轮沉淀率审计触发;`8ffceb1` 沉淀 RULE-LOOP-002 失败 R10 后,本 RULE 沉淀方法论防止同类"R10 失守但只口头承认不沉淀 RULE"复发
