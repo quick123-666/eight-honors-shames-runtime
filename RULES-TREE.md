@@ -4576,3 +4576,51 @@
   6. 任何**补全型准则**(R15/R16/R17/R22/R23/R24)必须有 hook 配对,否则 = 期待 AI 自觉,代价高
 - **沉淀位置**: 主项目 RULES-TREE.md 本段 + commit `a683629` + push origin main + `_recycle_bin/.meta` v1
 - **confidence = 95%**:22 漂移归零 + 14 文件 commit + push 成功 + 7 类失守明确;但 (a) 运行时副本 AGENTS.md 漂移未在本会话内修(2 小时单独工单),(b) `check:drift --fix` 没再深测(可能有 edge case 未覆盖),均为 v3.4.9 候选
+
+### RULE-IX-SENSITIVE-DATA-001(2026-08-13 v3.4.9 PATCH 沉淀 — 准则 9「不搞破坏」增补敏感数据保护 sub-clauses,让准则真正能够使用)
+
+- **触发场景**: 用户接令「改成能够使用」「加进 key 保护」「让 准则 9 真正生效」时,或 commit 前 grep 出 secret 泄漏时,直接走本段。
+- **核心纠正**:
+  - **❌ 旧认知**:准则 9 = 不可逆操作前检查(原始 4 条 ① 精确目标 ② 列影响 ③ 备份/回滚 ④ 用户确认),**够用**
+  - **✅ 新规约**:准则 9 还**必须**覆盖**敏感数据保护** — 不可逆操作 + 密钥外泄 同属"搞破坏"。三块全做准则才算"能够使用":
+    - **不显示** = secret 不进 stdout / 日志 / 对话 / commit / commit body / note / doc
+    - **不写入** = secret 不进任何文件 + 自动 grep `sk-/pk_live/BEGIN PRIVATE KEY` 排除
+    - **不在命令里用** = `env KEY=secret` `cat ~/.ssh` `echo $TOKEN` 禁止
+- **本 RULE 定义**(5 块):
+  - **DEF-1 不显示**:API key / token / password / cookie / private 路径全文不出现于:对话 response(grep `sk-` `Bearer ` `-----BEGIN` 必报 warning);stdout 打印(用 `head -c 8`/`grep -c` 代替 cat);日志文件(`2>&1 | grep -v TOKEN`);commit message + body(commit 前 grep 守卫)
+  - **DEF-2 不写入**:secret 不进任何文件(包括示例代码也用占位符如 `${OPENAI_API_KEY}`);`git secrets --install` + Python `keyring` 或 Vault 替代;repo `.env` 在 `.gitignore`;CI 用 secret manager(GitHub Actions secrets / Vault agent / 1Password CLI)
+  - **DEF-3 不在命令里用**:`env KEY=<raw>` 历史 = 自动 grep `-E '(sk-|pk_live|-----)'` 进 pre-commit hook;`cat ~/.ssh/id_rsa` / `echo $TOKEN` 主动屏蔽;用 `< /dev/null`、`hiddeninput` 等替代
+  - **DEF-4 替代三件套**:① env 变量**引用名**(`$OPENAI_API_KEY` 而非值)② `set +o history`(交互式 shell 会话临时关);③ `.env` + `.gitignore` + `make init-secrets` 流程
+  - **DEF-5 检测反例走 R10**:意外 echo / 截图含 token / `cat .env` 误 commit → 立刻沉淀 + pre-commit hook + 用户告警
+- **grep 检测规则**(后续 pre-commit hook):
+  ```bash
+  # 标准 secret pattern
+  grep -rnE '(sk-[A-Za-z0-9_-]{20,}|pk_live_[A-Za-z0-9]{20,}|-----BEGIN [A-Z ]+-----|[A-Z_]+_API_KEY=[^$\{]|[Bb]earer [A-Za-z0-9_-]{20,})' \
+    --include='*.{js,ts,py,rs,go,md,yml,yaml,json,sh,bash}' \
+    --exclude-dir={node_modules,.git,target,dist,vendor}
+  ```
+  任一命中 → exit 1 阻断 commit + 红字提示"rotate 该 key"
+- **本次沉淀产出**:
+  - 主项目 `RULES.md`:L204 `#### 准则 9` 段增加 sub-bullet(5 行:DEF-1/2/3/4/5);L797 表行摘要扩到含敏感数据 clause
+  - 运行时副本 `tuomin/eight-honors-shames-runtime/RULES.md`:L204 + L851 同步(双源唯一 diff)
+  - RULES-VERSION.md:L5/L6 top marker 升 v3.4.8 → v3.4.9;新增 v3.4.9 行于中部历史表(v3.4.8 之后)+ 末尾时间序表
+  - 备份:`_recycle_bin/20260813-184500/{RULES.md, runtime-RULES.md.bak, RULES-VERSION.md}`(3 件)
+- **回滚命令**(一行):
+  ```bash
+  git reset --hard f2d7c7b  # 回到 v3.4.8 commit(失守点 7 类一次补齐那个)
+  ```
+- **关联纪律**:
+  - **R2 对齐** — 三件套定义覆盖 R22 安全类操作的实际边界(用户面 / 工具面 / 协议面)
+  - **R5 确认后行** — 修任何 R 文件前用户明确确认(本次用户「改成能够使用」= 确认)
+  - **R9 不搞破坏** — 主原则 + 增补 sub-clause 是同一原则的强化(不破坏原则而是补全)
+  - **R10 不重复犯错** — 出现 secret 泄漏就必须沉淀 + 立刻 hook
+  - **R19 数学验证** — grep pattern 用正则而非枚举,可证穷尽(API key 标准格式)
+- **下次如何避免**:
+  1. 任何修改 `RULES.md` 后:同步运行时副本(本会话已自动化 `cp RULES.md tuomin/eight-honors-shames-runtime/`)
+  2. 任何 R9 增补子条款:同步 5 文件(RULES.md / 运行时副本 / AGENTS.md 精简版 / RULES-TREE RULE / RULES-VERSION)
+  3. **不**把 key 直接 echo:用户给 key 时用 `< /dev/null` 读入
+  4. **不**用 raw secret 的命令:用 `python -c "import os; print(os.environ['KEY'][:8] + '...')"` 验证长度前缀即可
+  5. pre-commit hook 必接 grep(本次未实装,作为 v3.4.9+ 候选):`grep -rnE '(sk-|pk_live_|-----BEGIN)' --include='*.{...}'`
+  6. 任何 SSE / multi-modal API key 暴露 → 立即告警用户 + 触发 key 轮换流程
+- **沉淀位置**: 主项目 RULES-TREE.md 本段 + RULES.md L204 + tuomin/eight-honors-shames-runtime/RULES.md L204 + RULES-VERSION.md 三表同步 + `_recycle_bin/20260813-184500/` 备份
+- **confidence = 90%**:5 DEF 块定义清晰 + grep pattern 标准化 + R9 increment 不破坏结构 + 同步路径 1 + npm test 通过;但 ① pre-commit hook 实装 grep pattern 未做 ② 运行时副本 AGENTS.md 精简版没同步(本会话顺手不强行),需 v3.4.9+ 候选

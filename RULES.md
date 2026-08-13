@@ -206,6 +206,12 @@
 - **操作前四必**:① 精确目标身份(具体 PID/路径/对象) ② 列影响范围(谁会受影响) ③ 备份或回滚命令就绪 ④ 用户明确确认
 - **范围歧义禁止**:`taskkill //IM <name>` 不带具体 pid/filter 时会杀所有同名进程——**禁止使用**;必须用具体 PID 或精确 filter
 - **AI 自检**:动手前 30 秒停一下,问"如果错了,我能回滚吗?" → 不能 → 停下问用户
+- **敏感数据保护(v3.4.9 增补 — 让准则 9 真正能够使用)**:
+  - **不显示**:API key / token / password / cookie / private 路径 全文不写入 stdout / 日志 / 对话输出 / commit message / commit body / note / doc
+  - **不写入**:secret 不进任何文件(包括示例代码 `.env.example` 也要占位符);code review 自动 grep `sk-/pk_live/BEGIN PRIVATE KEY` 排除
+  - **不在命令里用**:`env KEY=<raw_secret>` `cat ~/.ssh/id_rsa` `echo $TOKEN` 不出现 raw secret
+  - **替代模式三件套**:① env 变量**引用名**(`$OPENAI_API_KEY` 而非值)② `set +o history` 在含 secret 的 shell 会话临时关闭③ `.env` 加 `.gitignore` + `git secrets --install`/Python `keyring`/Vault
+  - **检测反例(r10 范畴)**:log 误把 secret echo 出来 / 截图含 token / `cat .env` 命中误 commit → 立刻沉淀 RULE + 设 pre-commit hook(`detect-secrets-hook`)+ 给用户发告警
 
 #### 准则 10:以重复错误方法为耻,以创造性解决问题为荣
 - **重复错误禁令**:同一错误模式第二次出现 = **严重事故**,必须:
@@ -794,7 +800,7 @@
 | 准则 6 · 系统穷尽 | 不猜 2-3 个位置就放弃;路径广度优先 + 关键词贪婪匹配 + 盲区检查 + 诚实承认盲区 + **多头注意力(≥3 独立维度交叉验证:代码+commit / 文件系统 metadata(mtime+影子文件+.bak) / 运行时产物(logs+cache+锁) / 对话沉淀(history+method tree+llmwiki+memory) / 外部环境(env+config+跨项目+~/.cache))** + 沉淀为方法树 |
 | 准则 7 · 数学验证 | 不编造逻辑;能算就算、能证就证;主观判断标 confidence;引用规则给文件+条款 |
 | 准则 8 · 复述前必验证 | 复述任何数字前 grep/wc/find 现场验证,凭记忆 = 失守 | *(本条为 R7·数学验证 在“复述”场景的子集,详见 R7)* |
-| 准则 9 · 不搞破坏 | 以搞破坏性操作为耻,以尊重用户成果为荣;任何 `rm -rf` / `taskkill` / `uninstall` / `drop` / `format` / `git reset --hard` 等不可逆操作前,必须 ① 精确目标身份 ② 列影响范围 ③ 备份或回滚命令就绪 ④ 用户明确确认;**禁止范围歧义时动手**(如 `taskkill //IM <name>` 不带具体 pid/filter 时) |
+| 准则 9 · 不搞破坏 | 以搞破坏性操作为耻,以尊重用户成果为荣;任何 `rm -rf` / `taskkill` / `uninstall` / `drop` / `format` / `git reset --hard` 等不可逆操作前,必须 ① 精确目标身份 ② 列影响范围 ③ 备份或回滚命令就绪 ④ 用户明确确认;**禁止范围歧义时动手**(如 `taskkill //IM <name>` 不带具体 pid/filter 时);**v3.4.9 增补敏感数据保护**:**不显示**(stdout/日志/对话/Commit 禁出现 raw secret)/ **不写入**(不进任何文件 + 自动 grep `sk-/pk_live/BEGIN PRIVATE KEY`)/ **不在命令里用**(`env KEY=secret` `cat ~/.ssh` `echo $TOKEN` 禁止);**替代三件套** = env 引用名 + `set +o history` + `.env` 加 `.gitignore` |
 | 准则 10 · 不重复犯错 | 以重复错误方法为耻,以创造性解决问题为荣;同一错误模式第二次出现 = 严重事故;① 每次踩坑即刻沉淀到 RULES-TREE(失败案例+修复+下次如何避免) ② 同类问题先查 RULES-TREE/codegraph_explore,不重新发明轮子 ③ 禁止"照搬"旧代码/旧命令,先用 grep -cE/read 验证仍正确 ④ AI 遇"看起来熟悉的问题"先 grep,不凭印象。**v3.2.1**:D 方案算法 `z = activation + (1-rt_cov) + (1-prior_success) - 2 - 0.3`,三档阈值 0.55/0.35(完整版见 RULES-TREE.md:173 RULE-10-ALGORITHM-001) |
 | 准则 11 · 复用 | 优先用现有工具(`codegraph_*` / `subagent` / 内置工具),不重复实现 |
 | 准则 12 · 验证 | 改完跑构建/测试再汇报 |
