@@ -1,4 +1,4 @@
-> 📌 **版本规范**:见 [`RULES-VERSION.md`](./RULES-VERSION.md) — 当前 **v3.4.3**;新增原则升 MINOR,调优升 PATCH,大重构升 MAJOR。
+> 📌 **版本规范**:见 [`RULES-VERSION.md`](./RULES-VERSION.md) — 当前 **v3.4.4**;新增原则升 MINOR,调优升 PATCH,大重构升 MAJOR。
 # RULES-TREE.md — kimi_code_test 项目的踩坑与流程沉淀
 
 > 与 RULES.md(纪律) / AGENTS.md(精简命令式) 并列。
@@ -3955,3 +3955,109 @@
   - 与 RULE-EIGHT-RULES-SKILLS-001(双层 skill 架构 + 反漂移硬话术)同源同步发布
   - git 分支:`eight-rules-skills-v1`(从 main 切出,未合并)
   - 备份:`_recycle_bin/20260813-193049-pre-eight-rules-skills/`
+
+---
+
+### RULE-METHOD-TREE-SKILLS-001(2026-08-13 v3.4.4 MINOR 沉淀 — 方法树 skill 套件 + 八荣八耻整合)
+
+- **触发场景**: 方法树系统需要"机器可读的 skill 套件"和"AI 主动调用的硬话术"任一项时。具体信号:
+  1. 用户问"方法树 skill 怎么设计 / 主动调用怎么实现"
+  2. AI 处理任务时**不会**主动调 `mr run`,总是等用户提醒
+  3. 方法树沉淀在 `methods/trees/` 但跨 session 失忆(无 wiki 化)
+  4. 方法树系统的工具链能力散落(lsx-mp-rust)但 pi 端无入口
+
+- **本次沉淀(2026-08-13 改前-改后)**:
+  1. **新建** 主持续 skill:`skills/method-tree/SKILL.md`(~100 行 / 4.3 KB) — 对标 `eight-rules/SKILL.md` 双层架构
+  2. **新建** 6 子档 skill(每个 60-100 行):
+     - `method-tree-help` 速查(对标 `eight-rules-help`)
+     - `method-tree-pick` 预览 skill 推荐(mr pick)
+     - `method-tree-run` 跑任务(开单→方法树)
+     - `method-tree-show` 看方法树(list/show/read-full/search/star)
+     - `method-tree-wiki` 沉淀到 llmwiki/(准则 28 跨会话沉淀)
+     - `method-tree-feedback` 反馈闭环(good/bad + scoreboard)
+  3. **改** `hooks/index.js`(91 → 124 行, +33 行):加 `buildMethodTreeHint(mode)` 函数 + 在 `onSessionStart` / `onBeforeAgentStart` 双层与 `buildEightRulesHint` 并列注入
+  4. **新建** `hooks/method-tree-hint.test.js`(55 行 / 1.5 KB) — 4 用例(off/full/lite/ultra),对标 `eight-rules-hint.test.js`
+  5. **改** `skills/eight-rules/SKILL.md` "相关 skill"表:加 method-tree 7 个 skill + 平行体系说明
+  6. **新建** 本 RULE(对标 `RULE-EIGHT-RULES-SKILLS-001` 的 7 段格式)
+
+- **根因(为什么之前缺这套 skill)**:
+  1. **方法树系统是工具链产物,不是 skill** — `mr.exe` 在 lsx-mp-rust 独立运行,pi 端无入口
+  2. **没显式反漂移硬话术** — eight-rules 主档有"ACTIVE EVERY RESPONSE. NO DRIFT.",方法树没
+  3. **没强度档** — method-tree 之前只有"用/不用"两态,没 lite/full/ultra/off 4 档
+  4. **关闭方式不明确** — eight-rules 有 3 种明确关闭方式;方法树之前无
+  5. **没与八荣八耻明确分工** — 容易误以为"方法树 ⊂ 八荣八耻"(2026-08-13 用户反问后澄清,见 RULES.md 准则 28 子项)
+
+- **方法树系统 vs 八荣八耻(已澄清,防概念错位)**:
+  | 维度 | 八荣八耻 | 方法树 |
+  |---|---|---|
+  | 本质 | 纪律(AI 怎么做) | 工具链(AI 用了什么工具) |
+  | 管 | 28 条准则 / 输出骨架 / 防空转 | `mr.exe` 9 个子命令 / 方法树沉淀 |
+  | 档联动 | 默认 full(28 条全执行) | 默认 full(主动自问开方法树) |
+  | 关闭 | `/rules off` / `"停止八荣八耻"` | `/mr off` / `"停止方法树"` |
+  | 关系 | 工具的"使用规范" | 工具的"产物沉淀" |
+  | **互引** | 准则 28 把方法树列为必沉淀 | 主档 Boundaries 段注明"不管纪律" |
+  | **层级** | 宪法(优先) | 体系说明书(服从 RULES-TREE) |
+
+- **每轮硬话术(反漂移核心,对标 eight-rules "ACTIVE EVERY RESPONSE")**:
+  ```
+  [方法树已激活 · ${mode} · ${activeLabel} · NO DRIFT.
+  Off only: "停止方法树" / "no mr" / "/mr off".
+  换档: /mr lite|full|ultra|off]
+  ```
+  - 在 `hooks/index.js` 的 `onSessionStart` 和 `onBeforeAgentStart` 与八荣八耻 hint **并列**注入
+  - 4 档显式 token(off/lite/full/ultra)
+  - ultra 档强调"强制每任务 mr run";其他档"任务进入时自问是否开方法树"
+  - **不与八荣八耻档联动** — 独立档位,各管各的
+
+- **Pre 阶(建立任何方法树 skill 套件前必跑)**:
+  1. **双层架构检查**:1 主档 + N 子档的层级
+  2. **反漂移硬话术检查**:每轮注入,4 档显式 token
+  3. **3 段 Boundaries 检查**:每个子档有 Scope / Action / Revert
+  4. **与八荣八耻边界检查**:明确"管/不管" 列表(防概念错位)
+  5. **共享字典检查**:Tags 在 method-tree-* 之间互引(对标 eight-rules)
+
+- **Run 阶(方法树 skill 套件的落地顺序)**:
+  1. 备份到 `_recycle_bin/<TS>-pre-method-tree-skills/`(R21)— 本次已做
+  2. 前置 3 项:`mr version` / `mr tree list` / `node --test hooks/eight-rules-hint.test.js` 全绿
+  3. **建主档**(对齐 eight-rules 主档)
+  4. **建 help 子档**(速查)
+  5. **建 5 个功能子档**(pick/run/show/wiki/feedback 一一对应 mr 子命令)
+  6. **改 hooks**(加 buildMethodTreeHint + 双层并列注入)
+  7. **建 test**(4 用例,对标 eight-rules)
+  8. **改 eight-rules 主档**(加平行体系说明)
+  9. 沉淀本 RULE
+
+- **下次如何避免**:
+  1. **新增方法树功能时,先检查双层架构** — 不能只加"看起来有用"的子档,先想"它属于哪个主档?"
+  2. **触发词不重叠** — method-tree 子档用 `/mr-*` 前缀,与 eight-rules `/rules-*` 区分
+  3. **硬话术必须有,且与八荣八耻 hint 并列** — 不靠 LLM 记忆,靠每轮注入
+  4. **改 RULES-TREE.md 时用 cat >> 而非 write** — 3800+ 行大文件,append 风险小
+  5. **新建 skill 后立刻更新主档的"相关 skill"列表** — 本次八荣八耻主档同步加了 method-tree 7 个
+
+- **关联 RULE**:
+  - RULE-EIGHT-RULES-SKILLS-001(L3792,八荣八耻 skill 化)— **直接对标**(同 7 段格式,同双层架构,同反漂移硬话术)
+  - RULE-LOOP-004(L3737,条数/版本/沉淀状态三重漂移)— 同源:沉淀完 RULE 必须回改索引表
+  - RULE-FP-001(L667,第一性原理复合算子)— 对齐沉淀模式
+  - RULES.md 准则 6(系统穷尽/沉淀侦察方法树)/ 准则 10(不重复犯错/方法树复用)/ 准则 24(联系全文/不读完工单-方法树-wiki 不开始)/ 准则 28(跨会话沉淀/方法树必须落盘 RULES-TREE.md-AGENTS.md-wiki)— **本 RULE 是 4 条准则的执行沉淀**
+  - 准则 1(查接口)/ 准则 14(谨慎改)/ 准则 16(超越平凡)/ 准则 21(删走回收站)/ 准则 28(跨会话沉淀)
+
+- **正交**: 全部 28 条八荣八耻 + 6 个 method-tree 子档 + mr.exe 9 个子命令 + METHOD-TREE.md 体系说明书
+
+- **回滚命令**:
+  ```bash
+  TS=$(date +%Y%m%d-%H%M%S)
+  rm -rf skills/method-tree skills/method-tree-help skills/method-tree-pick \
+         skills/method-tree-run skills/method-tree-show skills/method-tree-wiki \
+         skills/method-tree-feedback hooks/method-tree-hint.test.js
+  cp _recycle_bin/$TS-pre-method-tree-skills/skills/* skills/
+  cp _recycle_bin/$TS-pre-method-tree-skills/hooks.index.js.bak hooks/index.js
+  git checkout RULES-TREE.md skills/eight-rules/SKILL.md
+  ```
+
+- **本次落地清单**:
+  - 7 个新 SKILL.md(method-tree + help + pick + run + show + wiki + feedback)
+  - 1 个新 test(method-tree-hint.test.js, 4 用例)
+  - hooks/index.js +33 行(buildMethodTreeHint + 双层并列注入)
+  - skills/eight-rules/SKILL.md +12 行(平行体系说明)
+  - RULES-TREE.md 追加本 RULE(对标 RULE-EIGHT-RULES-SKILLS-001)
+  - 前置 3 项验证全绿 + 备份到 `_recycle_bin/20260813-200606-pre-method-tree-skills/`
