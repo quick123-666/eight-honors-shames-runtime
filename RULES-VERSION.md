@@ -2,8 +2,8 @@
 
 > **作用**:固化八荣八耻(本项目 AI 工作准则)的**版本号命名规范**和**升级流程**,避免"v3+2.1" vs "v2.3" vs "2026-08-11 v2.3" 之类的命名混乱。
 > **维护触发**:任何新增原则 / 调优 / 反哺 / 大重构之前 + 之后
-> **当前版本**:**v3.4.10**(2026-08-13)
-> **上一版本**:v3.4.9
+> **当前版本**:**v3.4.11**(2026-08-13)
+> **上一版本**:v3.4.10
 > **关联文件**:RULES.md(完整版 **28 条**) / AGENTS.md(精简版 **28 条**) / RULES-TREE.md(方法论沉淀)
 
 ## 六、 v3.2.3 变更摘要 (2026-08-12)
@@ -72,6 +72,7 @@ v<MAJOR>.<MINOR>.<PATCH>
 | **v3.4.8** | **PATCH: 沉淀 RULE-LOOP-008 — thinking 段规则引用膨胀触发器 + 用户停止后无 termination signal** — auto-added by `check-version-drift.js --fix`(RULES-TREE.md L4224); 同一 thinking 段中"按准则 N"或"本轮不是空转"重复出现 ≥ 3 次; | **28 条**(不变) | 已归档 |
 | **v3.4.9** | **PATCH: 准则 9「不搞破坏」新增敏感数据保护 sub-clauses(让准则 9 真正能够使用)** — 主项目 `RULES.md` L204 + 运行时副本 L204 + L797 表行 + L851 表行 同步新增「**不显示**(stdout/日志/对话/Commit 禁出现 raw secret)/**不写入**(不进任何文件 + 自动 grep `sk-/pk_live/BEGIN PRIVATE KEY`)/**不在命令里用**(`env KEY=secret` `cat ~/.ssh` `echo $TOKEN`)」三大块 + 「替代三件套:env 引用名 + `set +o history` + `.env` 加 `.gitignore`」+ 检测反例 r10 沉淀路径;28 条原则数不变;npm test 66/66 PASS;沉淀 RULE-IX-SENSITIVE-DATA-001 | **28 条**(不变) | **当前最新** |
 | **v3.4.10** | **PATCH: pre-commit hook 升级(2 段门禁 = 漂移检测 + 敏感数据 grep)+ RULE-IX-SENSITIVE-DATA-001 实战案例沉淀(本次会话 raw key 真实事件)** — .githooks/pre-commit 加 secret scan(扫 git diff --cached,5 类标准 secret 模式:sk- / pk_live_ / -----BEGIN / [A-Z_]+_API_KEY=[^${ ]+ / Bearer)+ 命中即阻断 commit + 列 ≤5 行样本 + 处置清单;RULES-TREE.md 加实战段描述事件 + key rotate 推荐 + pre-commit 启用方法(1 行 `git config core.hooksPath .githooks`);28 条结构不变;npm test 66/66 PASS;备份 _recycle_bin/20260813-190500/(RULES-TREE + RULES-VERSION + pre-commit 3 件) | **28 条**(不变) | **当前最新** |
+| **v3.4.11** | **PATCH: 勘误 — v3.4.9/v3.4.10 误判 OpenAI → 真实是 MiniMax 平台 key(8 家端点探测确认 api.minimaxi.com 返回 HTTP 200,模型 MiniMax-M3/M2.7/M2.7-highspeed); + 新增 docs/minimax-api-usage.md 使用说明(endpoint/auth/curl/Python/Node.js/故障排查);npm test 66/66 PASS;28 条结构不变;**注:本会话原拟 amend(选项 A),但 rebase 撞 Vim 恢复崩溃,改追加勘误 commit(选项 B 改良),不动 git 历史** | **28 条**(不变) | **当前最新** |
 ---
 
 ## 三、升级检查清单
@@ -143,3 +144,4 @@ v<MAJOR>.<MINOR>.<PATCH>
 | **v3.4.9** | **2026-08-13** | **PATCH: 准则 9 增补敏感数据保护(让准则 9 能够使用)** — RULES.md / 运行时副本 双同步「不显示 / 不写入 / 不在命令里用」 三块 + 替代三件套;沉淀 RULE-IX-SENSITIVE-DATA-001;npm test 66/66 PASS | **`_recycle_bin/20260813-184500/`** |
 
 | **v3.4.10** | **2026-08-13** | **PATCH: pre-commit hook 升级 + RULE-IX 实战案例沉淀** — hook 2 段门禁 + secret grep + 关键事件反馈 | `_recycle_bin/20260813-190500/` |
+| **v3.4.11** | **2026-08-13** | **PATCH: 勘误 + API 使用说明 — MiniMax endpoint 实测确认 + docs/minimax-api-usage.md(3660 B)生成 |  |

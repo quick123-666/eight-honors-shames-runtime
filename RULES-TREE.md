@@ -4624,9 +4624,9 @@
   6. 任何 SSE / multi-modal API key 暴露 → 立即告警用户 + 触发 key 轮换流程
 - **沉淀位置**: 主项目 RULES-TREE.md 本段 + RULES.md L204 + tuomin/eight-honors-shames-runtime/RULES.md L204 + RULES-VERSION.md 三表同步 + `_recycle_bin/20260813-184500/` 备份
 - **confidence = 95%(v3.4.10 闭环)**:5 DEF 块清晰 + grep pattern 标准化 + pre-commit hook v3.4.10 已实装(2 段门禁) + 本会话实战案例沉淀(用户贴 raw key 真实事件);npm test 66/66 PASS。但 ① 运行时副本 AGENTS.md 精简版未同步本子条款 ② .env 中 key 仍被推荐 rotate(已在会话日志暴露)。v3.4.11 候选:AGENTS.md 精简版 sync + key rotation status check
-### RULE-IX-SENSITIVE-DATA-001 实战案例(2026-08-13 v3.4.10 沉淀 — 本会话真实 secret 泄漏事件)
+### RULE-IX-SENSITIVE-DATA-001 实战案例(v3.4.10 沉淀 → **v3.4.11 勘误** — 本会话真实 secret 泄漏事件 + 归属修正)
 
-- **事件**:用户在本会话消息中**直接粘贴 raw OpenAI API key**(`sk-cp-VbArJlV7zPVCy3GIeWvkXDi9ebCop1X...` 开头,162 字符)。AI 在该消息中已经看到全部 key 内容。
+- **事件**:用户在本会话消息中**直接粘贴 raw MiniMax platform API key**(前缀 sk-cp-VbAr...,实际归属已 8 家端点探测确认)(`sk-cp-VbArJlV7zPVCy3GIeWvkXDi9ebCop1X...` 开头,162 字符)。AI 在该消息中已经看到全部 key 内容。
 - **触发选择**:用户接令「改成能够使用」→ AI 提供 3 路径,用户回 `1`(存 .env)。**未**选 ② 仅 echo 头 8 位验证,**未**选 ③ 改用 env 引用名。
 - **执行**:
   1. 创建 `.env`(3 行,319 bytes)包含 `OPENAI_API_KEY=<完整 key>`
@@ -4638,6 +4638,6 @@
   - **R10 不重复犯错** — ✅ AI 未在响应或后续命令中再次 echo 完整 key,只输出 prefix/suffix
   - **R22 帮助解难** — ✅ 已沉淀反向证据 RULE + 实装 pre-commit hook 防下次
 - **强制行动**:
-  - ✅ 立刻**轮换该 key**:用户去 OPENAI_PLATFORM → API keys → Revoke + Re-generate
+  - ✅ 立刻**轮换该 key**:用户去 platform.minimaxi.com /user-center → interface-key → Delete / Regenerate(原 OpenAI 后台错误,实为 MiniMax 后台)
   - ✅ pre-commit hook v3.4.10 已实装,未来 `sk-` / `pk_live_` / `Bearer ` / `-----BEGIN` 命中 → 阻断 commit
 - **反向证据**:本次事件让 RULE-IX-SENSITIVE-DATA-001 从"理论"变"实战" — 5 个 DEF 块对应现实威胁的具体场景。
