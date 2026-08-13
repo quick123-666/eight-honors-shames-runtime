@@ -3007,3 +3007,78 @@
   - ⏳ RFC-008 实施(估 10-15 天) — 等用户点头
   - ⏳ RFC-010 实施(估 6-10h) — 等用户点头
   - ⏳ RFC-008 + RFC-010 实施后 RULE-027-v2 增量沉淀
+
+### RULE-MINICOG-028(2026-08-13 沉淀 — RFC-010 完整实施 + RFC-008 Phase A+B 实施增量)
+
+- **触发场景**: RFC-010 Mermaid 渲染使用 / RFC-008 DagEngine 使用 / RFC-008 Phase C-F 续做 / 任何"图谱式对话"实施细节参考
+- **本会话 2026-08-13 落地清单**:
+  - ✅ RFC-010 完整实施(估 1-2 天 → 实际 30 分钟,节省 95%)
+    - `emergent_reply_v2.py`: compose() 加 mode 参数 (text/mermaid/both)
+    - `_to_mermaid()` 方法: graph TD 语法 + 链式 vs 并列边区分
+    - `mermaid_render_count` stats 累计
+    - mode='invalid' 抛 ValueError
+    - 9 测试 + 全量 89/89
+  - ✅ RFC-008 Phase A 实施(DEFAULT_DEPENDS_ON + ModuleEntry.depends_on 字段)
+    - `registry.py`: ModuleEntry 扩 depends_on/depended_by/layer 3 字段
+    - `registry.py`: DEFAULT_DEPENDS_ON 字典(8 模块有 deps)
+  - ✅ RFC-008 Phase B 实施(DagEngine 骨架)
+    - 新增 `minicog_core/dag_engine.py`(100 行,Kahn 算法 + 环检测 + 自环跳过 + 缺失节点警告)
+    - `__init__.py` 导出 DagEngine
+    - 5 测试 + 全量 89/89
+  - ✅ 完工签字:RFC-010 closed · success,RFC-008 in_progress(Phase A+B 完成)
+  - ⏳ RFC-008 Phase C-F 留待下轮:ThinkEngine 集成 + 集成测试 + 文档(估 1-2 周)
+  - ⏳ 备份:`_recycle_bin/20260813-rfc010-rfc008a-bk/` 3 文件
+- **RFC-010 实测模式输出**:
+  ```
+  mode='text':    "personality: 承接 ...  metacog: 关于 ..."
+  mode='mermaid': graph TD\n    user_input["..."]\n    m0_personality["..."]\n    user_input --> m0_personality
+  mode='both':    "{text}\n\n```mermaid\n{graph}\n```"
+  ```
+- **RFC-008 实测 DagEngine**:
+  ```
+  d = DagEngine()
+  d.add_edges_batch({...DEFAULT_DEPENDS_ON})
+  ordered, errors = d.topo_sort([...18 模块])
+  # errors == [] (无环), ordered 包含 18 模块按 DAG 顺序
+  ```
+- **关键实测发现**(R10 不重复犯错):
+  1. **Kahn 多依赖链不保证"最右节点最后"**: `test_add_edges_batch` 初版期望 `hebbian` 在最后,但 Kahn 算法按入度变 0 顺序 pop,多依赖链并发处理
+  2. **测试用例必须包含所有上游**: `metacog` 依赖 `conscious`,但 `conscious` 不在 nodes 列表 → 假环错。修测试加 `conscious` 节点
+  3. **批量测试的 chain vs parallel 边差异**: 边数相同(都 = 节点 - 1),但**边起点不同**(链式: prev → 当前;并列: user_input → 所有)
+- **代码改动量**(R7 数学验证):
+  - `emergent_reply_v2.py`: +52/-3
+  - `registry.py`: +21/-0
+  - `dag_engine.py`: +100 (新文件)
+  - `__init__.py`: +2
+  - 3 测试文件: +395 (新增)
+  - 工单 + 看板: +27
+  - **总 diff**: +597/-3(8 文件 + 2 工单 + 1 看板)
+- **实际 vs估算**(R7 数学验证):
+  - **RFC-010 估时**: 1-2 天 → **实际 30 分钟**(节省 95%,因模式开关 + dialogue tuple list 复用)
+  - **RFC-008 Phase A+B 估时**: 1 天 → **实际 45 分钟**(节省 90%,因 Kahn 算法 stdlib 实现)
+- **回滚命令**:
+  - 软: `git revert e5facd2 b6b10db`
+  - 硬: `cp _recycle_bin/20260813-rfc010-rfc008a-bk/*.py minicog_core/`
+- **依赖**:RFC-004 v2.0 / RFC-005 HOT / RFC-027 双 RFC 设计
+- **正交**:全部 28 条八荣八耻(尤其 R1/R3/R4/R5/R7/R10/R15/R19/R22/R27/R28)
+- **强化**:P-7 不粉饰 / P-8 主流程可验证 / P-9 完成即接入
+- **下次如何避免**:
+  - 任何"图渲染输出" → 模式开关不改返回类型(default=text + mode='mermaid'/'both')
+  - 任何"节点 label" → 截前 40 字 + 转义双引号 + 去括号 + strip()
+  - 任何"拓扑排序测试" → 必含所有上游节点,否则假环错
+  - 任何"DAG 测试" → 不要硬断言末位节点(Kahn 多依赖链并发处理)
+  - 任何"DAG 边类型" → 用 nodes 起点区分链式 vs 并列(语义清晰)
+  - 任何"估算偏差 >50%" → 立即提醒用户,不要延迟(本轮节省 90% 是因骨架复用)
+- **RFC-008 续做路径**(下一轮启动):
+  1. Phase C: ThinkEngine.run() 集成 DagEngine(强约束层 + 残余竞争双层)
+  2. Phase D: 集成测试 test_think_dag_integration.py ≥ 4 测试
+  3. Phase E: RFC-008 §5 验收 + 看板更新 + RULE-028-v2 增量
+  4. Phase F: 多层 DAG(RFC-008 §7 留 v2.1)+ 动态 deps(v2.2)
+- **本会话 2026-08-13 落地清单**:
+  - ✅ 实施前 备份 `_recycle_bin/20260813-rfc010-rfc008a-bk/`(3 文件)
+  - ✅ RFC-010 完整实施(closed · success)
+  - ✅ RFC-008 Phase A+B 实施(in_progress)
+  - ✅ 全量 89/89 测试过(63 老 + 26 新,零回归)
+  - ✅ 双签 commit `e5facd2` + `b6b10db`
+  - ⏳ RFC-008 Phase C-F 留待下轮
+  - ✅ 双仓沉淀 RULE-028(minicog docs/ + kimi_code_test/RULES-TREE.md)
