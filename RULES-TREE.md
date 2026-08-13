@@ -3952,6 +3952,7 @@
   - 继承 PUSH-V323-001(9 阶闭环原版)
   - 继承 PUSH-V330-001(微调类推送补漏)
   - 服务 v3.4.x / v3.5.x / v4.0.0 系列推送
+  - **设计决定**(2026-08-13 拍板):v3.4.0 / v3.4.1 / v3.4.2 / v3.4.3 **不补打 tag**。原因:(1) 这 4 个版本在 RULES.md 头部 changelog 记录是"语义事件",但发布时未走完整 9 阶闭环 step 7 = tag,纯本地 commit;(2) v3.4.4 是**首个**严格走完 9 阶闭环的 v3.x 版本,补打之前 4 个 tag 会污染 tag 历史。**接受现状 = v3.4.4 是 v3.x 系列首个 git tag, 历史 4 个 PATCH/MINOR 事件仅存在于 RULES.md 头部 changelog**。未来 v3.5.0 / v4.0.0 推送**必须**打 tag(本 RULE 9 阶闭环 step 7)。
   - 与 RULE-EIGHT-RULES-SKILLS-001(双层 skill 架构 + 反漂移硬话术)同源同步发布
   - git 分支:`eight-rules-skills-v1`(从 main 切出,未合并)
   - 备份:`_recycle_bin/20260813-193049-pre-eight-rules-skills/`
