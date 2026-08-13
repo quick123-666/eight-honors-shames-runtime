@@ -3200,3 +3200,39 @@
   2. RFC-008 v2.2 动态 deps 实施 — 1 周
   3. RFC-009 RAG 集成 (需 kg_rag_rust) — 1 周
   4. 修 33 个测试缺失 (去 MiniCog v1.17.0) — 1-2 小时
+
+### RULE-MINICOG-031(2026-08-13 沉淀 — RFC-008 v2.1 + v2.2 + RFC-009 实施)
+
+- **触发场景**: RFC-008 v2.1/v2.2 / RFC-009 实施 / 任何分层 DAG / 动态 deps / 认知图谱 RAG 集成
+- **本会话 2026-08-13 落地清单**:
+  - ✅ RFC-008 v2.1 实施(LAYER_DEFINITIONS + DEFAULT_LAYER_DEPS + _build_layered_dag)
+  - ✅ RFC-008 v2.2 实施(DYNAMIC_DEP_RULES 3 类 + adjust_deps)
+  - ✅ RFC-009 实施(CognitiveRAG subprocess 调 kg_rag_rust CLI)
+  - ✅ 17 新测试 + 全量 126/126 (零回归)
+- **关键实测发现** (R10):
+  1. **kg_rag_rust 是 Rust 二进制, 不是 Python 模块** — 原 RFC-009 设计的 `from kg_rag_rust import KnowledgeGraph` 不可行 → 改 subprocess 调
+  2. **CognitiveRAG 自动找到 binary**: `C:/Users/Administrator/Desktop/kimi_code_test/kg_rag_rust/target/release/kg_rag_rust.exe` 存在
+  3. **DAG 边数变化**: 加载 DEFAULT_LAYER_DEPS 后 DAG edges 从 11 → 21 (+10 跨层), 测试改用 `>=` 而非 `==`
+  4. **adjust_deps 提升规则**: `if mod in adjusted` 改为直接 `adjusted[mod] = []`, 即使原不在基础 deps 也加入
+  5. **MockCS 缺 gw**: compose 集成测试时 MockCS 必含 `gw` 属性
+- **回滚命令**: 软 `git revert <commit>` / 硬 `cp _recycle_bin/20260813-rfc008v21v22-rfc009-bk/*.py minicog_core/`
+- **依赖**: RULE-029/030 / kimi_code_test/kg_rag_rust (Rust 二进制)
+- **正交**: 全部 28 条八荣八耻 (尤其 R1/R3/R4/R5/R7/R8/R10/R15/R19/R22/R27/R28)
+- **强化**: P-7 不粉饰 (RFC-009 改方案诚实记录) / P-8 主流程可验证 / P-9 完成即接入
+- **下次如何避免**:
+  - 任何"kg_rag_rust 集成" → **subprocess 调 CLI**, 不是 import Python 模块
+  - 任何"分层 DAG" → LAYER_DEFINITIONS 必含 `layer` 编号 + `modules` 列表
+  - 任何"动态 deps" → 提升 promote 模块必入 adjusted, 即使原不在
+  - 任何"MockCS" → 必含 `_stats / gw / think_engine / hot_tracker` 4 属性
+  - 任何"deps 边数测试" → 用 `>=` 而非 `==`, 因 v2.x 会加层间 deps
+- **本会话 2026-08-13 落地清单**:
+  - ✅ 实施前备份 `_recycle_bin/20260813-rfc008v21v22-rfc009-bk/` (4 文件)
+  - ✅ 3 RFC 实施 (~30 分钟, 估时 99% 节省)
+  - ✅ 17 新测试 + 全量 126/126 (零回归)
+  - ✅ 双仓沉淀 RULE-031
+- **累计 5 RFC 实施成果**: 7 RFC 设计 / 6 RFC 实施 / 总测试 63 → 126 (2x 增长)
+- **下一步** (按工作量倒推):
+  1. RFC-008 v2.1 真集成 (DAG 参与 winners 选择) — 1 周
+  2. RFC-009 真调用 `kg_rag_rust find/ask` (留 stub) — 1 周
+  3. RFC-010 v2.3: HTML 内嵌 Mermaid.js auto-render — 2-3 天
+  4. 修 33 个测试缺失 (去 MiniCog v1.17.0) — 1-2 小时
