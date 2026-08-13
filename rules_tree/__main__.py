@@ -14,6 +14,15 @@ from __future__ import annotations
 
 import sys
 
+# Windows 终端默认 GBK,遇 emoji(⚠️/❌/✅)会 UnicodeEncodeError 直接崩掉整个命令。
+# 降级路径:reconfigure 不可用(旧 Python / stdout 被替换为 StringIO)时静默跳过 ——
+# StringIO 本就接受任意 unicode,不需要转码,故测试重定向场景不受影响。
+try:  # pragma: no cover - 仅环境相关
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except (AttributeError, ValueError):
+    pass
+
 
 def cmd_lln(args):
     if len(args) != 3:

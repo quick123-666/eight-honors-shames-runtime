@@ -157,7 +157,7 @@ def t14():
 def t15():
     sizes = {ev.name: len(ev.rules) for ev in _OP_SNAP["evaluate_operators"]()}
     assert sizes == {
-        "RUN-THROUGH": 8,
+        "RUN-THROUGH": 9,  # v3.4.3: +R28 跨会话沉淀(Sediment 阶准则化)
         "DEBUG": 6,
         "EXPLAIN": 4,
         "LEARN": 5,
@@ -182,7 +182,7 @@ def t16():
 def t17():
     rep = _OP_SNAP["coverage_report"]()
     assert rep["unused_rules"] == []  # COVER-ALL 后无闲置
-    assert rep["covered_rules"] == 27
+    assert rep["covered_rules"] == 28  # v3.4.3: R28 接入 RUN-THROUGH 后全覆盖
     # 验证 COVER-ALL 确实包含 8 条准则
     COVER_ALL = _OP_SNAP["OPERATORS"]["COVER-ALL"]
     assert COVER_ALL == frozenset({"R2", "R3", "R9", "R10", "R15", "R16", "R21", "R27"})
@@ -226,13 +226,14 @@ def t18b():
     assert coverage >= 0.5, f"算子家族总激活度 {coverage:.1%} 应 ≥ 50%"
 
 
-@test("∧ 组合: RUN-THROUGH ∪ DEBUG = 12 条")
+@test("∧ 组合: RUN-THROUGH ∪ DEBUG = 13 条")
 def t19():
     s = _OP_SNAP["union"]("RUN-THROUGH", "DEBUG")
-    assert len(s) == 12
+    # 9 + 6 - |{R11,R22}| = 13 (v3.4.3: RUN-THROUGH +R28,不在 DEBUG 中故并集 12→13)
+    assert len(s) == 13
 
 
-@test("家族并集 = 27 条 (含 COVER-ALL)")
+@test("家族并集 = 28 条 (含 COVER-ALL)")
 def t20():
     assert len(_OP_SNAP["family_union"]()) == 28
 

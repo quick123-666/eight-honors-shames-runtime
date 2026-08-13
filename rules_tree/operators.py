@@ -14,7 +14,7 @@
     数学:算子间只有 ∩ ∪ − 三种集合运算,不存在集合论矛盾(无 ⊕)
 
 设计:
-    5 算子原始覆盖 19/28 = 67.9%(v3.4.0 加 R28 后;v3.2.2 加 R27 时是 19/27=70.4%;v3.2.1 时是 19/26=73.1%)
+    5 算子原始覆盖 20/28 = 71.4%(v3.4.3 把 R28 接入 RUN-THROUGH 后;此前 19/28=67.9%)
     8 条闲置准则:R2/R3/R9/R10/R15/R16/R21/R27
     RULE-COVER-001 兜底覆盖全部 8 条 → 全集覆盖 100%
 """
@@ -29,8 +29,9 @@ RULES_ALL: frozenset[str] = frozenset(f"R{i}" for i in range(1, 29))
 
 # ──────────────── 5 原始算子(RULES-TREE.md §6) ─────────────
 OPERATORS: dict[str, frozenset[str]] = {
-    # 来源:RULES-TREE.md:320
-    "RUN-THROUGH": frozenset({"R5", "R14", "R19", "R20", "R11", "R22", "R23", "R25"}),
+    # 来源:RULES-TREE.md:320 + :1227 RULE-RUN-THROUGH-002(Sediment 强制)
+    # R28 跨会话沉淀 = Sediment 阶的准则化 —— 跑完流程必落盘,否则 state 不变(v3.4.3 接入)
+    "RUN-THROUGH": frozenset({"R5", "R14", "R19", "R20", "R11", "R22", "R23", "R25", "R28"}),
     # 来源:RULES-TREE.md:388
     "DEBUG":       frozenset({"R7", "R8", "R12", "R24", "R11", "R22"}),
     # 来源:RULES-TREE.md:450
