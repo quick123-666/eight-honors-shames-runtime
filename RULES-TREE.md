@@ -3572,3 +3572,22 @@
 - **强化**: P-7 不粉饰 / P-8 可验证 / P-9 完成即接入
 - **累计**: 13 RFC 实施 + 5 模块 (PSI/Governor/Memory/DAG/Organizer)
 - **下一步**: 连接词调优 / 状态机持久化 / FastAPI 集成
+
+### RULE-MINICOG-041(2026-08-13 沉淀 — 连接词去重变体 + 状态机持久化)
+
+- **触发场景**: ReplyOrganizer 调优 / 连接词变体 / 状态机跨轮持久化
+- **本会话 2026-08-13 落地清单**:
+  - ✅ 任务 1: CONNECTOR_VARIANTS 相同 tag 第二个用变体 (去重复)
+  - ✅ 任务 2: 状态机持久化 (load_state/save_state + 状态历史影响意图)
+  - ✅ EMOTION_WORDS 扩展 (加 烦/生气/沮丧/委屈/累)
+  - ✅ 9 新测试 + 全量 246/246 (连跑稳定)
+- **实测**: "我理解 emotion... 而且 attachment... 我感受到 predictor... 所以 htn_planner"
+- **关键发现** (R10):
+  1. reply_organizer 缺 json import → NameError 被吞
+  2. 测试污染共享状态文件 → 隔离路径
+  3. 情感词表缺"烦" → 扩展
+- **回滚命令**: 软 `git revert <commit>` / 硬 `cp _recycle_bin/20260813-org-tune-bk/*.py minicog_core/`
+- **依赖**: RULE-040 (ReplyOrganizer) / memory.py
+- **正交**: 全部 28 条八荣八耻
+- **累计**: 13 RFC 实施 + 5 模块 + 3 修复 + 调优 1 2
+- **下一步**: 多轮叙事 / FastAPI 集成
