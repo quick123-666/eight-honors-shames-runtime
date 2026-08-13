@@ -3236,3 +3236,61 @@
   2. RFC-009 真调用 `kg_rag_rust find/ask` (留 stub) — 1 周
   3. RFC-010 v2.3: HTML 内嵌 Mermaid.js auto-render — 2-3 天
   4. 修 33 个测试缺失 (去 MiniCog v1.17.0) — 1-2 小时
+
+### RULE-MINICOG-032(2026-08-13 沉淀 — RFC-010 v2.3 HTML mode + _gwt_score 改造)
+
+- **触发场景**: HTML 模式输出 / _gwt_score 解读 / Mermaid.js 集成 / 多层 DAG 评估
+- **本会话 2026-08-13 落地清单**:
+  - ✅ RFC-010 v2.3 实施 (closed · success) - compose() mode='html' 输出 HTML 含 Mermaid.js CDN
+  - ✅ _gwt_score 改造 (closed · success, RFC-008 v2.1) - 优先用 layer_winners
+  - ✅ 11 新测试 + 全量 137/137 (零回归)
+- **RFC-010 v2.3 实测输出** (摘录):
+  ```html
+  <!DOCTYPE html>
+  <html>
+  <head>
+      <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+      <script>mermaid.initialize({startOnLoad: true});</script>
+  </head>
+  <body>
+      <h3>user: hi</h3>
+      <div class="mermaid">
+  graph TD
+      user_input["hi"]
+      m0_metacog["metacog: ..."]
+      ...
+      </div>
+  </body>
+  </html>
+  ```
+- **_gwt_score 改造效果对比**:
+  | 场景 | 改造前 | 改造后 |
+  |---|---|---|
+  | 3 层都活跃 | 1.0 | 1.0 |
+  | 仅 meta 层 | 1.0 | **0.333** |
+  | perception + meta | 1.0 | **0.667** |
+  | 无 think_engine | 1.0/0.0 | 1.0/0.0 (退化兼容) |
+- **关键实测发现** (R10):
+  1. MockThinkEngine kwargs 兼容: 测试用 `MockThinkEngine(perception=0)` 但实际定义 `layer_winners_perception=0`, 需兼容 kwargs 命名
+  2. HTML CDN 选择 jsdelivr: Mermaid.js 官方推荐
+  3. HTML 模板用 f-string 双花括号: `{{startOnLoad: true}}` 转义 `{startOnLoad: true}`
+  4. mermaid.initialize 必须 auto-render: `{startOnLoad: true}` 触发页面加载时自动渲染
+- **回滚命令**: 软 `git revert <commit>` / 硬 `cp _recycle_bin/20260813-rfc010v23-gwt-bk/*.py minicog_core/`
+- **依赖**: RULE-031/029/030 / Mermaid.js 官方 CDN
+- **正交**: 全部 28 条八荣八耻
+- **强化**: P-7 不粉饰 / P-8 主流程可验证 / P-9 完成即接入
+- **下次如何避免**:
+  - 任何"HTML mode" → DOCTYPE + CDN + init + div 块 4 件套
+  - 任何"Mermaid 集成" → 用 jsdelivr CDN (无需 build)
+  - 任何"f-string 含 {}" → 用 `{{}}` 转义
+  - 任何"_gwt_score 改造" → 退化机制保留老调用
+  - 任何"Mock 类 kwargs 命名" → 双关键字兼容
+- **累计 7 RFC 实施 + 1 改造** (本会话):
+  - 7 RFC 设计: 004, 005, 008 v2.1, 008 v2.2, 009, 010 v2.1, 010 v2.2
+  - 7 RFC 实施 + 1 改造: 004, 005, 008 v2.1, 008 v2.2, 009, 010 v2.1, 010 v2.2, _gwt_score
+  - 总测试: 63 → 137 (2.17x 增长)
+- **下一步** (按工作量倒推):
+  1. RFC-009 真调 `kg_rag_rust find/ask` (当前 stub) — 1 周
+  2. RFC-008 v2.1 真集成 (DAG 参与 winners 选择) — 1 周
+  3. 修 33 个测试缺失 (去 MiniCog v1.17.0) — 1-2 小时
+  4. RFC-010 v2.4: PDF 导出 (留待) — 2-3 天
