@@ -1,4 +1,4 @@
-> 📌 **版本规范**:见 [`RULES-VERSION.md`](./RULES-VERSION.md) — 当前 **v3.4.3**;新增原则升 MINOR,调优升 PATCH,大重构升 MAJOR。
+> 📌 **版本规范**:见 [`RULES-VERSION.md`](./RULES-VERSION.md) — 当前 **v3.4.5**;新增原则升 MINOR,调优升 PATCH,大重构升 MAJOR。
 # RULES-TREE.md — kimi_code_test 项目的踩坑与流程沉淀
 
 > 与 RULES.md(纪律) / AGENTS.md(精简命令式) 并列。
@@ -3956,3 +3956,118 @@
   - 与 RULE-EIGHT-RULES-SKILLS-001(双层 skill 架构 + 反漂移硬话术)同源同步发布
   - git 分支:`eight-rules-skills-v1`(从 main 切出,未合并)
   - 备份:`_recycle_bin/20260813-193049-pre-eight-rules-skills/`
+
+---
+
+### RULE-METHOD-TREE-001(2026-08-13 v3.4.5 PATCH 沉淀 — 方法树 skill 套件 = RULES-TREE 7 段沉淀范式,重新与八荣八耻整合)
+
+- **触发场景**: AI 需要"主动调 RULES-TREE 7 段元工作流沉淀"任一项时。具体信号:
+  1. AI 失守 ≥ 1 条准则但**不会**主动按 7 段格式沉淀
+  2. AI 跑通了复杂流程(> 3 步)但**不会**主动沉淀
+  3. 用户问"方法树 skill 怎么设计 / 7 段 RULE 怎么写"
+  4. 项目内 RULES-TREE.md 沉淀池增长,但引用率(scoreboard)不维护 → 0 引用死 RULE 积累
+
+- **本次沉淀(2026-08-13 改前-改后)**:
+  1. **硬回滚** commit `bfad0bc`(v3.4.4 错绑版本)→ commit `d6283ea` 自动生成
+  2. **新建** 主持续 skill:`skills/method-tree/SKILL.md`(~140 行 / 5.7 KB) — 对标 `eight-rules/SKILL.md` 双层架构
+  3. **新建** 6 子档 skill(每个 30-110 行):
+     - `method-tree-help` 速查(对标 `eight-rules-help`)
+     - `method-tree-pattern` 找同主题已有 RULE(替代原 pick)
+     - `method-tree-write` 写新 7 段 RULE(替代原 run)
+     - `method-tree-show` 看现有 RULE 全文
+     - `method-tree-publish` 发布到 git(替代原 wiki)
+     - `method-tree-feedback` 跟踪引用次数/复用率
+  4. **改** `hooks/index.js`(91 → 133 行, +42 行):加 `buildMethodTreeHint(mode)` 函数 + 在 `onSessionStart` / `onBeforeAgentStart` 双层与 `buildEightRulesHint` 并列注入
+  5. **新建** `hooks/method-tree-hint.test.js`(55 行 / 2.1 KB) — 7 用例(off/full/lite/ultra/3 关闭/4 档枚举/未知档兜底)
+  6. **改** `skills/eight-rules/SKILL.md` "相关 skill"表:加 method-tree 7 个 + 强化版整合说明(v3.4.4→v3.4.5 错绑修正)
+  7. **新建** 本 RULE(替代 v3.4.4 的 RULE-METHOD-TREE-SKILLS-001)
+
+- **根因(为什么 v3.4.4 错绑 + v3.4.5 修正)**:
+  1. **v3.4.4 commit bfad0bc 假设错误**:看到 `~/.pi/agent/projects/lsx-mp-rust/` 有 mr.exe + 8 棵方法树,就"觉得"是它了。**没追问用户**指哪个系统,直接 commit。**准则 5 失守**(确认后行)。
+  2. **3 个真正独立的方法树系统**:
+     - A. **lsx-mp-rust 工具链**(`mr.exe`,自动生成执行树 `methods/trees/T-*.md`)—— 用户说"另外一个"是 C,**不是 A**
+     - **B. mini-mp-agent-1 项目**(`scripts/methods_tree.py`,15 方法 / 4 级 L0-L3)—— 独立 Python 实现
+     - **C. RULES-TREE 7 段元工作流沉淀**(本套件目标,58 条 RULE-XXX-001)—— **正解**
+  3. **八荣八耻准则 6/10/24/28 共 7 处**"方法树"指的都是 C(7 段沉淀范式),不是 A(mr.exe)
+  4. **沉淀动作不同**:C 是"踩坑后按 7 段写 RULE"(人脑反思);A 是"任务跑完自动生成"(工具记录)
+
+- **方法树系统对照(已澄清,防概念错位)**:
+  | 维度 | A. lsx-mp-rust (mr.exe) | B. mini-mp-agent-1 | **C. RULES-TREE 7 段(本套件)** |
+  |---|---|---|---|
+  | 产物 | 自动生成执行树 | 预定义 15 方法 | **人写 7 段 RULE** |
+  | 触发 | 任务跑完 | 调用时 | **失守后/新流程跑通** |
+  | 工具 | `mr.exe` | Python API | **`grep` + `cat` + `git commit`** |
+  | 数据来源 | 工具记录 | 预定义 | **人脑反思** |
+  | 数量 | 8 棵(本项目) | 15 方法 | **58 RULE(本项目)** |
+  | 与本套件关系 | **完全独立** | **完全独立** | — |
+
+- **本套件与方法树 6 子档对应关系(强制,不绑定 A)**:
+  | 子档 | 工具 | C 体系对应动作 |
+  |---|---|---|
+  | `method-tree-pattern` | `grep` + 向量图谱 `kg_rag_rust find` | 找同主题已有 RULE(防重复发明) |
+  | `method-tree-write` | `cat >> RULES-TREE.md` | 写新 7 段 RULE(按模板) |
+  | `method-tree-show` | `sed -n '/RULE-XXX/,/RULE/p' RULES-TREE.md` | 看现有 RULE 全文 |
+  | `method-tree-publish` | `git add RULES-TREE.md + 6 文件版本号对账 + commit` | 发布到 git(LOOP-002 强制) |
+  | `method-tree-feedback` | `grep -rE 'RULE-XXX' RULES-TREE.md skills/` | 跟踪引用次数/复用率 |
+  | `method-tree-help` | 文档 | 速查 |
+
+- **每轮硬话术(反漂移核心,对标 eight-rules "ACTIVE EVERY RESPONSE")**:
+  ```
+  [方法树已激活 · ${mode} · ${activeLabel} · NO DRIFT.
+  Off only: "停止方法树" / "no mr" / "/mr off".
+  换档: /mr lite|full|ultra|off]
+  ```
+  - `activeLabel`:
+    - ultra 档: "每任务完成必自问是否沉淀 7 段 RULE"
+    - 其他档(full/lite): "失守或新流程跑通时自问是否沉淀 7 段 RULE"
+  - 在 `hooks/index.js` 的 `onSessionStart` 和 `onBeforeAgentStart` 与八荣八耻 hint **并列**注入
+  - 4 档显式 token(off/lite/full/ultra)
+  - **不与八荣八耻档联动** — 独立档位,各管各的
+
+- **Pre 阶(沉淀新 RULE 前必跑,4 阶)**:
+  1. **失守 ≥ 1 条准则?** → 是 → 必沉淀(无例外;主观判断"差不多沉淀" = 失守 RULE-10)
+  2. **`mr-pattern` 0 命中?** → 是 → 才允许写(`/mr-write`)
+  3. **7 段必全**:触发 / 形式化 / 与 26 条关系表 / 反模式 / 实战 / 自检 / 下次如何避免
+  4. **反模式 ≥ 2 条真实坑**:本会话踩过 = 真实;不是凑数(对应准则 7 凑数禁令)
+
+- **Run 阶(沉淀动作 5 步,1 条 RULE 落盘)**:
+  1. **Pre 阶检查** 4 项全过
+  2. **写 RULE**:`/mr-write` → 7 段模板
+  3. **本地校验**:`grep -cE '^### RULE-[A-Z]+-[0-9]+\(' RULES-TREE.md` 增量 ≥ 1
+  4. **`/mr-publish`**:`git add RULES-TREE.md` + 6 文件版本号对账(LOOP-002)+ smoke 3 套 + commit
+  5. **`/mr-feedback`**(N 次后):跑 scoreboard,看引用率
+
+- **下次如何避免(本会话的失守,反哺)**:
+  1. **任何沉淀动作前**:先 `mr-pattern` 找同主题,确认无重复再写(不是"凭印象写")
+  2. **任何 commit 前**:6 文件版本号对账(LOOP-002)—— **本会话 v3.4.4 错绑后,revert 时漏了 RULES-TREE.md 顶部 v3.4.3 → v3.4.4 对账,导致 5/6 文件 v3.4.4 但 RULES-TREE v3.4.3 不对称**
+  3. **任何发现多个"同名不同物"系统时**:列候选 + 让用户选,不要自作主张绑定第一个(本会话 v3.4.4 失守根因)
+  4. **任何 skill 套件要绑特定工具/系统时**:必问"是哪个系统",而不是"我找到 1 个就 OK"
+
+- **关联 RULE**:
+  - RULE-EIGHT-RULES-SKILLS-001(L3792,八荣八耻 skill 化)— **直接对标**(同双层架构,同反漂移硬话术)
+  - RULE-LOOP-001/002/003/004 — LOOP 系列,本 RULE 是 v3.4.5 的第 5 个延续(LOOP-005? 暂不编号,本 RULE 命名沿用 METHOD-TREE-001 标识"方法树")
+  - RULE-PUSH-V323-001 — 全量推送 SOP;本 RULE 是其轻量版(只 RULE 改动)
+  - RULES.md 准则 6(系统穷尽/沉淀侦察方法树)/ 准则 10(不重复犯错/方法树复用)/ 准则 24(联系全文/不读完工单-方法树-wiki 不开始)/ 准则 28(跨会话沉淀/方法树必须落盘 RULES-TREE.md-AGENTS.md-wiki)— **本 RULE 是 4 条准则的执行沉淀**
+  - 准则 1(查接口)/ 准则 5(确认后行)/ 准则 14(谨慎改)/ 准则 16(超越平凡)/ 准则 21(删走回收站)/ 准则 28(跨会话沉淀)
+
+- **正交**: 全部 28 条八荣八耻 + 6 个 method-tree 子档 + RULES-TREE.md 现有 58 条 RULE
+
+- **回滚命令**:
+  ```bash
+  TS=$(date +%Y%m%d-%H%M%S)
+  rm -rf skills/method-tree skills/method-tree-help skills/method-tree-pattern \
+         skills/method-tree-write skills/method-tree-show skills/method-tree-publish \
+         skills/method-tree-feedback hooks/method-tree-hint.test.js
+  cp -r _recycle_bin/$TS-pre-method-tree-rework/skills/* skills/
+  cp _recycle_bin/$TS-pre-method-tree-rework/hooks.index.js.bak hooks/index.js
+  git checkout RULES-TREE.md skills/eight-rules/SKILL.md
+  ```
+
+- **本次落地清单**:
+  - 7 个新 SKILL.md(method-tree + help + pattern + write + show + publish + feedback)
+  - 1 个新 test(method-tree-hint.test.js, 7 用例)
+  - hooks/index.js +42 行(buildMethodTreeHint + 双层并列注入)
+  - skills/eight-rules/SKILL.md +25 行(平行体系说明 + v3.4.4→v3.4.5 修正注)
+  - RULES-TREE.md 追加本 RULE(替代 v3.4.4 的 RULE-METHOD-TREE-SKILLS-001)
+  - **回滚 bfad0bc**(commit d6283ea)→ 状态干净后重建
+  - 备份到 `_recycle_bin/20260813-201701-pre-method-tree-rework/`(双保险)

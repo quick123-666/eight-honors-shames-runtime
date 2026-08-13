@@ -2,8 +2,8 @@
 
 > **作用**:固化八荣八耻(本项目 AI 工作准则)的**版本号命名规范**和**升级流程**,避免"v3+2.1" vs "v2.3" vs "2026-08-11 v2.3" 之类的命名混乱。
 > **维护触发**:任何新增原则 / 调优 / 反哺 / 大重构之前 + 之后
-> **当前版本**:**v3.4.4**(2026-08-13)
-> **上一版本**:v3.4.3
+> **当前版本**:**v3.4.5**(2026-08-13)
+> **上一版本**:v3.4.4
 > **关联文件**:RULES.md(完整版 **28 条**) / AGENTS.md(精简版 **28 条**) / RULES-TREE.md(方法论沉淀)
 
 ## 六、 v3.2.3 变更摘要 (2026-08-12)
@@ -66,7 +66,8 @@ v<MAJOR>.<MINOR>.<PATCH>
 | **v3.4.1** | **PATCH: 本会话沉淀 + 工具化同步**(不新增原则,28 条不变) — RULE-DIRECT-DO-001(v1.0 + v1.1 不漏 meta 标签 + C 子任务粒度);RULE-IMPORT-RULES-TREE-001(沉淀 ↔ 向量 ↔ 语义搜索 端到端打通);kg_rag_kuzu/sync_rules_to_vector.py(4 步包装:备份→解析→重建→自动验证,exit 0/1);_audit_rules.py(扫描 ## 6+## 7,实测触发率 97%);修复 13 条 ## 6 RULE 被早期 regex 漏入库的缺陷 | **28 条**(不变) | 已发布,保留 |
 | **v3.4.2** | **PATCH: RULES.md 新增"## 六、编码操作纪律"板块**(借鉴 super-code + Ponytail:优先级排序 / 简化阶梯 / 反向守护 / 输出模板 / 生成纪律 / guardrail);RULE-CODING-001 沉淀;28 条不变 | **28 条**(不变) | 已归档 |
 | **v3.4.3** | **PATCH: 运行时副本三重漂移修复**(`tuomin/eight-honors-shames-runtime/RULES.md` 标题「二十六条」→「二十八条」 + 顶部 v3.3.0→v3.4.3 + 2.1/2.3 索引表 RULE-LOOP-001「❌ 待沉淀」→「✓ 已沉淀 L1175」 + 附录 E/F 24→28);**RULE-LOOP-002 对称检查 5→6 文件**;附录 E「20 字真言」验证闭环(20 个词条);RULE-LOOP-004 沉淀 | **28 条**(不变) | 已归档 |
-| **v3.4.4** | **MINOR: 双层 skill 架构 + 反漂移硬话术** — 1 主持续 + 6 子 one-shot skill(`eight-rules` + `-review`/`-audit`/`-acceptance`/`-benchmark`/`-help`/`decision-annotation`);`hooks/index.js` 加 `buildEightRulesHint(mode)` 函数 + 双层注入(`onSessionStart` + `onBeforeAgentStart`);npm test **34/34 PASS**(`buildEightRulesHint` 新 7 + 原 27);jshgd 教程同步(`pi-eight-honors-shames-教程` v1.1.1→**v1.4.4**, 加 §4.9 节 +123 行 + 关键决策 #13/14/15 + 踩坑 8);7 个 skill 文档在 `skills/eight-rules*/`;**RULE-EIGHT-RULES-SKILLS-001** 沉淀于 RULES-TREE.md L3793;Ponytail 5-tag 字典 2 个独有(`drift`/`unsafe`);诚实声明:benchmark 仅设计 + demo(n=1),任何 "省 X%" 断言 = 禁止。 | **28 条**(不变) | **当前最新** |
+| **v3.4.4** | **MINOR: 双层 skill 架构 + 反漂移硬话术** — 1 主持续 + 6 子 one-shot skill(`eight-rules` + `-review`/`-audit`/`-acceptance`/`-benchmark`/`-help`/`decision-annotation`);`hooks/index.js` 加 `buildEightRulesHint(mode)` 函数 + 双层注入(`onSessionStart` + `onBeforeAgentStart`);npm test **34/34 PASS**(`buildEightRulesHint` 新 7 + 原 27);jshgd 教程同步(`pi-eight-honors-shames-教程` v1.1.1→**v1.4.4**, 加 §4.9 节 +123 行 + 关键决策 #13/14/15 + 踩坑 8);7 个 skill 文档在 `skills/eight-rules*/`;**RULE-EIGHT-RULES-SKILLS-001** 沉淀于 RULES-TREE.md L3793;Ponytail 5-tag 字典 2 个独有(`drift`/`unsafe`);诚实声明:benchmark 仅设计 + demo(n=1),任何 "省 X%" 断言 = 禁止。 | **28 条**(不变) | 已 revert(错绑 mr.exe) |
+| **v3.4.5** | **PATCH: 方法树 skill 套件重新绑定到 RULES-TREE 7 段元工作流沉淀范式** — v3.4.4 首版错绑到 lsx-mp-rust `mr.exe` 工具链(commit bfad0bc,已 revert d6283ea);本版改为 RULES-TREE 7 段沉淀范式:7 个子档 `method-tree` + `-help` + `-pattern` + `-write` + `-show` + `-publish` + `-feedback`(每个 30-140 行);`hooks/index.js` 加 `buildMethodTreeHint(mode)` 函数(`onSessionStart` + `onBeforeAgentStart` 双层与 `buildEightRulesHint` 并列注入);`hooks/method-tree-hint.test.js` 7 用例(off/full/lite/ultra/3 关闭/4 档枚举/未知档兜底);8 个 test 全过(eight-rules 7/7 baseline + method-tree 7/7 新);沉淀 **RULE-METHOD-TREE-001** 于 RULES-TREE.md 末尾(替代 v3.4.4 的 RULE-METHOD-TREE-SKILLS-001);八荣八耻主档"平行体系"段同步指向 C 体系;备份到 `_recycle_bin/20260813-201701-pre-method-tree-rework/`(双保险) | **28 条**(不变) | **当前最新** |
 
 ---
 
