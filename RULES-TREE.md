@@ -3406,3 +3406,33 @@
   1. 修 33 个测试缺失 (去 MiniCog v1.17.0) — 1-2 小时
   2. RFC-008 v2.4: 多层 DAG 真正 + salience 强度 (留 v3.0)
   3. RFC-010 v2.4: PDF 导出 (留待)
+
+### RULE-MINICOG-036(2026-08-13 沉淀 — RFC-008 v2.4 多层 DAG 完整化)
+
+- **触发场景**: 多层 DAG / per_layer DagEngine / DEFAULT_LAYER_DEPS 跨层依赖
+- **本会话 2026-08-13 落地清单**:
+  - ✅ think_engine.layered_dags 字段 (3 个独立 DagEngine)
+  - ✅ DEFAULT_LAYER_DEPS 加载到各层 DAG
+  - ✅ stats() 暴露 6 字段 (per_layer DAG 信息)
+  - ✅ 6 新测试 + 全量 171/171 (零回归)
+- **关键实测发现** (R10):
+  1. `from .dag_engine import DagEngine` 函数内 import 导致 UnboundLocalError — Python parser 把 DagEngine 视为 local
+  2. 解法: 删除函数内 `from`, 顶部已有 import (line 14) 全局可用
+  3. 3 DAG 独立性: 修改一个 DAG (加边) 不影响其他 2 个
+  4. perception 层 nodes=0: 因 DEFAULT_LAYER_DEPS 中 to_node 都不在 perception modules
+- **回滚命令**: 软 `git revert <commit>` / 硬 `cp _recycle_bin/20260813-rfc008v24-bk/*.py minicog_core/`
+- **依赖**: `DagEngine` + `LAYER_DEFINITIONS` + `DEFAULT_LAYER_DEPS`
+- **正交**: 全部 28 条八荣八耻
+- **强化**: P-7 不粉饰 / P-8 主流程可验证 / P-9 完成即接入
+- **下次如何避免**:
+  - 任何"函数内 from .X import" → 顶部已 import 就删, 避免 UnboundLocalError
+  - 任何"per_layer DagEngine" → 每层独立实例
+  - 任何"stats 扩展" → 必加到 stats() 方法
+- **累计**: 12 RFC 实施 + 1 改造 + 4 真集成 + 1 P3 + 1 v2.4
+- **ROADMAP + RFC 完工**:
+  - ✅ P0/P1/P2/P3
+  - ✅ RFC-004/005/008(v2.1/v2.2/v2.3/v2.4)/009/010(v2.1/v2.2/v2.3)/006
+- **下一步**:
+  1. 修 33 个测试缺失 (去 MiniCog v1.17.0) — 1-2 小时
+  2. RFC-010 v2.4: PDF 导出
+  3. 部署 minicog 到 Web UI 集成
