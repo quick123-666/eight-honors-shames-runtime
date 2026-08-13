@@ -3713,3 +3713,21 @@
 - **正交**: 全部 28 条八荣八耻 (尤其 R7/R8)
 - **累计**: 持续学习 1 + 测试/可视化 1
 - **下一步**: 全量 60 卷训练 / FastAPI
+
+### RULE-MINICOG-048(2026-08-13 沉淀 — P1/P4/P5 自主学习 + 主动聊天 + 自我评估)
+
+- **触发场景**: 自主学习引擎 / 心跳驱动主动聊天 / 自我评估
+- **本会话 2026-08-13 落地清单**:
+  - ✅ P1: learning.py (5 组件)
+  - ✅ P4: chat.py --autolearn 集成 (3 触发)
+  - ✅ P5: SelfAssessment 盲区率 + 趋势
+  - ⏳ P3: 全量马恩训练 (后台 30/60)
+- **P1 5 组件**: LearningFocus / Goal / AutonomousLearner / SelfAssessment / ProactiveChat
+- **P4 集成**: chat.py --autolearn 启用 3 触发
+- **P5 自我评估**: 盲区率 + 趋势 (improving = 越学越聪明)
+- **关键发现** (R10): learn_active goal=idle 应仍学 (盲区存在); 回调 lambda bug 修复
+- **回滚命令**: 软 `git revert <commit>`
+- **依赖**: RULE-046/037 / semiotics.py / chat.py
+- **正交**: 全部 28 条八荣八耻
+- **累计**: 13 RFC + 5 模块 + 8 修复 + 自主学习 1 + 主动聊天 1
+- **下一步**: P3 完成
