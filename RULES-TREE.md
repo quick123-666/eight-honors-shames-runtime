@@ -3478,3 +3478,45 @@
   2. PSI 需求持久化 (跨会话) — 1-2 天
   3. Governor 接入 think_engine (输出前治理) — 3-5 天
   4. 更新 TUTORIAL-consciousness-modules.md
+
+### RULE-MINICOG-038(2026-08-13 沉淀 — 记忆系统升级 UnifiedMemory 4 层)
+
+- **触发场景**: 记忆系统 / UnifiedMemory / 跨会话记忆 / 记忆影响 winners / 遗忘曲线
+- **本会话 2026-08-13 落地清单**:
+  - ✅ minicog_core/memory.py 新增 (11.6KB) — UnifiedMemory 4 层记忆系统
+  - ✅ think_engine 集成 (use_memory → salience_for_modules)
+  - ✅ compose() memory 参数 (recent_pairs 兼容 history)
+  - ✅ chat.py --mem 跨会话 + 每轮记录 + 定期保存
+  - ✅ 15 新测试 + 全量 217/217 (连跑稳定)
+- **4 层记忆架构** (方案 A+B+C 全):
+  | 层 | 容量 | 实现 | 持久化 |
+  |---|---|---|---|
+  | Working | 7 (Miller) | deque(maxlen=7) | 内存 |
+  | Episodic | ∞ | 事件序列 + 情感 + recall_by_module | JSON |
+  | Semantic | ∞ | 概念提取 + 共现关系 | JSON |
+  | Procedural | ∞ | 高频模式 → 可复用模板 | JSON |
+  | Consolidator | — | Working 同步三层 | — |
+- **关键设计决策**:
+  1. MemoryEntry dataclass — 结构化, 不再纯字符串 tuple
+  2. remember() 三层同步写入 — LAAP encode_experience 风格
+  3. 原子写持久化 — tmp + os.replace
+  4. 遗忘曲线 — 指数衰减 (远期降权)
+  5. 记忆影响 winners (阶段 3) — salience_for_modules() → +0.15
+  6. to_pairs() 兼容 — 老 history 格式无缝兼容
+- **关键实测发现** (R10):
+  1. remember 三层同步 vs 原"Working 满才 consolidate": 改同步写入
+  2. chat.py modules 传 int bug: `'int' object is not iterable` → 修传 []
+  3. 跨会话验证: episodic 6→12, semantic 加载 ✅
+- **回滚命令**: 软 `git revert 6ec24da` / 硬 `cp _recycle_bin/20260813-memory-upgrade-bk/*.py minicog_core/`
+- **依赖**: semiotics / cognitive_rag (RFC-009) / psi_core
+- **正交**: 全部 28 条八荣八耻
+- **强化**: P-7 不粉饰 / P-8 主流程可验证 / P-9 完成即接入
+- **下次如何避免**:
+  - 任何"记忆系统" → 4 层 + Consolidator
+  - 任何"三层写入" → remember 直接同步
+  - 任何"modules 参数" → 传 list, 不传 int
+  - 任何"兼容" → to_pairs() 保持老格式
+- **累计**: 13 RFC 实施 + 3 模块 (PSI/Governor/Memory) + 1 修复 + 1 改造 + 4 真集成 + 1 P3 + 1 v2.4 + 改默认
+- **下一步**:
+  1. 记忆影响回复 (recall 注入 compose) — 1-2 天
+  2. 记忆可视化 (--mem 时打印 top concepts) — 1 天
