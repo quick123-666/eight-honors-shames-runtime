@@ -3634,3 +3634,21 @@
 - **正交**: 全部 28 条八荣八耻 (尤其 R6 多头注意力)
 - **累计**: 13 RFC 实施 + 5 模块 + 5 修复 + 多头 1 + 六道 1
 - **下一步**: FastAPI 集成 / 六道可视化
+
+### RULE-MINICOG-044(2026-08-13 沉淀 — 六道佩恩 × 18 意识模块结合)
+
+- **触发场景**: 六道↔模块结合 / 指挥官→手下 / 主道模块 salience
+- **本会话 2026-08-13 落地清单**:
+  - ✅ SIX_PATH_MODULES 映射 (六道 → 18 模块)
+  - ✅ think_engine use_six_paths → 主道模块 salience +0.2
+  - ✅ ReplyOrganizer 主道模块短句开头
+  - ✅ 8 新测试 + 全量 277/277
+- **结合架构**: 天道→personality/metacog, 人间道→metacog/memory, 修罗道→htn_planner/methods_ab, 畜生道→subconscious/internal_world/psi, 饿鬼道→governor/safety, 地狱道→memory/quale
+- **3 结合点**: think_engine salience +0.2 / organize 主道优先 / 黑棒=GW
+- **实测**: 修罗道 → htn_planner 开头; 饿鬼道 → governor 开头
+- **关键发现** (R10): 主道优先被 tag 覆盖 → 单独最前; run() 重 trigger 覆盖 salience
+- **回滚命令**: 软 `git revert <commit>` / 硬 `cp _recycle_bin/20260813-sixpath-module-bk/*.py minicog_core/`
+- **依赖**: RULE-043/040 / RFC-004
+- **正交**: 全部 28 条八荣八耻 (尤其 R6 多头)
+- **累计**: 13 RFC 实施 + 5 模块 + 6 修复 + 多头 1 + 六道 1 + 结合 1
+- **下一步**: 六道可视化 / FastAPI / Web UI
