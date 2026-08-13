@@ -12,7 +12,8 @@
     "adapters": "node scripts/build-adapters.js",
     "status": "node scripts/eight-rules-status.js",
     "check:drift": "node scripts/check-version-drift.js",
-    "check:drift:fix": "node scripts/check-version-drift.js --fix"
+    "check:drift:fix": "node scripts/check-version-drift.js --fix",
+    "probe:env": "node scripts/probe-env-apis.js"
   },
   "pi": {
     "extensions": [
