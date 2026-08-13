@@ -111,24 +111,6 @@ Level persists until changed or session end。
 | `eight-rules-help` | 子 one-shot | 速查(/rules-help 或 `/rules help`) |
 | `decision-annotation` | 子 one-shot | 八荣八耻决策标注 |
 
-## 平行 skill 体系(方法树 — 工作流产物沉淀)
-
-> **2026-08-13 v3.4.4 整合**:`method-tree` 套件独立于八荣八耻(纪律层),
-> 但**直接受八荣八耻约束**(准则 6/10/24/28 共 7 处要求主动调用+沉淀方法树)。
-> 两套档位**不联动**——纪律管"怎么用工具",工具管"工具做了什么"。
-
-| skill | 类型 | 触发 |
-|---|---|---|
-| `method-tree` | 主持续档 | 默认 full,自动问"是否开方法树" |
-| `method-tree-help` | 子 one-shot | 速查(`/mr-help` 或 `/mr help`) |
-| `method-tree-pick` | 子 one-shot | 预览 skill 推荐(`/mr-pick`) |
-| `method-tree-run` | 子 one-shot | 跑任务(开单→方法树)(`/mr-run`) |
-| `method-tree-show` | 子 one-shot | 看方法树(`/mr-show`) |
-| `method-tree-wiki` | 子 one-shot | 沉淀到 wiki(`/mr-wiki`) |
-| `method-tree-feedback` | 子 one-shot | 反馈闭环(`/mr-feedback`) |
-
-详见 [method-tree/SKILL.md](./method-tree/SKILL.md) + RULE-METHOD-TREE-SKILLS-001。
-
 ---
 
 > **生成信息**:本 skill 由 `skills/eight-rules/SKILL.md` 创建于 2026-08-13,

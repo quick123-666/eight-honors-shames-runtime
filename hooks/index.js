@@ -23,27 +23,6 @@ export function buildEightRulesHint(currentMode) {
   );
 }
 
-// 方法树硬话术(每轮显式前缀,反漂移核心)
-// 对标 eight-rules hint 模式 + lsx-mp-rust METHOD-TREE.md
-// 见 skills/method-tree/SKILL.md "Persistence" 段
-// 2026-08-13 v3.4.4: 整合方法树系统到八荣八耻 skill 体系
-//   (RULE-METHOD-TREE-SKILLS-001, 对标 RULE-EIGHT-RULES-SKILLS-001)
-export function buildMethodTreeHint(currentMode) {
-  if (currentMode === "off") {
-    return "[方法树已停用 · off · 启动: /mr 或 重启会话]";
-  }
-  // 4 档(off/lite/full/ultra)显式 token
-  // full/ultra 档强调"主动自问是否开方法树"(对应八荣八耻准则 6/10/24/28)
-  const activeLabel = currentMode === "ultra"
-    ? "强制每任务 mr run"
-    : "任务进入时自问是否开方法树";
-  return (
-    `[方法树已激活 · ${currentMode} · ${activeLabel} · NO DRIFT. ` +
-    `Off only: "停止方法树" / "no mr" / "/mr off". ` +
-    `换档: /mr lite|full|ultra|off]`
-  );
-}
-
 export function createHooks({ getEntries, getSystemPrompt, notify }) {
   let mode = getDefaultMode();
   let state = loadState();
@@ -68,10 +47,8 @@ export function createHooks({ getEntries, getSystemPrompt, notify }) {
         state.rulesInjected = { at: new Date().toISOString(), fullSize: full.full.length, source: arbitration.source };
         saveState(state);
         const base = getSystemPrompt ? getSystemPrompt(ctx) : "";
-        const eightRulesHint = buildEightRulesHint(mode);
-        // 2026-08-13: 方法树 hint 与八荣八耻 hint 并列注入(session_start 全文层)
-        const methodTreeHint = buildMethodTreeHint(process.env.METHOD_TREE_DEFAULT_MODE || "full");
-        return { systemPrompt: `${base}\n\n${eightRulesHint}\n\n${methodTreeHint}\n\n${full.full}` };
+        const hardHint = buildEightRulesHint(mode);
+        return { systemPrompt: `${base}\n\n${hardHint}\n\n${full.full}` };
       }
       saveState(state);
     },
@@ -80,10 +57,8 @@ export function createHooks({ getEntries, getSystemPrompt, notify }) {
       const lifecycle = lifecycleConfigSync();
       const inj = agentStartInjection(mode, lifecycle);
       if (!inj) return;
-      const eightRulesHint = buildEightRulesHint(mode); // ← Phase 4 加:每轮硬话术
-      // 2026-08-13: 方法树 hint 与八荣八耻 hint 并列注入(每轮 before_agent_start 层)
-      const methodTreeHint = buildMethodTreeHint(process.env.METHOD_TREE_DEFAULT_MODE || "full");
-      const composed = `${eightRulesHint}\n\n${methodTreeHint}\n\n${inj.summary}${inj.gateText}\n\n${inj.hint}`;
+      const hardHint = buildEightRulesHint(mode); // ← Phase 4 加:每轮硬话术
+      const composed = `${hardHint}\n\n${inj.summary}${inj.gateText}\n\n${inj.hint}`;
       const offenders = rejectIfSecretsInText(composed);
       if (offenders.length) return notify?.(event, `agent_start 注入拦截含敏感变量: ${offenders.join(", ")}`, "warning");
       return { systemPrompt: `${event.systemPrompt}\n\n${composed}` };
