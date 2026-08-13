@@ -2807,3 +2807,69 @@
 - **本会话 2026-08-13 落地清单**:
   - ✅ 备份 RULES-TREE.md
   - ✅ 沉淀本 RULE-024
+
+### RULE-MINICOG-025(2026-08-13 沉淀 — v2.0 真涌现对话 C 方案 + RFC-004 实施)
+
+- **触发场景**: 任何 v2.0+ 真涌现对话 / respond_to 模块对话图 / chain_mode 开关 / 链式 vs 拼接对比 / 18 speak 承接上下文 / 前后模块对话拓扑
+- **本会话 2026-08-13 落地清单**:
+  - ✅ `minicog 2.0.0/docs/RFC-004-respond-to-dialogue.md` 方案对比文档(7043 字节,3 方案 A/B/C 矩阵 + 6 风险 mitigation)
+  - ✅ `_tickets/T-20260813-MINICOG-P0-respond-to-001.json` P0 工单(closed · success,估 20h 实际 12h 编码 + 3h 测试 = 15h 节省 25%)
+  - ✅ commit `da415f6`(RFC-004 + 工单 + 看板沉淀) + `a38bfe4`(Phase A-D 实施)
+  - ✅ `minicog_core/module_speak.py` 扩 SpeechContext 3 字段(prev_module/prev_sentence/chain_mode),默认空 / False 不破坏老调用
+  - ✅ `module_speak.py:266-278` `speak()` 入口加 3 keyword argument 转发到 SpeechContext
+  - ✅ 6 核心 speak(personality/metacog/hebbian/emotion/attachment/internal_world)加链式分支,生成承接/关于/顺着/呼应/强化/模拟 6 种上下文感知短句
+  - ✅ `emergent_reply_v2.py:124-136` `respond_to()` 实现(替代 NotImplementedError),调 module_speak 传 `chain_mode=True`
+  - ✅ `emergent_reply_v2.py:43-79` `compose()` 加 chain_mode 参数,默认 False 保留老行为;True 时累计 `cs._stats["dialogue_chain_count"]`
+  - ✅ `tests/test_v2_dialogue_chain.py` 新增 7 测试(TestRespondToNoRaise / TestChainModeToggle / TestChainContainsKeyword / TestChainCountIncrement / TestSixSpeakersRespondNonEmpty / TestChainModeDefaultFalse×2)
+  - ✅ 全量 55/55 测试过(48 老 + 7 新),零回归
+  - ✅ `_recycle_bin/20260813-p0-respond-to-bk/` 备份 3 文件 + 软硬回滚路径
+  - ✅ `.gitignore` 加 `/recycle_bin/` 排除未来备份
+- **3 方案矩阵**(RFC-004 §2 沉淀):
+  | 方案 | 机制 | 并行性 | 短句连贯 | 工作量 | 推荐 |
+  |---|---|---|---|---|---|
+  | A 顺序链式 | module[i] 引用 module[i-1] | ❌ | ⭐⭐⭐ | 1-2 天 | ⭐⭐ |
+  | B 协商投票 | 4 模块各出 reply + 二次投票 | ✅ | ⭐⭐ | 3-5 天 | ⭐⭐ |
+  | **C 对话图式** | **3 机制并存: 引用 + 承接 + 反驳(可关)** | **✅(链式开关)** | **⭐⭐⭐** | **2-3 天** | **⭐⭐⭐** |
+
+  **采纳 C**(R15 完整版,非 A/B 简化)
+- **关键设计决策**:
+  1. **`respond_to` 骨架复用**(R10 不重复犯错)— 2026-08-13 RULE-020 已 stub,不重建只实现
+  2. **`chain_mode` 默认 False**(R22 帮助解难)— 老调用零回归,链式需显式开启
+  3. **3 机制分层沉淀**:本工单实现引用+承接;协商留 v2.2(RFC-005 候选);反驳留 v2.3(RFC-006 候选)
+  4. **链式累计 stats**(R8 主流程可验证):`cs._stats["dialogue_chain_count"]` 链式调用 +1/次
+  5. **prev_sentence 截 30 字**(R6 短句质量)— 避免短句过长破坏连贯性
+- **RFC-004 §6 验收硬标准**(7/7 全绿):
+  | # | 标准 | 验证 |
+  |---|---|---|
+  | 1 | respond_to 不抛 NotImplementedError | TestRespondToNoRaise ✓ |
+  | 2 | 链式输出含承接词 | TestChainContainsKeyword(6 模块)✓ |
+  | 3 | chain_mode 切换时 prev_sentence 行为差异 | TestChainModeToggle ✓ |
+  | 4 | chain_mode=True 累计 dialogue_chain_count +1 | TestChainCountIncrement ✓ |
+  | 5 | 6 speak 链式短句非空 | TestSixSpeakersRespondNonEmpty ✓ |
+  | 6 | chain_mode 默认 False 兼容老调用 | TestChainModeDefaultFalse(2 测试)✓ |
+  | 7 | 全量 48 老测试零回归 | pytest 55/55 ✓ |
+- **风险与 mitigation**(RFC-004 §风险):
+  - 风险 1(R1 短句过长)→ 缓解:prev_sentence[:30] 截断注入
+  - 风险 2(R2 失去并行)→ 缓解:chain_mode 开关,默认 False 保留并行
+  - 风险 3(R3 双重 GW)→ 缓解:本工单不实现协商,留 v2.2
+  - 风险 4(R4 反驳敌意)→ 缓解:本工单不实现反驳,留 v2.3
+- **回滚命令**:软 `git revert a38bfe4 da415f6` / 硬 `cp _recycle_bin/20260813-p0-respond-to-bk/*.py minicog_core/`
+- **依赖**:
+  - RULE-MINICOG-020 (18 speak 全真)
+  - RULE-MINICOG-016 (推倒重建 5 阶段)
+  - RFC-002 阶段 3 (v2.0 EmergentReply 骨架)
+  - think_engine.py L1 竞争-广播
+- **正交**:全部 28 条八荣八耻(尤其 R1 查接口 ✓ / R3 业务假设 ✓ / R5 候选 ✓ / R8 数学验证 ✓ / R10 不重复犯错 ✓ / R15 完整版 ✓ / R19 走流程 ✓ / R22 帮助解难 ✓ / R27 稳扎稳打 ✓)
+- **强化**:P-7 不粉饰(4 风险 mitigation 显式记录)/ P-8 主流程可验证(7/7 验收)/ P-9 完成即接入(默认 False 兼容)
+- **下次如何避免**:
+  1. 任何"模块对话"扩展 → 先扩 SpeechContext 字段,不改 speak 接口
+  2. 任何"链式 vs 并行"争议 → 默认并行(False),链式显式开启
+  3. 任何"承接词词典" → 用 if-elif 起步,数据驱动留 v2.1
+  4. 任何"反驳/协商" → 留 v2.2+(RFC-005/006),不挤本工单
+  5. 任何"对话历史持久化" → 不破坏 cs._stats 现有 schema,仅追加新字段
+- **本会话 2026-08-13 落地清单**:
+  - ✅ 备份 _recycle_bin/20260813-p0-respond-to-bk/(3 文件)
+  - ✅ 双仓沉淀 RULE-025(minicog docs/RULE-025-p0-dialogue.md + kimi_code_test/RULES-TREE.md 末尾)
+  - ⏳ P2 HOT 每模块独立二阶评分(RFC-005 候选,MINICOG-2.1-003 工单)
+  - ⏳ P3 asyncio 异步支持(RFC-006 候选,MINICOG-2.1-005 工单)
+  - ⏳ RFC-005 HOT 评分 + RFC-006 asyncio 双 RFC 沉淀
