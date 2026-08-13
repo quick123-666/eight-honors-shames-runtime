@@ -2935,3 +2935,75 @@
   - ✅ 双仓沉淀 RULE-026(minicog docs/RULE-026-p2-hot-per-module.md + kimi_code_test/RULES-TREE.md 末尾)
   - ⏳ P3 asyncio 异步支持(RFC-006 候选,MINICOG-2.1-005 工单)
   - ⏳ RFC-006 asyncio 双 RFC 沉淀
+
+### RULE-MINICOG-027(2026-08-13 沉淀 — RFC-008 思维 DAG + RFC-010 Mermaid 渲染 双 RFC)
+
+- **触发场景**: 任何"图谱式对话" / "思维 DAG 拓扑" / "Mermaid 渲染 reply" / RFC-008 / RFC-010 / 4 类图谱基础设施复用
+- **本会话 2026-08-13 落地清单**:
+  - ✅ 深读 4 文件(global_workspace / registry / contract / emergent_reply_v2)+ 探查 4 类图谱基础设施
+  - ✅ `minicog 2.0.0/docs/RFC-008-think-dag.md`(8043 字节) — 思维 DAG B 方案(混合依赖 + 竞争)
+  - ✅ `minicog 2.0.0/docs/RFC-010-mermaid-render.md`(6231 字节) — Mermaid 渲染 C 方案(mode 开关)
+  - ✅ `_tickets/T-20260813-MINICOG-RFC008-think-dag-003.json` P3 工单(估 2-3 周,大改动)
+  - ✅ `_tickets/T-20260813-MINICOG-RFC010-mermaid-render-004.json` P3 工单(估 1-2 天)
+  - ✅ `PROJECT_TICKETS.md` 加 RFC-008 + RFC-010 工单索引
+  - ⏳ Phase A-F 实施未动(估 RFC-008: 10-15 天 + RFC-010: 6-10h — 双 RFC 总 12-20 天)
+- **本会话探查的 4 类图谱基础设施**(RFC-008 §1.2 + RFC-010 §1.3):
+  | 现成 | 文件 | 性质 |
+  |---|---|---|
+  | GW 广播图 | `global_workspace.py` | Baars GWT 实现,`broadcast_callbacks` 订阅列表 |
+  | 事件总线图 | `enhanced_bus.py` | priority/dependency 多对多事件路由,已有 DAG 雏形 |
+  | 语义联想图 | `semiotics.py` + `cooccurrence.npz` | L2 共现训练产物,基于向量近邻构建 |
+  | dialogue 数据结构 | `emergent_reply_v2.py` | `[(module, sentence), ...]` 已是 list of tuples,直接构图 |
+- **3 方案矩阵**:
+  - **RFC-008 思维 DAG**:
+    | 方案 | 机制 | 复杂度 | 推荐 |
+    |---|---|---|---|
+    | A 纯依赖驱动 | deps 决定全部顺序 | 2-3 天 | ⭐⭐ |
+    | **B 混合**(DAG + 残余竞争) | DAG 强约束 + 残余 GW 竞争 | 2-3 周 | ⭐⭐⭐(本工单采纳) |
+    | C 完整多层 DAG | 多层独立 toposort + 跨层 deps | 4-6 周 | ⭐ 过度设计 |
+  - **RFC-010 Mermaid 渲染**:
+    | 方案 | 机制 | 复杂度 | 推荐 |
+    |---|---|---|---|
+    | A 字符串内嵌 | reply 末尾追加 mermaid 块 | 0.5 天 | ⭐⭐ |
+    | B 双输出 dict | 返回 `{text, mermaid}` | 1-2 天 | ⭐⭐ |
+    | **C 模式开关**(mode=text/mermaid/both) | compose() 加 mode 参数 | 1-2 天 | ⭐⭐⭐(本工单采纳) |
+- **关键设计决策**:
+  - **RFC-008 B 方案**(R15 完整版): DAG 强约束层(metacog→consciousness_level)+ 残余模块走 GW 竞争,**保留 RFC-005 HOT + RFC-004 链式所有机制**
+  - **RFC-010 C 方案**(R22 帮助解难): mode 默认 "text" 零回归,`mode="mermaid"` 输出 Mermaid,`mode="both"` 多模态
+  - **Kahn 算法**(R7 数学验证): stdlib 拓扑排序,O(V+E) 复杂度,必含环检测
+  - **Mermaid graph TD**(R10 复用): 纯文本语法,无需第三方依赖,GitHub/GitLab/VSCode 全部原生渲染
+- **DEFAULT_DEPENDS_ON 静态依赖**(RFC-008 §3.2):
+  - `metacog → conscious` (元认知依赖意识)
+  - `consciousness_level → metacog`
+  - `hebbian → emotion + personality` (强化学习依赖先有信号)
+  - `predictor → []` (总是先跑)
+  - `governor → metacog + hebbian + personality` (审查所有输出)
+  - `self_model → metacog + consciousness_level`
+  - 其余 10 个无 deps → 走残余竞争
+- **Mermaid 输出示例**(RFC-010 §3.2):
+  ```
+  graph TD
+      user_input["👤 你好 MiniCog"]
+      m0_personality["personality: 承接 'metacog: 关于' — warm_companion"]
+      user_input --> m0_personality
+      m1_metacog["metacog: 关于 'conscious: 我感到' — 我记录"]
+      m0_personality --> m1_metacog
+  ```
+- **回滚命令**:软 `git revert <commit>` / 硬 `cp _recycle_bin/<date>-bk/*.py minicog_core/`
+- **依赖**:RFC-004 v2.0 / RFC-005 HOT / enhanced_bus.py 雏形
+- **正交**:全部 28 条八荣八耻(尤其 R1/R3/R4/R5/R7/R8/R10/R15/R19/R22/R27)
+- **强化**:P-7 不粉饰 / P-8 主流程可验证 / P-9 完成即接入
+- **下次如何避免**:
+  - 任何"图谱式对话" → 优先混合(DAG + 残余),不丢原有机制
+  - 任何"拓扑排序" → Kahn 算法 + 环检测,不静默
+  - 任何"图渲染" → Mermaid 优先(纯文本,无依赖)
+  - 任何"输出格式"扩展 → 模式开关,不改返回类型
+  - 任何"DAG 默认依赖" → 用领域知识,不平均分布
+- **本会话 2026-08-13 落地清单**:
+  - ✅ 4 类图谱基础设施探查(GW + EnhancedBus + semiotics + dialogue tuple list)
+  - ✅ 双 RFC 设计(RFC-008 B 方案 + RFC-010 C 方案)
+  - ✅ 双工单开立(RFC-008: 2-3 周 + RFC-010: 1-2 天)
+  - ✅ 双仓沉淀 RULE-027(minicog docs/ + kimi_code_test/RULES-TREE.md)
+  - ⏳ RFC-008 实施(估 10-15 天) — 等用户点头
+  - ⏳ RFC-010 实施(估 6-10h) — 等用户点头
+  - ⏳ RFC-008 + RFC-010 实施后 RULE-027-v2 增量沉淀
