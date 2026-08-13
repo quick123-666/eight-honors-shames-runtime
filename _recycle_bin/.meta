@@ -1,0 +1,50 @@
+# _recycle_bin/ — 八荣八耻 临时快照
+
+## 目的(用途)
+
+`_recycle_bin/<时间戳>/` 目录存放**修改前快照**,用于:
+1. **灾难回滚** — 任何人在新方案出错时,一键 `cp -r _recycle_bin/<时间戳>/* <原路径>/` 还原子项目状态
+2. **审计追溯** — 改动可追源(每条 RULE 沉淀时,记录备份路径)
+3. **避免 `rm -rf` 不可逆操作**(R21·删走回收站准则)
+
+## 目录约定
+
+```
+_recycle_bin/
+├── .meta                                # 本文件(元数据,不存任何改动)
+└── <YYYYMMDD-HHMMSS>/                   # 每个时间戳一次快照
+    ├── hooks-index.js.bak               # 改前的 hooks/index.js 内容
+    ├── 决策-annotation/                  # 改前的 skill 目录(如果有 rename)
+    └── ...
+```
+
+## 当前快照(2026-08-13)
+
+| 时间戳 | 备份内容 | 对应 RULE / 行为 | 回滚命令 |
+|---|---|---|---|
+| `20260813-161935/` | decision-annotation 旧版 + hooks/index.js 备份 | v3.4.5 八荣八耻 daemon 三件套首版(RULE-EIGHT-RULES-DAEMON-001) | `mv _recycle_bin/20260813-161935/decision-annotation skills/ + git checkout -- hooks/index.js` |
+| `20260813-162600/` | hooks/index.js + src/runtime-log.js + scripts/eight-rules-status.js(v3.4.5 后版本)| v3.4.6 方法树 daemon 三件套首版(RULE-METHOD-TREE-DAEMON-001)| 同上述组合 |
+| `20260813-163300/` | hooks/index.js + src/runtime-log.js + RULES-VERSION.md(mtMode 持久化前)| v3.4.6 mtMode 持久化(RULE-MT-MODE-PERSIST-001)| 同上述组合 |
+
+## 应该不应该 commit 进 git?
+
+**不应该**。设计原则:
+- `_recycle_bin/` 是 **transient**(工程过程临时态)
+- commit 它会让每次 commit diff 膨胀(备份内容动则上千行)
+- 内容追溯功能已被 git 历史 + 本元数据覆盖
+
+## .gitignore
+
+需要在项目根 `.gitignore` 中显式忽略:
+
+```gitignore
+# 不 commit 临时备份
+/_recycle_bin/
+!/_recycle_bin/.meta
+```
+
+这样确保只有 `.meta` 元数据被跟踪。
+
+## R9 不搞破坏 / R21 删走回收站
+
+任何后续修改如需 `_recycle_bin/` 留档,**先 mkdir timestamp**,再 `cp` 备份,**永远不**用 `rm -rf` 直接删除旧备份(可以 `mv` 整体搬走)。

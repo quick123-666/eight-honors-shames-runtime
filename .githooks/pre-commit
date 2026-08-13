@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# 八荣八耻 pre-commit hook(v3.4.6 配套)
+# 触发时机:git commit 前
+# 行为:跑 RULES-VERSION.md 版本漂移检测,有 critical/warn 漂移则阻止 commit(exit 1)
+# 沉淀:RULE-VERSION-DRIFT-CHECK-001
+# 安装方式:
+#   git config core.hooksPath .githooks
+# 或:git init 之后此目录如 hooksPath 优先,会自动启用
+
+set -euo pipefail
+
+# 仅对含 RULES-VERSION.md + RULES-TREE.md 的项目启用
+if [[ ! -f "RULES-VERSION.md" || ! -f "RULES-TREE.md" ]]; then
+  exit 0
+fi
+
+echo "[pre-commit] RULES-VERSION drift check ..."
+npm run --silent check:drift || {
+  echo "[pre-commit] ✖ 漂移检测失败(见上方),拒绝 commit"
+  echo "[pre-commit] fix 路径:运行 'npm run check:drift:fix' 预览 + 'npm run check:drift' 看结果"
+  exit 1
+}
+exit 0

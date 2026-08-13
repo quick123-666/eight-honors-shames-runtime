@@ -124,7 +124,7 @@ Off only: "停止八荣八耻" / "normal mode" / "/rules off".
 | 强度档 | lite/full/ultra/off | lite/full/ultra/off + review 独立档 |
 | 触发词 | 英文 + 命令 | **中英双语** + 命令 |
 | 反漂移话术 | "ACTIVE EVERY RESPONSE" | "**NO DRIFT**" + 中文版 |
-| 反思文协 | Ponytail `ponytail-debt` | 八荣八耻 `decision-annotation` |
+| 反思文协 | Ponytail `ponytail-debt` | 八荣八耻 `eight-rules-decision-annotation` |
 
 ---
 

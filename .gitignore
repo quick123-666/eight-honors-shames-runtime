@@ -9,6 +9,7 @@
 # 本地运行时数据/缓存
 /ms_cache/
 /_recycle_bin/
+!/_recycle_bin/.meta
 /_backups/
 /_tickets/
 /methods/

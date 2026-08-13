@@ -2,8 +2,8 @@
 
 > **作用**:固化八荣八耻(本项目 AI 工作准则)的**版本号命名规范**和**升级流程**,避免"v3+2.1" vs "v2.3" vs "2026-08-11 v2.3" 之类的命名混乱。
 > **维护触发**:任何新增原则 / 调优 / 反哺 / 大重构之前 + 之后
-> **当前版本**:**v3.4.6**(2026-08-13)
-> **上一版本**:v3.4.5
+> **当前版本**:**v3.4.8**(2026-08-13)
+> **上一版本**:v3.4.7
 > **关联文件**:RULES.md(完整版 **28 条**) / AGENTS.md(精简版 **28 条**) / RULES-TREE.md(方法论沉淀)
 
 ## 六、 v3.2.3 变更摘要 (2026-08-12)
@@ -52,7 +52,6 @@ v<MAJOR>.<MINOR>.<PATCH>
 
 ## 二、当前版本对照表
 
-| SemVer | 含义 | 行数 | 状态 |
 |---|---|---|---|
 | **v3.0.0** | 22→24 条重排 | — | 已发布,保留 |
 | **v3.1.0** | + 准则 9 不搞破坏 + 升级准则 6 多头注意力 | 25 条 | 已发布,保留 |
@@ -69,7 +68,8 @@ v<MAJOR>.<MINOR>.<PATCH>
 | **v3.4.4** | **MINOR: 双层 skill 架构 + 反漂移硬话术** — 1 主持续 + 6 子 one-shot skill(`eight-rules` + `-review`/`-audit`/`-acceptance`/`-benchmark`/`-help`/`decision-annotation`);`hooks/index.js` 加 `buildEightRulesHint(mode)` 函数 + 双层注入(`onSessionStart` + `onBeforeAgentStart`);npm test **34/34 PASS**(`buildEightRulesHint` 新 7 + 原 27);jshgd 教程同步(`pi-eight-honors-shames-教程` v1.1.1→**v1.4.4**, 加 §4.9 节 +123 行 + 关键决策 #13/14/15 + 踩坑 8);7 个 skill 文档在 `skills/eight-rules*/`;**RULE-EIGHT-RULES-SKILLS-001** 沉淀于 RULES-TREE.md L3793;Ponytail 5-tag 字典 2 个独有(`drift`/`unsafe`);诚实声明:benchmark 仅设计 + demo(n=1),任何 "省 X%" 断言 = 禁止。 | **28 条**(不变) | 已 revert(错绑 mr.exe) |
 | **v3.4.5** | **MINOR:方法树 skill 套件重新绑定 + 八荣八耻 daemon 三件套** — **a)** 方法树 skill 套件重新绑定到 RULES-TREE 7 段元工作流沉淀范式(v3.4.4 首版错绑到 lsx-mp-rust `mr.exe` 工具链 commit bfad0bc,已 revert d6283ea):7 个子档 `method-tree` + `-help` + `-pattern` + `-write` + `-show` + `-publish` + `-feedback`(每个 30-140 行);`hooks/index.js` 加 `buildMethodTreeHint(mode)` 函数(`onSessionStart` + `onBeforeAgentStart` 双层与 `buildEightRulesHint` 并列注入);`hooks/method-tree-hint.test.js` 7 用例;沉淀 **RULE-METHOD-TREE-001** 于 RULES-TREE.md 末尾(替代 v3.4.4 的 RULE-METHOD-TREE-SKILLS-001);备份到 `_recycle_bin/20260813-201701-pre-method-tree-rework/`;**b)** 八荣八耻 daemon 三件套(B1 心跳 state + B2 JSONL log + B3 status CLI):新增 `src/runtime-log.js`(`appendLog`/`tailLog`/`readStatus` + 默认 `eight-rules` subsystem),`hooks/index.js` 加 `instanceId`/`startedAt`/`heartbeats` 三字段持久化 + 每 `onBeforeAgentStart` 刷心跳;新增 `scripts/eight-rules-status.js` 一屏 box + `"status": "node scripts/eight-rules-status.js"` npm script;新增 `tests/runtime-log.test.js` 6 用例;`skills/decision-annotation/` → `skills/eight-rules-decision-annotation/` 重命名对齐双层命名空间;npm test **47/47 PASS**(原 41 + daemon 6);沉淀 **RULE-EIGHT-RULES-DAEMON-001** + 备份 `_recycle_bin/20260813-161935/` | **28 条**(不变) | 已归档 |
 | **v3.4.6** | **MINOR:方法树 daemon 复用八荣八耻三件套 + mtMode 持久化 + RULES-VERSION 同步** — **a)** 方法树 daemon 三件套复用:同 `src/runtime-log.js` 加 `SUBSYSTEMS` 注册表 + `appendLogFor/tailLogFor/logFileFor` 三件 API(支持 N 个 subsystem 平展化);`hooks/index.js` 加 mt_ 字段平行持久化(`mtInstanceId`/`mtStartedAt`/`mtLastHeartbeat`/`mtHeartbeats`/`mtMode`)+ `onSessionStart` 写 `mt_session_start` + 每轮心跳刷 mt_heartbeat(env gated)+ `onSessionEnd` 写 `mt_session_end`;`scripts/eight-rules-status.js` 重构为两段式 box(📜 八荣八耻 daemon · 🌳 方法树 daemon 同框);`tests/runtime-log.test.js` +5 用例(appendLogFor 隔离 / tailLogFor 隔离 / readStatus 双子系统透出 / DEFAULT_MT_MODE / resolveMtMode 4 优先级用例);npm test **54/54 PASS**(原 47 + mt 7)。**b)** mtMode 持久化:新增 `resolveMtMode(env, persisted, fallback=full)` helper(env > 持久 > 默认,优先级同八荣八耻 `arbitrateMode` 但简化);`hooks/index.js` `syncMtMode()` 闭包 6 调用点替换(env 实时覆盖 + transition 自动落 `mt_mode_changed` log);持久化字段 `state.mtMode` 同步 state.json。**c)** RULES-VERSION.md 版本号同步到 v3.4.6(本行);备份到 `_recycle_bin/20260813-162600/`(hook + runtime-log + status CLI 3 件)+ `_recycle_bin/20260813-163300/`(本轮 mode 持久化前快照);沉淀 **RULE-METHOD-TREE-DAEMON-001** + **RULE-MT-MODE-PERSIST-001** + **RULE-VERSION-SYNC-V346-001** 于 RULES-TREE.md | **28 条**(不变) | **当前最新** |
-
+| **v3.4.7** | **PATCH: 沉淀 RULE-LOOP-007 — chat.py Windows bash stdin 编码修复** — auto-added by `check-version-drift.js --fix`(RULES-TREE.md L4210); chat.py 在 Windows bash 跑 stdin 喂中文对话,read 工具读 chat_log.txt 看 | **28 条**(不变) | 已归档 |
+| **v3.4.8** | **PATCH: 沉淀 RULE-LOOP-008 — thinking 段规则引用膨胀触发器 + 用户停止后无 termination signal** — auto-added by `check-version-drift.js --fix`(RULES-TREE.md L4224); 同一 thinking 段中"按准则 N"或"本轮不是空转"重复出现 ≥ 3 次; | **28 条**(不变) | 已归档 |
 ---
 
 ## 三、升级检查清单

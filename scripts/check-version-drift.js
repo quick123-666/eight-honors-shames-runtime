@@ -26,12 +26,19 @@ export function readTopMarker(text) {
 }
 
 // 历史表行:| **v3.4.5** | <KIND>: ... | **28 条** | <状态> |
+// 兼容老格式:| **v3.2.0** | + 准则 ... | 26 条 | 已发布 |
+// 跳过 chrono 行(第 2 列是 **YYYY-MM-DD**)
 export function parseHistoryTable(text) {
   const rows = [];
   for (const line of text.split("\n")) {
+    // 先检查是否 chrono 行(第 2 列是日期)— 跳过
+    if (/^\|\s*\*\*v\d+\.\d+\.\d+\*\*\s*\|\s*\*\*\d{4}-\d{2}-\d{2}\*\*/.test(line)) continue;
     // 必须 | **vX.Y.Z** | 开头,避免匹配 marker 行
-    const m = line.match(/^\|\s*\*\*v(\d+\.\d+\.\d+)\*\*\s*\|\s*\*\*(MINOR|PATCH|MAJOR)/);
-    if (m) rows.push({ version: `v${m[1]}`, kind: m[2], line });
+    const m = line.match(/^\|\s*\*\*v(\d+\.\d+\.\d+)\*\*\s*\|/);
+    if (!m) continue;
+    const rest = line.slice(m[0].length);
+    const kindMatch = rest.match(/\b(MINOR|PATCH|MAJOR)\b/);
+    rows.push({ version: `v${m[1]}`, kind: kindMatch ? kindMatch[1] : "UNKNOWN", line });
   }
   return rows;
 }
@@ -158,9 +165,127 @@ function renderReport(result) {
   return lines.join("\n");
 }
 
+// ===== 自动修复(D3 critical) =====
+
+// 按 SemVer 比较版本号
+function cmpSemver(a, b) {
+  const pa = a.replace(/^v/, "").split(".").map(Number);
+  const pb = b.replace(/^v/, "").split(".").map(Number);
+  for (let i = 0; i < 3; i += 1) {
+    if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) - (pb[i] || 0);
+  }
+  return 0;
+}
+
+// 从 RULES-TREE.md 提取 RULE 标题(从 ### 行往后读,直到下一个 ### / ## / ---)
+function readRuleBody(rtText, lineNumber) {
+  const lines = rtText.split("\n");
+  const start = Math.max(0, lineNumber - 1);
+  let body = lines[start] || "";
+  for (let i = start + 1; i < Math.min(lines.length, start + 8); i += 1) {
+    if (/^###\s/.test(lines[i]) || /^##\s/.test(lines[i]) || /^---$/.test(lines[i])) break;
+    body += "\n" + lines[i];
+  }
+  return body;
+}
+
+// 从 RULE 标题提取 KIND
+function extractKind(body) {
+  const m = body.match(/(?:MINOR|PATCH|MAJOR|PATCH\s+沉积)/);
+  return m ? m[0].replace(/\s+沉积$/, "") : "PATCH";
+}
+
+// 从 RULE 标题提取一句话标题(### RULE-X(... vX.Y.Z KIND 沉淀 — <TITLE>))
+function extractTitle(body) {
+  const m = body.match(/沉淀\s*[—\-]\s*([^)\n]+)/);
+  if (m) return m[1].trim();
+  return body.split("\n")[0].replace(/^###\s+/, "").slice(0, 80);
+}
+
+// 从 RULE body 提取一句话触发场景(作为 row 补充信息)
+function extractTrigger(body) {
+  const m = body.match(/\*\*触发(?:场景)?\*\*[::]\s*([^\n*]+)/);
+  return m ? m[1].trim() : "";
+}
+
+// 生成一个历史表行(保守:不强行重排,只追加在表格末尾)
+function buildHistoryRow(rule, body) {
+  const kind = extractKind(body);
+  const title = extractTitle(body);
+  const trigger = extractTrigger(body).slice(0, 60);
+  return `| **${rule.version}** | **${kind}: 沉淀 ${rule.rule} — ${title.replace(/[*]/g, "")}** — auto-added by \`check-version-drift.js --fix\`(RULES-TREE.md L${rule.line})${trigger ? `; ${trigger.replace(/[*]/g, "")}` : ""} | **28 条**(不变) | 已归档 |`;
+}
+
+// 生成 chrono 表行
+function buildChronoRow(rule, body) {
+  const kind = extractKind(body);
+  const title = extractTitle(body);
+  const dateMatch = body.match(/\((\d{4}-\d{2}-\d{2})/);
+  const date = dateMatch ? dateMatch[1] : new Date().toISOString().slice(0, 10);
+  return `| **${rule.version}** | **${date}** | **${kind}: 沉淀 ${rule.rule} — ${title.replace(/[*]/g, "").slice(0, 60)}** — auto-added from RULES-TREE.md L${rule.line} | \`(无 /\_recycle\_bin 备份; 脚本追溯)\` |`;
+}
+
+// 在历史表中插入新行(保持表头与表尾不变,中间行重排为 semver 排序)
+export function buildFixedRvText(rvText, allRules) {
+  const lines = rvText.split("\n");
+
+  // 找历史表范围:`## 二、` 到下一个 `##` 或文件尾
+  let historyStart = -1, historyEnd = -1;
+  for (let i = 0; i < lines.length; i += 1) {
+    if (/^## 二、/.test(lines[i])) {
+      historyStart = i;
+      // 找下一个 ## 或 ---
+      for (let j = i + 1; j < lines.length; j += 1) {
+        if (/^## /.test(lines[j]) || /^---$/.test(lines[j]) || /^[#]{2,3}\s+三/.test(lines[j])) {
+          historyEnd = j;
+          break;
+        }
+      }
+      break;
+    }
+  }
+  if (historyStart < 0 || historyEnd < 0) {
+    return { text: rvText, added: 0, error: "can't find history table section" };
+  }
+
+  // 提取历史表的所有现有行(包括表头 + 分隔线)— 兼容老格式
+  const headerSection = lines.slice(historyStart, historyEnd);
+  const existingDataRows = headerSection.filter((l) => /^\|\s*\*\*v\d+\.\d+\.\d+\*\*\s*\|/.test(l));
+
+  // 合并现有 + 新规则 + 去重
+  const rulesForVersions = allRules.filter((r) => !existingDataRows.some((row) => row.includes(`**${r.version}**`)));
+  const newRows = rulesForVersions.map((r) => ({ version: r.version, row: buildHistoryRow(r, readRuleBody(r.ruleText || "", r.line)) }));
+
+  // 合并 + 排序(升序)
+  const allRows = [...existingDataRows, ...newRows.map((n) => n.row)].sort((a, b) => {
+    const va = (a.match(/\*\*v(\d+\.\d+\.\d+)\*\*/) || [])[1] || "0.0.0";
+    const vb = (b.match(/\*\*v(\d+\.\d+\.\d+)\*\*/) || [])[1] || "0.0.0";
+    return cmpSemver(va, vb);
+  });
+
+  // 重建历史表 section:保留 header (historyStart+1 ~ header 末尾 + 分隔线) + 数据行 + ...
+  const headerLines = headerSection.slice(0, 2);  // ## 标题 + 表头行
+  // 找最后一条分隔线(常见格式: `|---|---|---|---|`)
+  const sepLines = headerSection.filter((l) => /^\|[-\s|]+\|$/.test(l));
+  const sepLine = sepLines[sepLines.length - 1] || "|---|---|---|---|";
+  const rebuiltSection = [...headerLines, sepLine, ...allRows];
+
+  // 替换原 section
+  const newLines = [...lines.slice(0, historyStart), ...rebuiltSection, ...lines.slice(historyEnd)];
+
+  return {
+    text: newLines.join("\n"),
+    added: newRows.length,
+    versions: newRows.map((n) => n.version)
+  };
+}
+
 // ===== 入口 =====
 
 function main() {
+  const args = process.argv.slice(2);
+  const fixMode = args.includes("--fix");
+  const dryRun = args.includes("--dry-run");
   const cwd = process.cwd();
   const rvPath = path.join(cwd, "RULES-VERSION.md");
   const rtPath = path.join(cwd, "RULES-TREE.md");
@@ -172,8 +297,39 @@ function main() {
   const rtText = fs.readFileSync(rtPath, "utf8");
   const result = detectDrifts({ rvText, rtText });
   const drifts = result.drifts;
+
+  if (fixMode && !dryRun) {
+    // 在 fix 模式下,同时给 rules 配 ruleText 供 buildFixedRvText 使用
+    const rulesWithText = result.rules.map((r) => ({ ...r, ruleText: rtText }));
+    const fixed = buildFixedRvText(rvText, rulesWithText);
+    if (fixed.error) {
+      console.error(`✖ --fix failed: ${fixed.error}`);
+      process.exit(2);
+    }
+    fs.writeFileSync(rvPath, fixed.text);
+    console.log(`[fix] RULES-VERSION.md 已更新:`);
+    console.log(`  - 添加 ${fixed.added} 行: ${fixed.versions.join(", ")}`);
+    // 重新检测
+    const reText = fs.readFileSync(rvPath, "utf8");
+    const reResult = detectDrifts({ rvText: reText, rtText });
+    console.log(`  - 修复后漂移:`);
+    console.log(renderReport(reResult));
+    const blocking = reResult.drifts.filter((d) => d.severity === "critical" || d.severity === "warn");
+    process.exit(blocking.length ? 1 : 0);
+  }
+
   console.log(renderReport(result));
-  // exit:critical/warn 漂移 → 1,info 漂移 → 0,干净 → 0
+  if (fixMode && dryRun) {
+    // 仅打印预览,不写文件
+    const rulesWithText = result.rules.map((r) => ({ ...r, ruleText: rtText }));
+    const fixed = buildFixedRvText(rvText, rulesWithText);
+    console.log(`\n[dry-run] 预览 (不会写文件):会添加 ${fixed.added || 0} 行到 RULES-VERSION.md 历史表`);
+    if (fixed.added > 0) {
+      const d3Rules = result.rules.filter((r) => !result.historyVersions.includes(r.version));
+      console.log(`  待插入版本: ${[...new Set(d3Rules.map((r) => r.version))].sort((a, b) => cmpSemver(a, b)).join(", ")}`);
+    }
+    console.log(`  跑真实修复:去掉 --dry-run 参数`);
+  }
   const blocking = drifts.filter((d) => d.severity === "critical" || d.severity === "warn");
   process.exit(blocking.length ? 1 : 0);
 }

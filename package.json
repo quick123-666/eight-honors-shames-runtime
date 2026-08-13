@@ -6,12 +6,13 @@
   "private": true,
   "scripts": {
     "test": "node --test tests/*.test.js hooks/*.test.js",
-    "check": "node scripts/build-adapters.js && npm test && node scripts/check-rules.js && node scripts/check-annotations.js",
+    "check": "node scripts/build-adapters.js && npm test && node scripts/check-rules.js && node scripts/check-annotations.js && npm run check:drift",
     "benchmark": "node scripts/run-benchmark.js",
     "accept": "node scripts/run-quality-gates.js",
     "adapters": "node scripts/build-adapters.js",
     "status": "node scripts/eight-rules-status.js",
-    "check:drift": "node scripts/check-version-drift.js"
+    "check:drift": "node scripts/check-version-drift.js",
+    "check:drift:fix": "node scripts/check-version-drift.js --fix"
   },
   "pi": {
     "extensions": [
