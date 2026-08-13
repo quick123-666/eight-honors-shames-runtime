@@ -3520,3 +3520,31 @@
 - **下一步**:
   1. 记忆影响回复 (recall 注入 compose) — 1-2 天
   2. 记忆可视化 (--mem 时打印 top concepts) — 1 天
+
+### RULE-MINICOG-039(2026-08-13 沉淀 — 记忆影响回复 + PSI 持久化 + 记忆可视化)
+
+- **触发场景**: 记忆影响回复 / PSI 跨会话持久化 / 记忆可视化
+- **本会话 2026-08-13 落地清单**:
+  - ✅ 任务 1: compose() 加 memory.recall → 相关记忆注入 reply (recall_segments)
+  - ✅ 任务 3: psi_core.save/load 原子写 + 时间衰减恢复 + 脏数据防护
+  - ✅ 任务 2: chat.py --mem 每 3 轮打印 top concepts + 相关记忆
+  - ✅ 5 新测试 + 全量 222/222 (217 老 + 5 新)
+- **任务 1 记忆影响回复**: compose() memory 参数 + recall_segments 追加 base_reply
+- **任务 3 PSI 持久化**: save() 原子写 / load() 恢复 + clamp + setdefault + 时间衰减 (上限 1000 tick)
+- **任务 2 记忆可视化**: chat.py --mem 每 3 轮 top concepts + recall top 2
+- **关键实测发现** (R10):
+  1. psi_core 缺 json/time import → NameError → 加 import
+  2. PSI 时间衰减恢复: elapsed 小时 → 需求回落 (模拟睡眠)
+  3. 跨会话记忆闭环: episodic 12→18, 语义概念 predictor(7)
+- **回滚命令**: 软 `git revert <commit>` / 硬 `cp _recycle_bin/20260813-mem3tasks-bk/*.py minicog_core/`
+- **依赖**: RULE-038 (UnifiedMemory) / RULE-037 (PSI) / memory.py / psi_core.py
+- **正交**: 全部 28 条八荣八耻
+- **强化**: P-7 不粉饰 / P-8 主流程可验证 / P-9 完成即接入
+- **下次如何避免**:
+  - 任何"save/load" → 原子写 + clamp + setdefault + 时间衰减
+  - 任何"记忆影响回复" → recall 注入 base_reply
+  - 任何"新 import" → grep 检查文件头
+- **累计**: 13 RFC 实施 + 4 模块 + 2 修复 + 1 改造 + 4 真集成 + 1 P3 + 1 v2.4 + 改默认 + 任务 1 3 2
+- **下一步**:
+  1. 意识模块自然语言回复 (当前状态汇报式) — 需 LLM 或模板升级
+  2. FastAPI 集成 (ROADMAP TODO) — 2-3 天
