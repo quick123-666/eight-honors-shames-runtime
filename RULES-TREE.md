@@ -4137,3 +4137,53 @@
   - 补 PUSH-V323-001 4 个反模式 → 本轮 5 个反模式(递增)
   - 与 RULE-EIGHT-RULES-SKILLS-001 同源(双层 skill 架构)
   - 服务 v3.4.5+ 任意后续推送, 含 ahead/behind 双会话场景
+
+### RULE-EIGHT-RULES-SKILLS-001 增量(2026-08-13 v3.4.5 沉淀 — 双套双层 skill 体系:纪律层 + 沉淀层, 各 7 个 = 14 个总)
+
+- **触发**: 本会话后在 `skills/` 出现 14 个 skill, 不仅是原 7 个八荣八耻(纪律层), 还多 7 个 method-tree(沉淀层)。AI 被动接令 “判断 skill 体系完整性 / 调整 skill 结构” 时, 必走本段。
+
+- **现状 14 个 skill**(双套双层架构):
+
+  | 层级 | 八荣八耻 skill 套件(纪律层) | method-tree skill 套件(沉淀层) |
+  |---|---|---|
+  | **主持续档** | `eight-rules` | `method-tree` |
+  | **子 one-shot**(6个) | `eight-rules-review` | `method-tree-pattern` |
+  | | `eight-rules-audit` | `method-tree-write` |
+  | | `eight-rules-acceptance` | `method-tree-show` |
+  | | `eight-rules-benchmark` | `method-tree-publish` |
+  | | `eight-rules-help` | `method-tree-help` |
+  | | `decision-annotation` | `method-tree-feedback` |
+  | **计** | 1 主 + 6 子 = 7 | 1 主 + 6 子 = 7 |
+  | **总** | **14 个** | |
+
+- **两套 skill 的关键关系**:
+  1. **平行独立**: 纪律层(八荣八耻)与沉淀层(方法树) 管不同东西 — 纪律管"怎么做事"(28 条 + 4 档), 沉淀管"沉淀什么"(RULES-TREE 7 段范式)
+  2. **直接受八荣八耻约束**: 方法树 (method-tree) 套件**直接受**八荣八耻准则 6/10/24/28 共 **7 处**要求 — 这些准则"要求" AI 主动调用+沉淀方法树
+  3. **档位不联动**: 两套独立档位(lite/full/ultra/off), 不能"调八荣八耻 lite 动 method-tree 档位"
+  4. **平行双层架构** = 双层架构原则(1 主持续 + 6 子 one-shot) **被复用**到 2 个不同体系 = **架构可移植**证明
+
+- **本轮增量 ≠ 重写原 RULE**: 原 RULE-EIGHT-RULES-SKILLS-001(双层 skill 架构 + 反漂移硬话术)仍**独立有效**。本增量是"该架构被复用 2 次后, 总结双套体系的并列关系", **不**修改原 RULE。
+
+- **本轮 v3.4.4 → v3.4.5 增量**(仅本增量沉淀范围内的数字):
+  - skills/ 从 7 个(八荣八耻)→ 14 个(+ method-tree 7 个)
+  - hooks/index.js 从 91 → 133 行(+42, 加 `buildMethodTreeHint(mode)` + 双层并列注入)
+  - hooks/ 从 0 → 1 test(method-tree-hint.test.js, 7 个用例)
+  - npm test 从 34/34 → **41/41 PASS**(原 34 + method-tree 7)
+  - RULES-TREE.md 从 3892 → 4139 行(本 RULE 原 + PUSH-V344 增量 + 本增量)
+
+- **反模式 1(本增量沉淀反哺)**:
+  1. **以为双层架构是“八荣八耻独有”** — 不是。 v3.4.5 证明双层架构 = 架构模式, 可被任何 skill 体系复用(纪律层 + 沉淀层, 都适用)。**R27 稳扎稳打分**补: 任何"主持续 + N 子 one-shot"需求的 skill 体系, 都能套这个架构。
+  2. **以为两套 skill 会冲突** — 不会。八荣八耻 4 档(method-tree 独立 4 档), 各自 ACTIVE EVERY RESPONSE, 反漂移话术互补。纪律层管"怎么调用" + 沉淀层管"沉淀什么"。
+  3. **不沉淀本轮双套体系为 RULE** — 本轮如果不沉淀, 下个会话会重新发现"为什么有 14 个 skill"(信息丢失)。R28 跨会话沉淀。
+
+- **下次如何避免** (3 步):
+  1. 看到 skills/ 14 个时, 不要误判为"重复/冗余" — 是**双套双层架构**, 1 主 6 子 × 2 套 = 14
+  2. 修改任意 skill 套件时, 先看 hooks/index.js 的双层注入是否需同步(八荣八耻 + method-tree 都有 build*Hint)
+  3. **R14 谨慎改**: hooks/ 改任何文件必跑 `npm test` 验证 41/41 PASS(不是 34/34, 包含 method-tree test)
+
+- **关联纪律**:
+  - 继承 RULE-EIGHT-RULES-SKILLS-001 原 7 skill 定义
+  - 证明 **双层 skill 架构 = 模式可复用**, 不仅是纪律层专用
+  - 与 RULE-METHOD-TREE-001(方法树 7 段范式) 交叉, 两者**平行独立**但同源 Ponytail 设计
+  - 与 RULE-PUSH-V344-001 增量 同次 v3.4.5 沉淀, 互为上下文(双套 skill + 双会话分叉 rebase 都是 v3.4.5 的两条主线)
+  - 服务 v3.4.6+ 任意"是否加新 skill 体系"决策: 直接套双层架构 = 1 主持续 + N 子 one-shot
