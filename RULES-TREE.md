@@ -3104,3 +3104,61 @@
 - **RFC-008 §3.4 真集成 (DAG 真参与 winners 选择) 留 v2.1**: 当前 run() 仅在 stats 暴露 DAG,真拓扑重选 winners 留多层 DAG (RFC-008 §7)
 - **回滚命令**:软 `git revert 02504f9` / 硬 `cp _recycle_bin/20260813-rfc008-phase-c-bk/*.py minicog_core/`
 - **下一步 (v2.1)**:多层 DAG (perception/cognition/meta 三层)+ 运行时动态 deps
+
+### RULE-MINICOG-029(2026-08-13 沉淀 — RFC-010 v2.1 实施 + 3 RFC 设计)
+
+- **触发场景**: RFC-010 v2.1 Mermaid classDef 使用 / RFC-008 v2.1/v2.2 续做参考 / RFC-009 RAG 集成参考
+- **本会话 2026-08-13 落地清单**:
+  - ✅ RFC-010 v2.1 实施(closed · success,~15 分钟)
+  - ✅ RFC-008 v2.1 设计文档(5 KB,3 方案 + LAYER_DEFINITIONS 三层 + DEFAULT_LAYER_DEPS)
+  - ✅ RFC-008 v2.2 设计文档(3 KB,DYNAMIC_DEP_RULES 3 类 + adjust_deps())
+  - ✅ RFC-009 设计文档(4 KB,CognitiveRAG 封装 + compose() 注入 + 降级机制)
+  - ✅ 4 工单开立:RFC-010-v21(styles 008) + RFC-008-v21(005) + RFC-008-v22(006) + RFC-009(007)
+  - ✅ 全量 98/98 测试过(93 老 + 5 mermaid_styles,零回归)
+  - ✅ commit (10 文件创建)
+- **RFC-010 v2.1 实测输出**:
+  ```
+  graph TD
+      user_input["hi"]
+      m0_metacog["metacog: ... hi"]
+      user_input --> m0_metacog
+      classDef meta fill:#9B59B6,color:#fff,stroke:#333
+      class m0_metacog meta
+  ```
+- **5 类颜色表**(LAAP §9.3 ProcessType):
+  - cognitive: #4A90E2 (蓝) — 5 模块(hebbian / htn_planner / methods_ab / liquid_autonomous / local_llm)
+  - affective: #E94B6B (红) — 2 模块(emotion / desires)
+  - perceptual: #50C878 (绿) — 5 模块(psi / conscious / quale / internal_world / predictor)
+  - meta: #9B59B6 (紫) — 7 模块(metacog / consciousness_level / self_model / personality / attachment / subconscious / governor)
+  - motor: #F39C12 (橙) — 0 模块(预留)
+  - **总计 19**(5+2+5+7=19)
+- **关键实测发现**(R10 不重复犯错):
+  1. **CATEGORY_COLORS 应在模块顶部**(不能在 `compose()` 方法内部)— 否则 Python 解析错误(类局部常量 + 后续 def 缩进)
+  2. **19 模块不是 18**:`predictor` deps=[] 仍入 DAG,但 CATEGORY_DEFAULT_MAP 包含它 = 19 项
+  3. **with_styles 开关**:`compose(mode='mermaid', chain_mode=False)` 默认 with_styles=True,加 classDef;`compose(mode='mermaid', chain_mode=True)` 也支持(链式 + 样式并存)
+- **3 RFC 设计沉淀**(等用户点头开 Phase A):
+  - **RFC-008 v2.1 多层 DAG**(B 方案 + 真参与 winners 选择,1-2 周)— perception / cognition / meta 三层,DAG 真参与 winners 选取
+  - **RFC-008 v2.2 运行时动态 deps**(B 方案 + DYNAMIC_DEP_RULES 3 类,1 周)— emotional / task / philosophical 关键词触发 deps 调整
+  - **RFC-009 认知图谱 RAG**(B 方案 + CognitiveRAG 封装 kg_rag_rust,1 周)— 可选依赖,降级机制
+- **回滚命令**:软 `git revert <commit>` / 硬 `cp _recycle_bin/20260813-rfc010-v21-bk/emergent_reply_v2.py minicog_core/`
+- **依赖**:RULE-028 / kimi_code_test/kg_rag_rust (RFC-009)
+- **正交**:全部 28 条八荣八耻(尤其 R1/R3/R4/R5/R10/R15/R19/R22/R27/R28)
+- **强化**:P-7 不粉饰 / P-8 主流程可验证 / P-9 完成即接入
+- **下次如何避免**:
+  - 任何"模块级常量" → 放文件顶部,**不在方法内部**
+  - 任何"模块数量" → 实际数 DEFAULT_DEPENDS_ON keys = 8,但全 18 模块 = 19(因含 predictor deps=[])
+  - 任何"classDef 颜色" → 按 LAAP §9.3 ProcessType 5 类分配
+  - 任何"v2.x 设计 RFC" → 标 "PROPOSED — 等用户点头", 实施留用户点头
+  - 任何"v2.x 实施" → RFC-XXX §5 验收硬标准 + 测试 + 全量回归 3 件套
+- **本会话 2026-08-13 落地清单**:
+  - ✅ 实施前 备份 `_recycle_bin/20260813-rfc010-v21-bk/`(1 文件)
+  - ✅ RFC-010 v2.1 实施(closed · success,~15 分钟,节省 87.5%)
+  - ✅ 3 RFC 设计沉淀(等点头,估 3-5 周总实施)
+  - ✅ 4 工单开立(RFC-010 v2.1 closed + 3 设计 open)
+  - ✅ 全量 98/98 测试过(63 老 + 35 累计,零回归)
+  - ✅ 双仓沉淀 RULE-029(minicog docs/ + kimi_code_test/RULES-TREE.md)
+- **下一步**(按工作量倒推):
+  1. **RFC-010 v2.2** JSON 输出 (留待) — 1-2 天
+  2. **RFC-008 v2.1** 多层 DAG 实施(大改动) — 1-2 周分多轮
+  3. **RFC-008 v2.2** 动态 deps 实施 — 1 周
+  4. **RFC-009** RAG 集成(需 kg_rag_rust 集成测试) — 1 周
