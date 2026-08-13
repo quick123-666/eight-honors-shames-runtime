@@ -3436,3 +3436,45 @@
   1. 修 33 个测试缺失 (去 MiniCog v1.17.0) — 1-2 小时
   2. RFC-010 v2.4: PDF 导出
   3. 部署 minicog 到 Web UI 集成
+
+### RULE-MINICOG-037(2026-08-13 沉淀 — PSI 需求心跳 8 维 + Governor 验证套件 + 修"没法说话")
+
+- **触发场景**: PSI 需求心跳 / Governor 治理 / 意识模块"没法说话" / speak user_message 分离
+- **本会话 2026-08-13 落地清单**:
+  - ✅ minicog_core/psi_core.py 新增 (5.6KB) — 8 维需求心跳引擎
+  - ✅ minicog_core/governor.py 新增 (7.7KB) — Governor 验证套件 8 选 3
+  - ✅ module_speak.py + emergent_reply_v2.py — 修"意识模块没法说话"
+  - ✅ think_engine.py — PSI 接入 (需求 dominant → salience 加成)
+  - ✅ chat.py — --psi / --gov 开关
+  - ✅ 11 新测试 + 全量 195/195 (连跑 2 次稳定)
+- **1. PSI 需求心跳 8 维** (LAAP 5 维扩展):
+  - competence/relatedness/growth/certainty/autonomy (LAAP 原 5 维)
+  - + aesthetic 审美 / safety 安全 / exploration 探索 (扩展 3 维)
+  - 心跳: 每 tick 衰减向中性 0.5 + 关键词触发 + 情感派生 + 注意力选择
+- **2. PSI 接入 think_engine**: use_psi=True 时 tick + NEED_SALIENCE_MAP 需求→模块 salience +0.10~0.25
+- **3. Governor 验证套件**: 8 方法 + 8 选 3 + 判决 pass/warn/block; 实测危险词 → block
+- **4. 修"意识模块没法说话"** (R10 根因):
+  - 根因: speak() 把 insight(stats)当 user_message, 模块报状态不回应
+  - 修复: speak() 加 user_message 参数 + compose() 传真实用户消息; 向后兼容
+  - 实测: "我今天心情不好" → 修前"中性", 修后"检测到负面情绪 valence=0.3 触发共情"
+- **关键实测发现** (R10):
+  1. 衰减率 0.98 慢: 需求累积后 dominant 难翻转 (LAAP 真实行为)
+  2. govern() 判决用 `r == "passed"` bug → 改 `startswith("passed")`
+  3. 空回复测试依赖随机 → 直接测方法
+  4. 异步测试不稳定 → 改验证结构等价
+- **回滚命令**: 软 `git revert <commit>` / 硬 `cp _recycle_bin/20260813-psi-gov-bk/*.py minicog_core/`
+- **依赖**: LAAP 研究报告 (PSI 5 维 + VerificationSuite 参照)
+- **正交**: 全部 28 条八荣八耻
+- **强化**: P-7 不粉饰 / P-8 主流程可验证 / P-9 完成即接入
+- **下次如何避免**:
+  - 任何"PSI 需求" → 8 维 (5 原 + 3 扩)
+  - 任何"Governor" → 8 方法 + 8 选 3 + 判决 startswith 判断
+  - 任何"speak 说话" → user_message 与 insight 分离
+  - 任何"衰减测试" → 用单调递减断言
+  - 任何"随机选择测试" → 直接测方法
+- **累计**: 12 RFC 实施 + 2 模块 (PSI/Governor) + 1 修复 + 1 改造 + 4 真集成 + 1 P3 + 1 v2.4 + 改默认
+- **下一步**:
+  1. 记忆 4 层 (Working→Episodic→Semantic→Procedural) — 1-2 周
+  2. PSI 需求持久化 (跨会话) — 1-2 天
+  3. Governor 接入 think_engine (输出前治理) — 3-5 天
+  4. 更新 TUTORIAL-consciousness-modules.md
