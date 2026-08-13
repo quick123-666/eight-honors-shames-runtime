@@ -2873,3 +2873,65 @@
   - ⏳ P2 HOT 每模块独立二阶评分(RFC-005 候选,MINICOG-2.1-003 工单)
   - ⏳ P3 asyncio 异步支持(RFC-006 候选,MINICOG-2.1-005 工单)
   - ⏳ RFC-005 HOT 评分 + RFC-006 asyncio 双 RFC 沉淀
+
+### RULE-MINICOG-026(2026-08-13 沉淀 — HOT 每模块独立二阶评分 + 接死链 + 修路径)
+
+- **触发场景**: 任何 HOT 评估 / 每模块二阶表征 / 死链接通 / import 路径错误 / 观测盲区陷阱 / RFC-005 实施
+- **本会话 2026-08-13 落地清单**:
+  - ✅ `minicog 2.0.0/docs/RFC-005-hot-per-module.md` 方案对比(7595 字节,3 方案 A/B/C 矩阵 + 3 风险 mitigation)
+  - ✅ `_tickets/T-20260813-MINICOG-P2-hot-per-module-002.json` P2 工单(closed · success,估 10-12h 实际 ~30min 节省 90% 因骨架复用)
+  - ✅ commit `f60c2c1`(RFC-005 + Phase A-F 实施,7 文件 +525/-7) + `3bd55b9`(完工签字)
+  - ✅ `minicog_core/hot.py`: observe() 强类型 + per_module dict + per_module_score() API + stats() 输出 per_module_scores 字段 + last_marker 记录
+  - ✅ `minicog_core/emergent_reply_v2.py`: compose() 每个 speak 触发 hot_tracker.observe(s, module_name=w)(RFC-005 Phase B 接死链)
+  - ✅ `minicog_core/consciousness_assessment.py`: 修 import 路径 `minicog.emergent_reply_v2` → `minicog_core.emergent_reply_v2`(RFC-005 Phase C)
+  - ✅ `minicog_core/__init__.py`: 导出 HigherOrderTracker + create_hot_tracker + SECOND_ORDER_MARKERS(17 词)
+  - ✅ `tests/test_hot_per_module.py`: 8 测试覆盖 RFC §6 验收 7/7 + 1 安全测试
+  - ✅ 全量 63/63 测试过(55 老 + 8 新),零回归
+  - ✅ `_recycle_bin/20260813-p2-hot-bk/` 备份 4 文件 + 软硬回滚路径
+- **3 隐藏缺口**(深读发现,R4 不装懂诚实记录):
+  1. **死链**: `grep "hot_tracker|observe"` 在 emergent_reply_v2.py + __init__.py 全 0 hit — HigherOrderTracker.observe() 从未被任何 compose()/speak() 调用,score 永远 0
+  2. **路径错误**: `consciousness_assessment.py:48` `from minicog.emergent_reply_v2` 正确路径是 `minicog_core`,被 try/except 静默吞
+  3. **测试缺失**: `tests/test_hot.py` 不存在(RULE-022 文档声称"4 测试"为假,属 RULE-011 观测盲区陷阱重现)
+- **3 方案矩阵**(RFC-005 §2 沉淀):
+  | 方案 | 接口 | 数据结构 | 复杂度 | 兼容 | 推荐 |
+  |---|---|---|---|---|---|
+  | A 全局加 per_module 字段 | observe() 加 kwarg module_name | tracker._stats['per_module'] | +20 行 | ✓ | ⭐⭐ |
+  | B 18 独立实例 | cs.hot_trackers dict | 18 个独立对象 | +60 行 | ✓ | ⭐ |
+  | **C 混合(强类型)** | observe(utterance, module_name=必填) | 同 A 但强类型 | +25 行 | ✓ (无现存 observe 调用) | ⭐⭐⭐ |
+
+  **采纳 C**(R15 完整版 + R22 帮助解难)
+- **关键设计决策**:
+  1. **observe 强类型 module_name**(R22 帮助解难)— 空字符串警告一次后归入 __anonymous__
+  2. **stats() 输出 per_module_scores**(P-8 主流程可验证)— 每模块 4 字段扁平输出便于 introspection
+  3. **last_marker 记录**(R6 短句质量)— 第一个命中的 marker
+  4. **per_module_score(module_name) API**(R8 数学验证)— 单模块 0-1 分数
+  5. **接死链 in compose()**(R9 不搞破坏)— 每个 speak 调 observe 一次
+- **RFC-005 §6 验收硬标准**(7/7 全绿,实测 8 测试超出 ≥6 要求):
+  | # | 标准 | 验证 |
+  |---|---|---|
+  | 1 | observe(utterance, module_name=必填) 强类型 | TestObserveRequiredModuleName ✓ |
+  | 2 | 空 module_name 警告一次 + 归 __anonymous__ | test_empty_module_name_warned_once ✓ |
+  | 3 | per_module_score(module_name) 正确 | TestPerModuleScore ✓ |
+  | 4 | stats() 含 per_module_scores 字段 | TestStatsHasPerModule ✓ |
+  | 5 | compose() 触发 observe(死链接通) | TestComposeObserversEachSpeak ✓ |
+  | 6 | assessment.py 修路径后 import 不抛 | TestConsciousnessAssessmentImport ✓ |
+  | 7 | 全量 55 老测试零回归 | pytest 63/63 ✓ |
+- **风险与 mitigation**:
+  - 风险 1(observe 强类型破坏老调用)→ 缓解:无现存 observe 调用,grep 0 hit
+  - 风险 2(per_module dict 嵌套难调试)→ 缓解:stats() 输出扁平 per_module_scores
+  - 风险 3(死链接通后 score 跳变 0→非0)→ 缓解:R4 不装饰,跳变记录在 commit
+- **回滚命令**:软 `git revert f60c2c1 3bd55b9` / 硬 `cp _recycle_bin/20260813-p2-hot-bk/*.py minicog_core/`
+- **依赖**:RULE-MINICOG-022 / RFC-002 阶段 3.7 / RFC-004 v2.0 真涌现对话 (P0 已完成)
+- **正交**:全部 28 条八荣八耻(尤其 R1/R3/R4/R5/R7/R10/R11/R15/R19/R22/R27/R28)
+- **强化**:P-7 不粉饰(3 隐藏缺口诚实记录)/ P-8 主流程可验证(8 测试)/ P-9 完成即接入(接死链 + 修路径 + 加导出)
+- **下次如何避免**:
+  1. 任何"tracker"扩展 → 强类型参数 + stats 含 per_X dict
+  2. 任何"路径 import" → 写代码时跑 import 验证,不要凭记忆
+  3. 任何"声称有测试" → `pytest tests/ --collect-only | grep -c` 现场验证
+  4. 任何"全局 vs per_module" → 优先 per_module 强类型
+  5. 任何"死链检查" → `grep -rn "tracker.observe"` 验证链路
+- **本会话 2026-08-13 落地清单**:
+  - ✅ 备份 _recycle_bin/20260813-p2-hot-bk/(4 文件)
+  - ✅ 双仓沉淀 RULE-026(minicog docs/RULE-026-p2-hot-per-module.md + kimi_code_test/RULES-TREE.md 末尾)
+  - ⏳ P3 asyncio 异步支持(RFC-006 候选,MINICOG-2.1-005 工单)
+  - ⏳ RFC-006 asyncio 双 RFC 沉淀
