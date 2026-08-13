@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
-# 八荣八耻 pre-commit hook(v3.4.6 配套)
+# 八荣八耻 pre-commit hook(v3.4.10 升级版)
+# 沉淀:RULE-IX-SENSITIVE-DATA-001 + RULE-VERSION-DRIFT-CHECK-001
 # 触发时机:git commit 前
-# 行为:跑 RULES-VERSION.md 版本漂移检测,有 critical/warn 漂移则阻止 commit(exit 1)
-# 沉淀:RULE-VERSION-DRIFT-CHECK-001
-# 安装方式:
+# 行为(二段门禁):
+#   ① 跑 RULES-VERSION.md 版本漂移检测 → critical/warn 漂移阻断 commit
+#   ② 扫描 staged diff 含敏感数据(secret 模式)→ 命中阻断 commit
+# 安装(一次性,用户级别):
 #   git config core.hooksPath .githooks
-# 或:git init 之后此目录如 hooksPath 优先,会自动启用
+# 关闭(调试时):
+#   git commit --no-verify
 
 set -euo pipefail
 
@@ -14,10 +17,35 @@ if [[ ! -f "RULES-VERSION.md" || ! -f "RULES-TREE.md" ]]; then
   exit 0
 fi
 
-echo "[pre-commit] RULES-VERSION drift check ..."
-npm run --silent check:drift || {
-  echo "[pre-commit] ✖ 漂移检测失败(见上方),拒绝 commit"
-  echo "[pre-commit] fix 路径:运行 'npm run check:drift:fix' 预览 + 'npm run check:drift' 看结果"
+TMPF=$(mktemp 2>/dev/null || echo "/tmp/.pre-commit-$$.txt")
+trap 'rm -f "$TMPF"' EXIT
+
+echo "[pre-commit] ① drift check ..."
+if ! npm run --silent check:drift 2>"$TMPF"; then
+  echo "[pre-commit] ✖ 漂移检测失败,拒绝 commit"
+  cat "$TMPF" | tail -10
+  echo "[pre-commit] fix:运行 'npm run check:drift:fix' 预览 + 'npm run check:drift' 看结果"
   exit 1
-}
+fi
+
+echo "[pre-commit] ② secret scan(staged diff)..."
+# v3.4.10 secret 模式(标准 5 类):
+#   sk-/pk_live_/-----BEGIN / *_API_KEY= / Bearer
+SECRET_PAT='(sk-[A-Za-z0-9_-]{20,}|pk_live_[A-Za-z0-9]{20,}|-----BEGIN [A-Z ]+-----|[A-Z_]+_API_KEY=[^${ ]+|[Bb]earer [A-Za-z0-9_-]{20,})'
+
+# 只扫 staged diff 内容(git diff --cached 走 stdin,排除已 gitignored 文件如 .env)
+if git diff --cached | grep -E "$SECRET_PAT" > "$TMPF" 2>/dev/null; then
+  echo "[pre-commit] ✖ 敏感数据命中 staged diff,拒绝 commit"
+  echo "[pre-commit] 命中行(≤5):"
+  head -5 "$TMPF" | sed 's/^/  | /'
+  echo ""
+  echo "[pre-commit] 处置清单:"
+  echo "[pre-commit]   1) 立刻销该 key(OPENAI_PLATFORM_API_KEY / GitHub / 等)"
+  echo "[pre-commit]   2) 把 .env 写到 .gitignore 之外 + 用 \$KEY 引用名"
+  echo "[pre-commit]   3) 暂存旧值 + 改后重提(-amend)"
+  echo "[pre-commit] 绕过(慎重):git commit --no-verify"
+  exit 1
+fi
+
+echo "[pre-commit] ✅ all gates passed."
 exit 0

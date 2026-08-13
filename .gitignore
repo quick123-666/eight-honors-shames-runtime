@@ -66,3 +66,6 @@ __pycache__/
 /benchmarks/reports/*.json
 /benchmarks/real/fake-express-app/
 /benchmarks/real/scratch/
+# AI temp scratch files(session-local)
+/_ts*
+/_tmp*
