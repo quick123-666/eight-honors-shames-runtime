@@ -3341,3 +3341,30 @@
   2. RFC-008 v2.3: 多层 DAG 真正 + salience 强度 — 留 v2.x
   3. 修 33 个测试缺失 (去 MiniCog v1.17.0) — 1-2 小时
   4. P3 asyncio 异步支持 (RFC-006) — 2-3 天
+
+### RULE-MINICOG-034(2026-08-13 沉淀 — RFC-008 v2.2 + v2.3 真集成)
+
+- **触发场景**: 动态 deps 应用到 run() / salience 强度排序 / _current_deps 解读
+- **本会话 2026-08-13 落地清单**:
+  - ✅ RFC-008 v2.2 真集成 (closed · success) - _build_dynamic_layered_dag + adjust_deps
+  - ✅ RFC-008 v2.3 salience 强度 (closed · success) - _run_layered 层内 competitive_strength 排序
+  - ✅ 9 新测试 + 全量 159/159 (零回归)
+- **关键实测发现** (R10):
+  1. `adjust_deps` 改变 `DEFAULT_DEPENDS_ON` 的 reference — `adjusted != DEFAULT_DEPENDS_ON` 才累计
+  2. salience 排序是层内 tie-breaker, 不是跨层 — 拓扑顺序优先
+  3. `_current_deps != te._current_deps` 永远 True — 同一对象自身比较
+  4. `adjust_deps` 加新模块: `htn_planner` 默认不在 `DEFAULT_DEPENDS_ON` 中, 但 task 规则 promote 时会加入
+- **回滚命令**: 软 `git revert <commit>` / 硬 `cp _recycle_bin/20260813-rfc008v22v23-real-bk/*.py minicog_core/`
+- **依赖**: RULE-033 (RFC-008 v2.1 真集成)
+- **正交**: 全部 28 条八荣八耻
+- **强化**: P-7 不粉饰 / P-8 主流程可验证 / P-9 完成即接入
+- **下次如何避免**:
+  - 任何"对象自身比较" → 用属性访问 + 比较
+  - 任何"动态调整" → compare with base 决定是否累计
+  - 任何"层内排序" → salience 是层内 tie-breaker
+  - 任何"test 默认值 vs 调整值" → 用 key-level 比较
+- **累计**: 9 RFC 实施 + 1 改造 + 3 真集成
+- **下一步**:
+  1. P3 asyncio 异步支持 (RFC-006) — 2-3 天
+  2. 修 33 个测试缺失 (去 MiniCog v1.17.0) — 1-2 小时
+  3. RFC-008 v2.4: 多层 DAG 真正 + salience 强度 (留 v3.0)
