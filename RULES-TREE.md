@@ -3368,3 +3368,41 @@
   1. P3 asyncio 异步支持 (RFC-006) — 2-3 天
   2. 修 33 个测试缺失 (去 MiniCog v1.17.0) — 1-2 小时
   3. RFC-008 v2.4: 多层 DAG 真正 + salience 强度 (留 v3.0)
+
+### RULE-MINICOG-035(2026-08-13 沉淀 — P3 RFC-006 asyncio 异步支持)
+
+- **触发场景**: 异步 think / 异步 compose / cognitive_rag 并发 / ROADMAP P3 完工
+- **本会话 2026-08-13 落地清单**:
+  - ✅ think_engine.run_async() 新增 (closed · success)
+  - ✅ emergent_reply_v2.compose_async() 新增
+  - ✅ 6 新测试 + 全量 165/165 (零回归)
+  - ✅ 老同步 API 保留 (R9 不搞破坏 + R22 帮助解难)
+- **策略**: 保留老同步 API + 新增异步方法 (opt-in)
+- **关键实测发现** (R10):
+  1. asyncio.gather + run() 不嵌套: run() 是同步, 异步版用 gather 处理 trigger 阶段
+  2. asyncio.to_thread 调 subprocess: cognitive_rag.find() 是 IO 密集
+  3. winners 顺序因 timestamp 略不同: 用 set() 比较
+  4. 保留老同步 API 是关键: 不让现有 159 测试失败, 异步 API opt-in
+- **回滚命令**: 软 `git revert <commit>` / 硬 `cp _recycle_bin/20260813-p3-asyncio-bk/*.py minicog_core/`
+- **依赖**: Python 3.10+ `asyncio` (stdlib)
+- **正交**: 全部 28 条八荣八耻
+- **强化**: P-7 不粉饰 / P-8 主流程可验证 / P-9 完成即接入
+- **下次如何避免**:
+  - 任何"同步转异步" → 保留老 API + 加 async 变体, 不嵌套
+  - 任何"asyncio.gather + trigger" → 触发阶段并发, 后续处理仍同步
+  - 任何"subprocess in async" → 用 `asyncio.to_thread`
+  - 任何"同步/异步等价测试" → 用 `set()` 比较
+  - 任何"开新 opt-in" → 默认 False / 老行为
+- **累计 11 RFC 实施 + 1 改造 + 4 真集成 + 1 P3 完工**:
+  - 7 RFC 设计 / 8 实施 + 1 改造 + 4 真集成 + 1 P3
+  - 总测试: 63 → 165 (2.62x 增长)
+- **ROADMAP 状态**:
+  - ✅ P0 v2.0 真涌现 (respond_to) — RFC-004
+  - ✅ P1 L2 共现训练 — RFC-003
+  - ✅ P2 HOT 每模块评分 — RFC-005
+  - ✅ P3 asyncio 异步支持 — RFC-006 (本轮)
+  - ⏳ P4 ROADMAP 中无明确
+- **下一步**:
+  1. 修 33 个测试缺失 (去 MiniCog v1.17.0) — 1-2 小时
+  2. RFC-008 v2.4: 多层 DAG 真正 + salience 强度 (留 v3.0)
+  3. RFC-010 v2.4: PDF 导出 (留待)
