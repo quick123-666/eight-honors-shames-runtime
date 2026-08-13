@@ -1,5 +1,5 @@
 ---
-name: decision-annotation
+name: eight-rules-decision-annotation
 description: >
   Add or audit eight-rules decision annotations for intentional simplifications
   and boundaries. Companion to eight-rules-review, focused on the
@@ -12,7 +12,7 @@ homepage: file:///C:/Users/Administrator/Desktop/kimi_code_test/AGENTS.md
 license: MIT
 ---
 
-# Decision Annotation — 八荣八耻:`comment` Convention
+# Eight Rules Decision Annotation — 八荣八耻:`comment` Convention
 
 `eight-rules:` 注释 = 声明"这是有意简化/特殊决策" + 标注天花板 + 给出升级触发条件。
 让"later"不变成"never"。对标 Ponytail `ponytail-debt`(扫描 + ledger 模式)。
@@ -38,7 +38,7 @@ license: MIT
 或:
 
 ```rust
-// eight-rules: <ceiling>, upgrade: <trigger>
+// eight-rules: <what>, upgrade: <trigger>
 ```
 
 或 4 段全:
@@ -106,4 +106,4 @@ src/cache.rs:88 — 全局锁。ceiling: 单进程 < 1ms 响应。upgrade: per-a
 
 ---
 
-> 生成:2026-08-13,八荣八耻子档改进(RULE-EIGHT-RULES-SKILLS-001 配套)
+> 生成:2026-08-13 v3.4.5,八荣八耻子档重命名(`decision-annotation/` → `eight-rules-decision-annotation/` 对齐双层 skill 命名空间);配套 RULE-EIGHT-RULES-DAEMON-001 实现运行时指示器(B1+B2+B3)

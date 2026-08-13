@@ -1,7 +1,7 @@
 {
   "name": "eight-honors-shames-runtime",
   "version": "1.1.1",
-  "description": "八荣八耻 · AI 编程核心价值观 — 把 AI 协作纪律工程化:21 条准则 / 单一来源 / 可注入 / 可审计 / 可基准测试 / 可验收",
+  "description": "八荣八耻 · AI 编程核心价值观 — 把 AI 协作纪律工程化:28 条准则 / 单一来源 / 可注入 / 可审计 / 可基准测试 / 可验收",
   "type": "module",
   "private": true,
   "scripts": {
@@ -9,7 +9,9 @@
     "check": "node scripts/build-adapters.js && npm test && node scripts/check-rules.js && node scripts/check-annotations.js",
     "benchmark": "node scripts/run-benchmark.js",
     "accept": "node scripts/run-quality-gates.js",
-    "adapters": "node scripts/build-adapters.js"
+    "adapters": "node scripts/build-adapters.js",
+    "status": "node scripts/eight-rules-status.js",
+    "check:drift": "node scripts/check-version-drift.js"
   },
   "pi": {
     "extensions": [

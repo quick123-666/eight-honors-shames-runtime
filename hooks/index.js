@@ -5,6 +5,8 @@ import { lifecycleConfigSync, sessionStartInjection, agentStartInjection, toolCa
 import { arbitrateMode, summarize, fullInstructions, getDefaultMode } from "../src/core.js";
 import { loadState, saveState, resolveSessionMode } from "../src/acceptance.js";
 import { loadEnvFiles, resolveEnvFiles, rejectIfSecretsInText } from "../src/env.js";
+import { appendLog, appendLogFor, resolveMtMode, DEFAULT_MT_MODE } from "../src/runtime-log.js";
+import { randomUUID } from "node:crypto";
 
 loadEnvFiles(resolveEnvFiles());
 
@@ -48,6 +50,48 @@ export function buildMethodTreeHint(currentMode) {
 export function createHooks({ getEntries, getSystemPrompt, notify }) {
   let mode = getDefaultMode();
   let state = loadState();
+  // v3.4.5 B1:首次启动给实例打 stamped,持久到 state 文件 + 写一条 instance_started
+  if (!state.instanceId) {
+    state.instanceId = randomUUID();
+    state.startedAt = new Date().toISOString();
+    state.heartbeats = 0;
+    saveState(state);
+    appendLog({ event: "instance_started", instanceId: state.instanceId, mode });
+  }
+  // v3.4.6:B1 同架构平行复用 — 方法树 daemon 首次启动 stamp
+  const mtModeInitial = resolveMtMode(process.env.METHOD_TREE_DEFAULT_MODE, state.mtMode);
+  if (!state.mtInstanceId && mtModeInitial !== "off") {
+    state.mtInstanceId = randomUUID();
+    state.mtStartedAt = new Date().toISOString();
+    state.mtHeartbeats = 0;
+    state.mtMode = mtModeInitial;
+    saveState(state);
+    appendLogFor("method-tree", { event: "mt_instance_started", instanceId: state.mtInstanceId, mode: mtModeInitial });
+  } else {
+    // v3.4.6 mode 持久化:env > 持久 > 默认
+    const desired = resolveMtMode(process.env.METHOD_TREE_DEFAULT_MODE, state.mtMode);
+    if (desired !== state.mtMode) {
+      const from = state.mtMode || null;
+      state.mtMode = desired;
+      saveState(state);
+      if (from && from !== desired) {
+        appendLogFor("method-tree", { event: "mt_mode_changed", from, to: desired });
+      }
+    }
+  }
+  // v3.4.6 helper:每次调用前 refresh state.mtMode(env override 即时生效 + 持久化)
+  const syncMtMode = () => {
+    const desired = resolveMtMode(process.env.METHOD_TREE_DEFAULT_MODE, state.mtMode);
+    if (desired !== state.mtMode) {
+      const from = state.mtMode || null;
+      state.mtMode = desired;
+      saveState(state);
+      if (from && from !== desired) {
+        appendLogFor("method-tree", { event: "mt_mode_changed", from, to: desired });
+      }
+    }
+    return state.mtMode;
+  };
 
   return {
     getMode: () => mode,
@@ -61,6 +105,7 @@ export function createHooks({ getEntries, getSystemPrompt, notify }) {
       });
       mode = arbitration.mode;
       state = loadState();
+      const mtModeSession = syncMtMode();
       const lifecycle = lifecycleConfigSync();
       const full = sessionStartInjection(mode, lifecycle);
       if (full) {
@@ -70,20 +115,39 @@ export function createHooks({ getEntries, getSystemPrompt, notify }) {
         saveState(state);
         const base = getSystemPrompt ? getSystemPrompt(ctx) : "";
         const eightRulesHint = buildEightRulesHint(mode);
-        // 2026-08-13: 方法树 hint(RULES-TREE 7 段沉淀范式)与八荣八耻 hint 并列注入
-        const methodTreeHint = buildMethodTreeHint(process.env.METHOD_TREE_DEFAULT_MODE || "full");
+        // 2026-08-13: 方法树 hint(RULES-TREE 7 段沉淀范式)与八荣八耻 hint 并列注入(v3.4.6 使用 syncMtMode 持久化值)
+        const methodTreeHint = buildMethodTreeHint(syncMtMode());
+        appendLog({ event: "session_start", instanceId: state.instanceId, mode, source: arbitration.source });
+        // v3.4.6:方法树 session_start(仅在 mt 非 off 时落)
+        if (mtModeSession !== "off") {
+          appendLogFor("method-tree", { event: "mt_session_start", instanceId: state.mtInstanceId, mode: mtModeSession });
+        }
         return { systemPrompt: `${base}\n\n${eightRulesHint}\n\n${methodTreeHint}\n\n${full.full}` };
       }
       saveState(state);
     },
 
     onBeforeAgentStart: async (event) => {
+      // v3.4.5 B1:每轮刷心跳(写盘 + 计数 + 落 log)
+      state.lastHeartbeat = new Date().toISOString();
+      state.heartbeats = (state.heartbeats || 0) + 1;
+      saveState(state);
+      appendLog({ event: "heartbeat", instanceId: state.instanceId, mode, n: state.heartbeats });
+      // v3.4.6:方法树心跳(同架构平行刷新;gated by 持久化 mode != off)
+      const mtMode = syncMtMode();
+      if (mtMode !== "off") {
+        state.mtLastHeartbeat = new Date().toISOString();
+        state.mtHeartbeats = (state.mtHeartbeats || 0) + 1;
+        state.mtMode = mtMode;
+        saveState(state);
+        appendLogFor("method-tree", { event: "mt_heartbeat", instanceId: state.mtInstanceId, mode: mtMode, n: state.mtHeartbeats });
+      }
       const lifecycle = lifecycleConfigSync();
       const inj = agentStartInjection(mode, lifecycle);
       if (!inj) return;
       const eightRulesHint = buildEightRulesHint(mode); // ← Phase 4 加:每轮硬话术
-      // 2026-08-13: 方法树 hint(RULES-TREE 7 段沉淀范式)与八荣八耻 hint 并列注入
-      const methodTreeHint = buildMethodTreeHint(process.env.METHOD_TREE_DEFAULT_MODE || "full");
+      // 2026-08-13: 方法树 hint(RULES-TREE 7 段沉淀范式)与八荣八耻 hint 并列注入(v3.4.6 使用 syncMtMode 持久化值)
+      const methodTreeHint = buildMethodTreeHint(syncMtMode());
       const composed = `${eightRulesHint}\n\n${methodTreeHint}\n\n${inj.summary}${inj.gateText}\n\n${inj.hint}`;
       const offenders = rejectIfSecretsInText(composed);
       if (offenders.length) return notify?.(event, `agent_start 注入拦截含敏感变量: ${offenders.join(", ")}`, "warning");
@@ -107,7 +171,14 @@ export function createHooks({ getEntries, getSystemPrompt, notify }) {
       saveState(state);
     },
 
-    onSessionEnd: async () => saveState(state),
+    onSessionEnd: async () => {
+      appendLog({ event: "session_end", instanceId: state.instanceId, mode, heartbeats: state.heartbeats || 0 });
+      const mtModeEnd = syncMtMode();
+      if (mtModeEnd !== "off") {
+        appendLogFor("method-tree", { event: "mt_session_end", instanceId: state.mtInstanceId, mode: mtModeEnd, heartbeats: state.mtHeartbeats || 0 });
+      }
+      saveState(state);
+    },
 
     subagentMode: (depth = 0) => subagentInheritanceMode(mode, lifecycleConfigSync(), depth),
 
