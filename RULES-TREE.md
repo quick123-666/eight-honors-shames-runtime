@@ -4071,3 +4071,69 @@
   - RULES-TREE.md 追加本 RULE(替代 v3.4.4 的 RULE-METHOD-TREE-SKILLS-001)
   - **回滚 bfad0bc**(commit d6283ea)→ 状态干净后重建
   - 备份到 `_recycle_bin/20260813-201701-pre-method-tree-rework/`(双保险)
+
+### RULE-PUSH-V344-001 增量(2026-08-13 v3.4.5 沉淀 — 双会话分叉协作 + `git pull --rebase` 解决 + 误判修正)
+
+- **触发**: 本会话同主项目出现 **“两会话并行 push 同 commit message + 同 parent + 不同内容”** 场景(本地 `4df2289` + 远程 `c6a435c`,都叫 "v3.4.5 PATCH: 方法树 skill 套件重新绑定到 RULES-TREE 7 段元工作流沉淀范式")。AI 被动接令 "推进" 时, 必走本段。
+
+- **场景识别**(5 个信号, 中 ≥3 即可判定):
+  1. `git status -sb` 显示 `## main...origin/main [ahead N, behind N]`(N ≥ 1)
+  2. `git log --oneline` 头部出现 2 个 commit message **完全相同**
+  3. `git log --oneline` 头部出现 2 个 commit 共享同一个 parent(`git merge-base HEAD origin/main`)
+  4. `git diff HEAD~1 HEAD -- <file>` 与 `git diff origin/main HEAD -- <file>` **有冲突**(一方 + 某行/另一方 - 同位置)
+  5. `git diff --stat HEAD..origin/main` + `git diff --stat origin/main..HEAD` **都为非空**(= 两方向都有独享修改)
+  - 3 个以上 = "双会话分叉协作", 优先 `git pull --rebase`
+
+- **本轮错判修正 SOP**(本会话踩坑, 反哺):
+  - **问题**: 用 `tail -20 <file> | grep -c "<pattern>"` 验证“某段是否在文件里”返 0, 误判“丢失”。
+  - **根因**: `tail -20` 截到的是文件末尾 20 行, 如果要查的段在更早位置, **仍存在但 grep 看不到**。
+  - **修复**: 验证文件内容是否存在必须用 `grep -c "<pattern>" <file>`, **不**用 `tail | grep`。**R8 复述前必验证** 补充: 任何"间接验证"管道(tail/head/sed/awk)都不能替代**直接 grep**。
+
+- **本轮 rebase 9 步** (本增量 PUSH-V344 补充, 原 9 阶→总 10 阶):
+  1. **R20+R21 备份**: `git tag backup-pre-rebase-<ts> <local-HEAD>` 留可回滚点
+  2. **R5+R9 拍板**: 选 `pull --rebase` (不是 `merge`), 不选 `force push` 覆盖
+  3. **R26+R27 执行**: `git pull --rebase origin main` (无冲突则自动处理, 冲突则停手报告)
+  4. **R8 验证本地领先**: `git diff --stat origin/main..HEAD` 应只含 1 文件 1 个方向 ≠ 0
+  5. **R7+R12 smoke 3 套**: ① 准则条数 ② npm test ③ Python tests; **任一 fail = 不推**
+  6. **R22 push**: `git push origin main` (ahead 1 = non-fast-forward, Git 自动合并)
+  7. **R8 验证 diff=0**: `git rev-list --count HEAD` = `git rev-list --count origin/main`
+  8. **R8 验证文件状态**: 远程 8 rules 段/文件内容 = 本地
+  9. **R28 沉淀本轮**: commit + push 本增量段
+  10. **R21 清理备份**: `git tag -d backup-pre-rebase-<ts>`(验证 diff=0 后才删)
+
+- **本轮推送实战数字**(增量):
+  - 本地 4df2289 → rebase → ed043a5(同 commit message, 不同 hash)
+  - rebase 无冲突(只 8 rules/SKILL.md 本地 +20 行 vs 远程 -20 行, 互补)
+  - 推送后: 本地 79 = 远程 79, **diff = 0**
+  - 备份 tag `backup-pre-rebase-20260813-204712` → 4df2289(未删, 留可回滚)
+
+- **反模式 5(本轮增量)**: 
+  1. **head/tail 间接验证代替直接 grep** — 返 0 不代表“不在”, 可能只是不在末尾。**R8 复述前必验证**: 用 `grep -c` 直接查, 不要 `tail -20 | grep -c`。
+  2. **看到 ahead 1, behind 1 误判为"push 不上去"** — 实际是“同 commit message 双 commit”, `git pull --rebase` 可解。
+  3. **vim 打开 .git/COMMIT_EDITMSG 时猜 AI 在干什么** — 不猜, `git log` 看 commit body 与本地文件状态交叉验证。
+  4. **盲目 `git push --force`** — 覆盖是“不可逆洗历史”, 在 ahead/behind 场景下选 pull rebase 才是无损。
+  5. **smoke 3 套跑完才 rebase** 还是 **rebase 完才 smoke**? — **答案是 rebase 完**。rebase 可能引入冲突/状态改变, rebase 后 re-test 才是真验证。
+
+- **本轮 vs PUSH-V323-001 增量表**:
+  | 增量 | PUSH-V323-001 | **PUSH-V344-001 增量**(本轮) |
+  |---|---|---|
+  | 推送前 SSH 测试 | 0 | **本轮新加(ssh -T git@github.com 返 "successfully authenticated")** |
+  | 推送前 tar 验证 | 0 | **本轮新加(`git archive` 验证脱敏)** |
+  | 双仓库 origin 冲突检查 | 0 | **本轮新加(同 URL 双 .git)** |
+  | **同 commit message 双 commit 分叉处理** | 0 | **本轮新加(`pull --rebase` 步骤 1-10)** |
+  | 间接验证(grep via tail)误判 | 0 | **本轮新加(同 R8 复述前必验证)** |
+  | 备份 tag 留可回滚点 | `_recycle_bin/` 文件备份 | **本轮新加(`git tag backup-pre-rebase-<ts>`)** |
+
+- **下次如何避免** (5 步):
+  1. 看到 `ahead N, behind N` 不慌, 先 `git log --oneline origin/main..HEAD` 与 `HEAD..origin/main` **双向看**
+  2. 如果两端 commit message 一样, 看到是 “同 commit message 双 commit”, **不**误判为"重复 commit"
+  3. 任何 `pull --rebase` 前 `git tag backup-pre-rebase-<ts> <local-HEAD>` 留回滚点
+  4. rebase 后必跑 smoke 3 套(准则是 28, npm test, Python tests)
+  5. 验证文件内容必须用 `grep -c "<pattern>" <file>`, **不**用 `tail | grep` 间接验证
+
+- **关联纪律**: 
+  - 继承 RULE-PUSH-V344-001 原 9 阶闭环
+  - 补双会话并行 + 内容分叉场景
+  - 补 PUSH-V323-001 4 个反模式 → 本轮 5 个反模式(递增)
+  - 与 RULE-EIGHT-RULES-SKILLS-001 同源(双层 skill 架构)
+  - 服务 v3.4.5+ 任意后续推送, 含 ahead/behind 双会话场景
