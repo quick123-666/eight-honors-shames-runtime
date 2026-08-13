@@ -3082,3 +3082,25 @@
   - ✅ 双签 commit `e5facd2` + `b6b10db`
   - ⏳ RFC-008 Phase C-F 留待下轮
   - ✅ 双仓沉淀 RULE-028(minicog docs/ + kimi_code_test/RULES-TREE.md)
+
+### RULE-MINICOG-028-v2 增量 (2026-08-13 — RFC-008 Phase C+D 完成 + 闭环)
+
+- **本轮新增落地清单**:
+  - ✅ RFC-008 Phase C: ThinkEngine 集成 DagEngine + GW 子集竞争
+  - ✅ RFC-008 Phase D: test_think_dag_integration.py 4 测试(全过)
+  - ✅ RFC-008 完工签字 (closed · success)
+  - ✅ 全量 93/93 测试过 (89 老 + 4 think_dag_integration)
+  - ✅ commit `02504f9` (4 文件 +191/-10)
+- **Phase C 实施细节**:
+  - `global_workspace.py` +28 行: `compete_and_broadcast_for(nodes, capacity)` 子集竞争方法
+  - `think_engine.py` +36 行: 集成 DagEngine + 加载 DEFAULT_DEPENDS_ON + stats 扩字段
+    - method = 'dag_toposort_with_residual_competitive'
+    - dag_nodes / dag_edges / dag_sorted_count / dag_cycle_detected / dag_residual_count
+- **Phase D 关键实测发现** (R10 不重复犯错):
+  1. **predictor deps=[] 不入 DAG**: 因 for 循环 `for upstream_list in DEFAULT_DEPENDS_ON.items()` 跳过空 deps, predictor 没 add_edge 调用 → `_indegree` 不含 predictor
+  2. **DAG 节点数 9 不等于 8**: 实际 = `len(to_nodes ∪ upstreams) - predictor(无deps)` = `8 + 6 - 5 - 0 = 9`
+  3. **topo_sort 必须含所有上游**: `conscious` 是 `metacog` 上游但不在 to_nodes,如果不传给 nodes → 假环错(`metacog` 入度永远 1)
+  4. **测试需排除无 deps 节点**: `nodes_with_deps = [k for k, v in DEFAULT_DEPENDS_ON.items() if v]` 才能避免 missing 错
+- **RFC-008 §3.4 真集成 (DAG 真参与 winners 选择) 留 v2.1**: 当前 run() 仅在 stats 暴露 DAG,真拓扑重选 winners 留多层 DAG (RFC-008 §7)
+- **回滚命令**:软 `git revert 02504f9` / 硬 `cp _recycle_bin/20260813-rfc008-phase-c-bk/*.py minicog_core/`
+- **下一步 (v2.1)**:多层 DAG (perception/cognition/meta 三层)+ 运行时动态 deps
