@@ -3548,3 +3548,27 @@
 - **下一步**:
   1. 意识模块自然语言回复 (当前状态汇报式) — 需 LLM 或模板升级
   2. FastAPI 集成 (ROADMAP TODO) — 2-3 天
+
+### RULE-MINICOG-040(2026-08-13 沉淀 — RFC-011 ReplyOrganizer 4 层组合 + 记忆结合)
+
+- **触发场景**: ReplyOrganizer / 4 层组合回复 / 记忆影响决策+组织
+- **本会话 2026-08-13 落地清单**:
+  - ✅ minicog_core/reply_organizer.py 新增 (7.1KB) — 4 层组合流水线
+  - ✅ emergent_reply_v2.compose() organizer 参数
+  - ✅ chat.py --organize 开关
+  - ✅ 工单 017 closed · success
+  - ✅ 15 新测试 + 全量 237/237 (零回归)
+- **4 层组合**: D 状态机 → B 叙事意图 (PSI+记忆) → C 主导者+顾问 → A 话语行为
+- **记忆结合**: 层 B memory.recall 含情感 → 共情型; 输出含记忆段 "想起你之前说 X"
+- **实测**:
+  ```
+  输入: 今天心情不好
+  组合: "我理解 emotion: 检测到负面情绪... 我感受到 predictor... 所以 htn_planner: 分解任务"
+  ```
+- **关键发现** (R10): 连接词重复可优化 / GBK 乱码用 UTF-8 / 意图-主导 fallback / 打标规则
+- **回滚命令**: 软 `git revert b68a727` / 硬 `cp _recycle_bin/20260813-organizer-bk/*.py minicog_core/`
+- **依赖**: RULE-037 (PSI) / RULE-038-039 (Memory) / RFC-004
+- **正交**: 全部 28 条八荣八耻
+- **强化**: P-7 不粉饰 / P-8 可验证 / P-9 完成即接入
+- **累计**: 13 RFC 实施 + 5 模块 (PSI/Governor/Memory/DAG/Organizer)
+- **下一步**: 连接词调优 / 状态机持久化 / FastAPI 集成
