@@ -3294,3 +3294,50 @@
   2. RFC-008 v2.1 真集成 (DAG 参与 winners 选择) — 1 周
   3. 修 33 个测试缺失 (去 MiniCog v1.17.0) — 1-2 小时
   4. RFC-010 v2.4: PDF 导出 (留待) — 2-3 天
+
+### RULE-MINICOG-033(2026-08-13 沉淀 — RFC-009 真调 + RFC-008 v2.1 真集成)
+
+- **触发场景**: CognitiveRAG.find 真查询 / 分层 DAG 选 winners / stats.layer_winners 解读
+- **本会话 2026-08-13 落地清单**:
+  - ✅ RFC-009 真调 (closed · success) - cognitive_rag.find() 实际 subprocess 调 kg_rag_rust CLI
+  - ✅ RFC-008 v2.1 真集成 (closed · success) - use_layered_dag 标志 + _run_layered 分层选 winners
+  - ✅ 13 新测试 + 全量 150/150 (零回归)
+- **RFC-009 真调实测**:
+  ```
+  c = CognitiveRAG()
+  results = c.find("RFC-008", top_k=3)
+  # [{"text": "...", "score": 0.85}, ...]
+  ```
+- **RFC-008 v2.1 真集成实测**:
+  ```
+  te.use_layered_dag = True
+  result = te.run("hi", "", "user_input", {})
+  # result["winners"] = ["conscious", "hebbian", "emotion", "psi"]
+  # te._stats = {layer_winners_perception: 2, cognition: 1, meta: 1, ...}
+  ```
+- **关键实测发现** (R10):
+  1. kg_rag_rust 输出含 GBK 字符 → 必须 `errors='ignore' encoding='utf-8'`
+  2. DAG topo_sort 需含所有上游 — 否则 active_nodes 有 deps 但上游 missing → cycle detected
+  3. 残余模块 (无 deps) 不调 topo_sort — 用 `DEFAULT_DEPENDS_ON.get(n) is not None` 过滤
+  4. stats() 必须显式暴露新字段 — 否则不可观测
+  5. use_layered_dag 默认 False — 保 R9 不搞破坏
+  6. per_layer_cap = max(1, capacity // 3) — 防 capacity<3 时变 0
+- **回滚命令**: 软 `git revert <commit>` / 硬 `cp _recycle_bin/20260813-rfc009-rfc008v21-real-bk/*.py minicog_core/`
+- **依赖**: RULE-031/032 / kimi_code_test/kg_rag_rust
+- **正交**: 全部 28 条八荣八耻
+- **强化**: P-7 不粉饰 / P-8 主流程可验证 / P-9 完成即接入
+- **下次如何避免**:
+  - 任何"subprocess 调第三方 CLI" → 必加 `errors='ignore' encoding='utf-8'`
+  - 任何"DAG topo_sort 部分节点" → 必含所有上游
+  - 任何"残余 + DAG 混合" → DAG 只管有 deps 部分
+  - 任何"stats 字段扩展" → 必加到 stats() 方法
+  - 任何"开关改造" → 默认 False 保老行为
+  - 任何"per_layer_cap" → `max(1, capacity // 3)`
+- **累计 7 RFC 实施 + 1 改造 + 2 真集成**:
+  - 7 RFC 设计 / 8 实施 / 2 真集成
+  - 总测试: 63 → 150 (2.38x 增长)
+- **下一步** (按工作量倒推):
+  1. RFC-008 v2.2 真集成 (动态 deps 应用到 run()) — 1 周
+  2. RFC-008 v2.3: 多层 DAG 真正 + salience 强度 — 留 v2.x
+  3. 修 33 个测试缺失 (去 MiniCog v1.17.0) — 1-2 小时
+  4. P3 asyncio 异步支持 (RFC-006) — 2-3 天
