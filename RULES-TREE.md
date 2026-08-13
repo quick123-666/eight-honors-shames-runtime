@@ -3162,3 +3162,41 @@
   2. **RFC-008 v2.1** 多层 DAG 实施(大改动) — 1-2 周分多轮
   3. **RFC-008 v2.2** 动态 deps 实施 — 1 周
   4. **RFC-009** RAG 集成(需 kg_rag_rust 集成测试) — 1 周
+
+### RULE-MINICOG-030(2026-08-13 沉淀 — RFC-010 v2.2 JSON 输出 + _hot_score 改造)
+
+- **触发场景**: RFC-010 v2.2 JSON mode 使用 / consciousness_assessment HOT 分数解读
+- **本会话 2026-08-13 落地清单**:
+  - ✅ RFC-010 v2.2 实施(closed · success, ~15 分钟)
+    - compose() 加 mode='json' 分支
+    - _to_json() 返回 D3.js force graph 兼容 JSON
+  - ✅ _hot_score 改造(RFC-005 §8 兑现)
+    - 用 mean(per_module_scores) 替代全局分数
+  - ✅ 11 测试 + 全量 109/109 (98 老 + 11 新, 零回归)
+- **RFC-010 v2.2 实测输出**:
+  ```json
+  {"nodes": [...], "edges": [...], "chain_mode": false, "method": "d3_force_graph_compatible"}
+  ```
+- **_hot_score 改造效果**:
+  - 改造前: higher_order_score() 全局 (3/5=0.6)
+  - 改造后: mean(per_module_scores) 各模块贡献, 找出 0 二阶模块
+  - 退化: 无观察或 per_module_scores 空 → 用全局分数
+- **关键实测发现** (R10):
+  1. mode 分支优先级: text → mermaid → both → json → ValueError
+  2. 错误消息要更新含所有合法 mode 列表
+  3. JSON 序列化: ensure_ascii=False (中文) + indent=2 (可读)
+  4. category 复用 CATEGORY_DEFAULT_MAP, 不重复
+- **回滚命令**: 软 `git revert <commit>` / 硬 `cp _recycle_bin/20260813-rfc010v22-hot-avg-bk/*.py minicog_core/`
+- **依赖**: RULE-029 / RFC-005 §8 / D3.js force graph (前端,可选)
+- **正交**: 全部 28 条八荣八耻 (尤其 R1/R3/R4/R5/R7/R8/R10/R15/R19/R22/R27/R28)
+- **强化**: P-7 不粉饰 / P-8 主流程可验证 / P-9 完成即接入
+- **下次如何避免**:
+  - 任何"模式开关" → 错误消息必含所有合法 mode 列表
+  - 任何"分数改造" → 保留退化机制
+  - 任何"JSON 输出" → ensure_ascii=False + indent=2 + method 标识
+  - 任何"per_module" → 复用已有 CATEGORY_DEFAULT_MAP
+- **下一步** (按工作量倒推):
+  1. RFC-008 v2.1 多层 DAG 实施 (大改动) — 1-2 周分多轮
+  2. RFC-008 v2.2 动态 deps 实施 — 1 周
+  3. RFC-009 RAG 集成 (需 kg_rag_rust) — 1 周
+  4. 修 33 个测试缺失 (去 MiniCog v1.17.0) — 1-2 小时
