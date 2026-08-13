@@ -5,6 +5,7 @@
 # 知识图谱运行时
 /kg_rag_rust/
 /kg_search/
+/kg_rag_kuzu/
 # 本地运行时数据/缓存
 /ms_cache/
 /_recycle_bin/
@@ -15,6 +16,8 @@
 /TokenThrottle/
 /tuomin/
 /.eight-rules/
+/_ab_test/
+/needle-playground-demo.png
 
 # 个人资源
 /baidu_repos.json
