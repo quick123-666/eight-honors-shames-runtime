@@ -8,6 +8,21 @@ import { loadEnvFiles, resolveEnvFiles, rejectIfSecretsInText } from "../src/env
 
 loadEnvFiles(resolveEnvFiles());
 
+// 八荣八耻硬话术(每轮显式前缀,反漂移核心)
+// 对标 Ponytail "ACTIVE EVERY RESPONSE. NO DRIFT."
+// 见 skills/eight-rules/SKILL.md "Persistence" 段
+function buildEightRulesHint(currentMode) {
+  if (currentMode === "off") {
+    return "[八荣八耻已停用 · off · 启动: /rules 或 重启会话]";
+  }
+  // 默认 + 4 档(off/lite/full/ultra)显式 token
+  return (
+    `[八荣八耻已激活 · ${currentMode} · 28条 · NO DRIFT. Still active if unsure. ` +
+    `Off only: "停止八荣八耻" / "normal mode" / "/rules off". ` +
+    `换档: /rules lite|full|ultra|off]`
+  );
+}
+
 export function createHooks({ getEntries, getSystemPrompt, notify }) {
   let mode = getDefaultMode();
   let state = loadState();
@@ -32,7 +47,8 @@ export function createHooks({ getEntries, getSystemPrompt, notify }) {
         state.rulesInjected = { at: new Date().toISOString(), fullSize: full.full.length, source: arbitration.source };
         saveState(state);
         const base = getSystemPrompt ? getSystemPrompt(ctx) : "";
-        return { systemPrompt: `${base}\n\n${full.full}` };
+        const hardHint = buildEightRulesHint(mode);
+        return { systemPrompt: `${base}\n\n${hardHint}\n\n${full.full}` };
       }
       saveState(state);
     },
@@ -41,7 +57,8 @@ export function createHooks({ getEntries, getSystemPrompt, notify }) {
       const lifecycle = lifecycleConfigSync();
       const inj = agentStartInjection(mode, lifecycle);
       if (!inj) return;
-      const composed = `${inj.summary}${inj.gateText}\n\n${inj.hint}`;
+      const hardHint = buildEightRulesHint(mode); // ← Phase 4 加:每轮硬话术
+      const composed = `${hardHint}\n\n${inj.summary}${inj.gateText}\n\n${inj.hint}`;
       const offenders = rejectIfSecretsInText(composed);
       if (offenders.length) return notify?.(event, `agent_start 注入拦截含敏感变量: ${offenders.join(", ")}`, "warning");
       return { systemPrompt: `${event.systemPrompt}\n\n${composed}` };

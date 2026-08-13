@@ -3789,3 +3789,104 @@
 - **正交**: 全部 28 条八荣八耻
 - **回滚命令**: `cp _backups/RULES.md.bak-20260813-191245-before-28count-fix tuomin/eight-honors-shames-runtime/RULES.md && cp _backups/RULES-TREE.md.bak-20260813-191245-before-loop004 RULES-TREE.md`
 - **本次落地清单**: 运行时 RULES.md 12 处修正(标题 1 + 版本号 1 + 版本段追加 6 + 索引表 2 + 附录 E/F 4)+ RULES-TREE.md 沉淀本 RULE + 附录 E「20 字真言」待验证项闭环(实测 20 个词条,非 20 汉字)
+
+### RULE-EIGHT-RULES-SKILLS-001(2026-08-13 v3.4.4 MINOR 沉淀 — 双层 skill 架构 + 反漂移硬话术)
+
+- **触发场景**: 八荣八耻需要"机器可读的 skill 套件"和"每轮显式反漂移机制"任一项时。具体信号:
+  1. 用户问"八荣八耻 skill 怎么设计 / Ponytail 双层架构怎么落地"
+  2. 加载会话时发现 `/rules` 命令没有持久化档位,或每轮 hint 体积过大易衰减
+  3. 用户问"Ponytail 主持续档 vs 八荣八耻主持续档的差异"
+  4. 项目内 hooks/index.js 没有"ACTIVE EVERY RESPONSE"硬话术
+
+- **本次沉淀(2026-08-13 改前-改后)**:
+  1. **新建** 主持续 skill:`skills/eight-rules/SKILL.md`(117 行 / 7.0 KB) — 对标 Ponytail `skills/ponytail/SKILL.md`
+  2. **新建** 子档 skill:`skills/eight-rules-help/SKILL.md`(94 行 / 3.6 KB) — 对标 Ponytail `skills/ponytail-help`
+  3. **改进** 5 已有 skill(6 行 → 69-108 行,平均 13 倍):`eight-rules-review` / `-audit` / `-acceptance` / `-benchmark` / `decision-annotation`
+  4. **改** `hooks/index.js`(67 行 → 91 行, +24 行):加 `buildEightRulesHint(mode)` 函数 + 在 `onSessionStart` / `onBeforeAgentStart` 双层注入硬话术
+  5. **新建** `docs/rules-help.md`(142 行 / 4.7 KB) — 人类可读版配套
+  6. **修复** 1 个 typo:`skills/eight-rules-audit/SKILL.md:10` 的 homepage 路径少打"Users"
+
+- **根因(为什么之前缺这套 skill)**:
+  1. **八荣八耻原是"纪律文档"(AGENTS.md / RULES.md),不是"skill 套件"** — 没有 frontmatter / 触发词 / Boundaries 段结构
+  2. **没显式反漂移硬话术** — Ponytail 主档有"ACTIVE EVERY RESPONSE. No drift back to over-building. Still active if unsure." —— 八荣八耻没硬话术,只列 28 条 → 长上下文易衰减
+  3. **没强度档** — Ponytail 有 lite/full/ultra/off + review 独立档;八荣八耻只有 full 一档,想关只能 disable
+  4. **关闭方式不一致** — Ponytail 3 种明确关闭方式(`stop ponytail` / `normal mode` / `/ponytail off`);八荣八耻当时没有
+
+- **5-tag 字典扩展(八荣八耻独有 2 个)**:
+  | tag | Ponytail | 八荣八耻 |
+  |---|---|---|
+  | `delete:` | ✅ | ✅ |
+  | `stdlib:` | ✅ | ✅ |
+  | `native:` | ✅ | ✅ |
+  | `yagni:` | ✅ | ✅ |
+  | `shrink:` | ✅ | ✅ |
+  | `drift:` | ❌ | ✅ **(八荣八耻专有)** 规则副本漂移(AGENTS.md vs RULES.md vs README.md 不一致) |
+  | `unsafe:` | ❌ | ✅ **(八荣八耻专有)** 砍了永不精简的边界 → HIGH 优先级 |
+
+- **每轮硬话术(反漂移核心,对标 Ponytail "ACTIVE EVERY RESPONSE")**:
+  ```
+  [八荣八耻已激活 · ${mode} · 28条 · NO DRIFT. Still active if unsure.
+  Off only: "停止八荣八耻" / "normal mode" / "/rules off".
+  换档: /rules lite|full|ultra|off]
+  ```
+  - 在 `hooks/index.js` 的 `onSessionStart` 和 `onBeforeAgentStart` 双层注入
+  - LLM 永远看到,不靠记忆
+  - 强度档动态显示(full / lite / ultra / off)
+
+- **Pre 阶(建立任何 skill 套件前必跑)**:
+  1. **双层架构检查**:是否有"主持续档" + "子 one-shot 档"的层级
+  2. **反漂移硬话术检查**:是否有"ACTIVE EVERY RESPONSE"类硬话术
+  3. **3 段 Boundaries 检查**:每个子档是否有 Scope / Action / Revert
+  4. **触发词冲突检查**:python 扫所有 description,验证触发词无重叠
+  5. **5-tag 共享字典检查**:review/audit 等同源 skill 是否显式互引
+
+- **Run 阶(双层 skill 套件的落地顺序)**:
+  1. 备份到 `_recycle_bin/<TS>-pre-<主题>/`(R21)
+  2. git 建分支(R20 回滚点)
+  3. **先建主持续档**(对齐 Ponytail 主档)
+  4. **再建 help 子档**(速查)
+  5. **再改进已有子档**(加触发词 + Boundaries + 共享字典 + 输出格式 + 诚实协议)
+  6. 最后改 hooks(加硬话术)
+  7. 写人类可读文档
+  8. 沉淀 RULE(本 RULE)
+
+- **下次如何避免**:
+  1. **新增 skill 时,先检查双层架构** — 不能只加"看起来有用"的子档,先想"它属于哪个主档?"
+  2. **触发词不重叠 + 5-tag 互引** — 加新子档时,先用 python 扫现有 description,验证不冲突
+  3. **硬话术必须有,且写在主档"反漂移"段** — 不靠 LLM 记忆,靠每轮注入
+  4. **改 RULES-TREE.md 时用 edit 而非 write** — 3791 行大文件,write 风险大
+  5. **新建 skill 后立刻更新主档的"相关 skill"列表** — 避免主档与子档引用不一致
+
+- **关联 RULE**:
+  - RULE-CODING-001(L2765,编码操作纪律)— 共享 7 rung 简化阶梯思路
+  - RULE-LOOP-004(L3737,条数/版本/沉淀状态三重漂移)— 同源:沉淀完 RULE 必须回改索引表(本 RULE 沉淀完,需在 RULES.md 附录 G「交叉引用」加 RULE-EIGHT-RULES-SKILLS-001)
+  - RULE-FP-001(L667,第一性原理复合算子)— 对齐沉淀模式
+  - RULE-V340-001(L1288,跨会话沉淀)— 直接复用本 RULE 的"下次如何避免"5 条
+  - 准则 1(查接口)/ 准则 6(系统穷尽)/ 准则 14(谨慎改)/ 准则 16(超越平凡)/ 准则 21(删走回收站)/ 准则 28(跨会话沉淀)
+
+- **正交**: 全部 28 条八荣八耻 + Ponytail `skills/ponytail/*` 设计模式
+
+- **回滚命令**:
+  ```bash
+  cd C:/Users/Administrator/Desktop/kimi_code_test
+  # 1. 放弃所有改动(已备份到 _recycle_bin/20260813-193049-pre-eight-rules-skills/)
+  git checkout -- skills/ hooks/index.js docs/rules-help.md RULES-TREE.md
+  # 2. 或回退到本 RULE 之前的 commit
+  git reset --hard HEAD~1
+  # 3. 或从回收站手动恢复
+  cp -r _recycle_bin/20260813-193049-pre-eight-rules-skills/* .
+  ```
+
+- **本次落地清单**:
+  - `skills/eight-rules/SKILL.md`(新,117 行)
+  - `skills/eight-rules-help/SKILL.md`(新,94 行)
+  - `skills/eight-rules-review/SKILL.md`(改,6 → 69 行)
+  - `skills/eight-rules-audit/SKILL.md`(改 + bug fix,6 → 78 行)
+  - `skills/eight-rules-acceptance/SKILL.md`(改,6 → 83 行)
+  - `skills/eight-rules-benchmark/SKILL.md`(改,6 → 79 行)
+  - `skills/decision-annotation/SKILL.md`(改,6 → 108 行)
+  - `hooks/index.js`(改,67 → 91 行,加 buildEightRulesHint + 双层注入)
+  - `docs/rules-help.md`(新,142 行)
+  - `RULES-TREE.md`(本 RULE 沉淀,+~80 行)
+  - git 分支:`eight-rules-skills-v1`(从 main 切出,未合并)
+  - 备份:`_recycle_bin/20260813-193049-pre-eight-rules-skills/`
