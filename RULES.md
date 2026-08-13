@@ -4,7 +4,7 @@
 >
 > pi 启动时**不会**自动加载本文件;agent 侧的精简命令式清单见 [`AGENTS.md`](./AGENTS.md)。
 >
-> 📌 **版本规范**:见 [`RULES-VERSION.md`](./RULES-VERSION.md) — 当前 **v3.4.0**;新增原则升 MINOR,调优升 PATCH,大重构升 MAJOR。
+> 📌 **版本规范**:见 [`RULES-VERSION.md`](./RULES-VERSION.md) — 当前 **v3.4.2**;新增原则升 MINOR,调优升 PATCH,大重构升 MAJOR。
 > **v3.0.0 重构说明(2026-08-11)**: 准则由 22 条扩展为 24 条,重新编号 1-24。**旧编号 → 新编号映射见附录 D**;旧 commit / 文档中引用的准则编号在本次重排后已失效,请用新编号。
 > **v3.2.0 重构(v2.2,2026-08-11 同步本次)**:24→25→**26 条**;第二次插入新原则"准则 10 · 不重复犯错"于末尾(原 10-25 全部 +1 → 11-26)。v3 / v3.1.0 历史保留在附录 D。
 > **v3.2.1 调优(v2.3,2026-08-11 同步本次)**:26 条不变;**RULES-TREE.md RULE-10-ALGORITHM-001 调优闭环**(D 方案加和公式 + 三档阈值)反哺到 RULES.md 准则 10;调优史见 RULES-TREE.md:305。
@@ -13,6 +13,8 @@
 > **v3.4.0 升级(2026-08-13)**: 27→**28 条**;MINOR: + 准则 28·跨会话沉淀(R2/R5/R10/R19 子项强化);三文件 + RULES-TREE 同步;沉淀 RULE-V340-001。变更摘要见 RULES-VERSION.md。
 > **v3.3.0 调优(2026-08-12)**:27 条结构不变;**R8/R19 互引注记**(破除重复度70-80%:R8 为 R7 子集;R19 为 R20/R5/R12/R15 的操作串联);**COVER-ALL 兑底算子实装**(`rules_tree/operators.py::CoverAllContext/Item/check_cover_all/render_cover_all` + `__main__.py::cmd_cover-all` + 8 单测 38/38 通过);**全局 AGENTS.md F 档 hook**(每轮结尾必输出 `[COVER-ALL]` 8 行);**RULE-MR-DIAG-001 沉淀**(未来 MR 诊断工作流);**运行时/主项目版本漂移合并对齐**(运行时 v3.2.1→v3.3.0)。变更摘要见 RULES-VERSION.md。
 > **v3.3.1 调优(2026-08-13)**:27 条结构不变;**RULES.md 第五章 5.1-5.5"防空转循环机制"**(新增)纳入版本号 + **全局 AGENTS.md 顶部版本号** v3.2.1→v3.3.0 漂移修复 + **多源终止信号**(全局"二点五"段 + F 档 `[COVER-ALL]` hook + 项目根"探针"段)未给优先级冲突显式化(优先级:**RULES.md 第五章 5.1 终止标记 ≥ F 档 hook ≥ 项目根探针** = 末行硬约束 > 兑底 > 加载验证);沉淀 **RULE-LOOP-001**。变更摘要见 RULES-VERSION.md。
+> **v3.4.1 调优(2026-08-12)**:28 条不变;RULE-DIRECT-DO-001 v1.1(不漏 meta 标签 + C 子任务粒度);RULE-IMPORT-RULES-TREE-001(沉淀 ↔ 向量 ↔ 语义搜索 端到端打通);kg_rag_kuzu/{_import_rules.py, sync_rules_to_vector.py, _audit_rules.py}(4 步包装:备份→解析→重建→自动验证,exit 0/1;## 6+## 7 扫描,触发率 97%);修复 13 条 ## 6 RULE 被早期 regex 漏入库的缺陷。变更摘要见 RULES-VERSION.md。
+> **v3.4.2 调优(2026-08-12)**:28 条不变;**RULES.md 新增"## 六、编码操作纪律"板块**(借鉴 super-code 优先级 + Ponytail 简化阶梯 7 级 + 反射反弹反向守护 5 项 + 输出形状模板 + 生成纪律 + 6.6 guardrail 3 问);RULE-CODING-001 沉淀(对齐 RULE-FP-001 模式)。变更摘要见 RULES-VERSION.md。
 
 ---
 
