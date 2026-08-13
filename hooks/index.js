@@ -11,7 +11,7 @@ loadEnvFiles(resolveEnvFiles());
 // 八荣八耻硬话术(每轮显式前缀,反漂移核心)
 // 对标 Ponytail "ACTIVE EVERY RESPONSE. NO DRIFT."
 // 见 skills/eight-rules/SKILL.md "Persistence" 段
-function buildEightRulesHint(currentMode) {
+export function buildEightRulesHint(currentMode) {
   if (currentMode === "off") {
     return "[八荣八耻已停用 · off · 启动: /rules 或 重启会话]";
   }
