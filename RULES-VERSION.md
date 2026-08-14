@@ -2,8 +2,8 @@
 
 > **作用**:固化八荣八耻(本项目 AI 工作准则)的**版本号命名规范**和**升级流程**,避免"v3+2.1" vs "v2.3" vs "2026-08-11 v2.3" 之类的命名混乱。
 > **维护触发**:任何新增原则 / 调优 / 反哺 / 大重构之前 + 之后
-> **当前版本**:**v3.4.12**(2026-08-13)
-> **上一版本**:v3.4.11
+> **当前版本**:**v3.5.5**(2026-08-14,PATCH: v3.5.4 QClaw 适配器追平 + token-slim 001/002 — skill 注入瘦身 ~87% + 会话卫生 + RULES 按需读 + [COVER-ALL] 输出取消)
+> **上一版本**:v3.5.4
 > **关联文件**:RULES.md(完整版 **28 条**) / AGENTS.md(精简版 **28 条**) / RULES-TREE.md(方法论沉淀)
 
 ## 六、 v3.2.3 变更摘要 (2026-08-12)
@@ -73,7 +73,15 @@ v<MAJOR>.<MINOR>.<PATCH>
 | **v3.4.9** | **PATCH: 准则 9「不搞破坏」新增敏感数据保护 sub-clauses(让准则 9 真正能够使用)** — 主项目 `RULES.md` L204 + 运行时副本 L204 + L797 表行 + L851 表行 同步新增「**不显示**(stdout/日志/对话/Commit 禁出现 raw secret)/**不写入**(不进任何文件 + 自动 grep `sk-/pk_live/BEGIN PRIVATE KEY`)/**不在命令里用**(`env KEY=secret` `cat ~/.ssh` `echo $TOKEN`)」三大块 + 「替代三件套:env 引用名 + `set +o history` + `.env` 加 `.gitignore`」+ 检测反例 r10 沉淀路径;28 条原则数不变;npm test 66/66 PASS;沉淀 RULE-IX-SENSITIVE-DATA-001 | **28 条**(不变) | **当前最新** |
 | **v3.4.10** | **PATCH: pre-commit hook 升级(2 段门禁 = 漂移检测 + 敏感数据 grep)+ RULE-IX-SENSITIVE-DATA-001 实战案例沉淀(本次会话 raw key 真实事件)** — .githooks/pre-commit 加 secret scan(扫 git diff --cached,5 类标准 secret 模式:sk- / pk_live_ / -----BEGIN / [A-Z_]+_API_KEY=[^${ ]+ / Bearer)+ 命中即阻断 commit + 列 ≤5 行样本 + 处置清单;RULES-TREE.md 加实战段描述事件 + key rotate 推荐 + pre-commit 启用方法(1 行 `git config core.hooksPath .githooks`);28 条结构不变;npm test 66/66 PASS;备份 _recycle_bin/20260813-190500/(RULES-TREE + RULES-VERSION + pre-commit 3 件) | **28 条**(不变) | **当前最新** |
 | **v3.4.11** | **PATCH: 勘误 — v3.4.9/v3.4.10 误判 OpenAI → 真实是 MiniMax 平台 key(8 家端点探测确认 api.minimaxi.com 返回 HTTP 200,模型 MiniMax-M3/M2.7/M2.7-highspeed); + 新增 docs/minimax-api-usage.md 使用说明(endpoint/auth/curl/Python/Node.js/故障排查);npm test 66/66 PASS;28 条结构不变;**注:本会话原拟 amend(选项 A),但 rebase 撞 Vim 恢复崩溃,改追加勘误 commit(选项 B 改良),不动 git 历史** | **28 条**(不变) | **当前最新** |
-| **v3.4.12** | **PATCH: API key 状态标记基础设施** — .env 内每条 key 上方加 inline 状态注释(status=✅ verified_provider / rotate_required / verified_at / next_check)+ .env.STATUS.json sidecar(只含 prefix+suffix + 端点 + 模型,**无 secret**)+ scripts/probe-env-apis.js(扫 _API_KEY/_TOKEN/_SECRET 等模式 → 8 家 curl 探测 → 只显示 maskValue → 写 sidecar)+ npm run probe:env 命令 + tests/probe-env-apis.test.js 6 用例(maskValue/正则/STATUS 结构/行注释);npm test 72/72 PASS;28 条结构不变;**沉淀**:v3.4.11 误判后,RULE-IX-001 演进 = 不光"不显示 secret",还得"追踪已用 key 的状态" | **28 条**(不变) | **当前最新** |
+| **v3.4.12** | **PATCH: API key 状态标记基础设施** — .env 内每条 key 上方加 inline 状态注释(status=✅ verified_provider / rotate_required / verified_at / next_check)+ .env.STATUS.json sidecar(只含 prefix+suffix + 端点 + 模型,**无 secret**)+ scripts/probe-env-apis.js(扫 _API_KEY/_TOKEN/_SECRET 等模式 → 8 家 curl 探测 → 只显示 maskValue → 写 sidecar)+ npm run probe:env 命令 + tests/probe-env-apis.test.js 6 用例(maskValue/正则/STATUS 结构/行注释);npm test 72/72 PASS;28 条结构不变;**沉淀**:v3.4.11 误判后,RULE-IX-001 演进 = 不光"不显示 secret",还得"追踪已用 key 的状态" | **28 条**(不变) | 已发布,保留 |
+| **v3.4.13** | **PATCH: loop-watchdog 信号使用边界 + dsh 首次跑 4 步流程** — 用户感知失守修复 + dsh web 安装/构建/detached 启动/验证 全链路沉淀 + Windows `Start-Process -RedirectStandardOutput` 后台启动 trick(避开 bash `&` 丢 stdout 的坑);28 条结构不变;npm test 47/47 PASS;**沉淀 RULE-LOOP-WATCHDOG-INTERP-001**(2 类场景区分:空转 vs 有任务)+ **RULE-DSH-FIRST-RUN-001**(4 步流程 + PowerShell detached start)于主项目 RULES-TREE.md,运行时副本 RULES-TREE.md 同步 | **28 条**(不变) | 已发布,保留 |
+| **v3.4.14** | **PATCH: 输出格式显式标签 RULE** — 招认“沉淀/使用工作方法不见了”根因 = thinking vs output 脱节;4 件强制:每轮 ≥ 2 个 `[按 RULE-XXX]` 标签 + 每次沉淀时 `[沉淀 RULE-XXX-XXX]` 标签 + 末行 `[COVER-ALL]` 8 行兑底 + thinking 触发器自动跳 RULES-TREE;28 条结构不变;**沉淀 RULE-OUTPUT-LABEL-001** 于主 + 副本 RULES-TREE.md 同步 | **28 条**(不变) | 已发布,保留 |
+| **v3.5.0** | **MINOR: 28 → 29 条;新增准则 29·用户感知守护** — 把 RULE-OUTPUT-LABEL-001 从 R10 子项升级为独立原则;补全型准则触发器自动跳 RULES-TREE 不被动等指令;28→29 条结构变更;npm test 47/47 PASS;**沉淀 RULE-USER-PERCEPTION-GUARD-001** 于主 + 副本 RULES-TREE.md 同步 | **29 条**(+1) | 已发布,保留 |
+| **v3.5.1** | **PATCH: 27 条独立 RULE 沉淀(本批首 5 条 R22/R3/R13/R17/R25)** — 系统性修复 28 条准则全无独立 RULE 段的问题;每条独立段:触发场景/核心纠正/4 件定义/量化证据/下次如何避免/覆盖关系;npm test 47/47 PASS;**沉淀 RULE-22-HELP-NO-PUSHBACK-001 / RULE-3-COMMUNICATION-CONFIRM-001 / RULE-13-CODE-STANDARDS-001 / RULE-17-USER-COMMS-001 / RULE-25-ACCOMPANY-TO-END-001** 于主 + 副本 RULES-TREE.md 同步 | **29 条**(不变) | 已发布,保留 |
+| **v3.5.2** | **PATCH: 22 条独立 RULE 沉淀(剩余 22 条全量一次完成)** — R1/R2/R4/R5/R6/R7/R8/R9/R10/R11/R12/R14/R15/R16/R18/R19/R20/R21/R23/R24/R26/R27/R28 全部独立段;系统性补全 28 条准则 7 段标准(触发/纠正/定义/证据/避免/覆盖)+ 触发器自动跳机制;npm test 47/47 PASS;双副本 RULES-TREE.md 同步 | **29 条**(不变) | 已发布,保留 |
+| **v3.5.3** | **PATCH: 沉淀 RULE-USER-RAW-KEY-REPEAT-001(防用户重复贴 raw key)** — 5 件强制(masks 显示 / 不擅自写 / 不 echo 完整 / 主动 grep RULES-TREE 已知端点 / 主动补测该端点);本会话触发场景:3 次贴 raw key 误测 3 端点全 401 = 浪费 6 端点 curl + RULES-TREE L4669 minimax 端点未主动查;npm test 47/47 PASS;双副本 RULES-TREE.md 同步 | **29 条**(不变) | 已发布,保留 |
+| **v3.5.4** | **PATCH: QClaw/OpenClaw 适配器(第 8 个适配目标)** — `scripts/build-adapters.js` 新增 qclaw 目标生成 always-load skill 模板(metadata.openclaw.always: true + 21 条精简命令式 + 指针);部署 `~/.qclaw/skills/qclaw-eight-honors/` + openclaw.json 注册 main/mr-llm;npm test 48/48 PASS;**沉淀 RULE-QCLAW-ADAPTER-001**(本版为运行时副本先发,主项目 v3.5.5 追平) | **29 条**(不变) | 已发布,保留 |
+| **v3.5.5** | **PATCH: token-slim 001/002(用户报 token 消耗暴涨)** — ① settings.json 排除 `~/.agents/skills`(2022 个 skill description 全量注入 ≈358KB/请求 → 排除后 -87%,pi 0.84.1 `!` 排除语法已验证)② compaction 显式化 + 会话卫生脚本 `scripts/session-health.py`(近 30 天 128 会话 126.7MB,63 个 >15 万 token)③ RULES.md 会话首读改前 120 行索引(81KB→~6KB)④ [COVER-ALL] 8 行输出先分级后完全取消(用户指令,防空转由二点五 A 终止标记兑底);三文件 + 全局 AGENTS.md 同步;**沉淀 RULE-TOKEN-SLIM-001/002** 主 + 副本 | **29 条**(不变) | **当前最新** |
 ---
 
 ## 三、升级检查清单
@@ -147,3 +155,11 @@ v<MAJOR>.<MINOR>.<PATCH>
 | **v3.4.10** | **2026-08-13** | **PATCH: pre-commit hook 升级 + RULE-IX 实战案例沉淀** — hook 2 段门禁 + secret grep + 关键事件反馈 | `_recycle_bin/20260813-190500/` |
 | **v3.4.11** | **2026-08-13** | **PATCH: 勘误 + API 使用说明 — MiniMax endpoint 实测确认 + docs/minimax-api-usage.md(3660 B)生成 |  |
 | **v3.4.12** | **2026-08-13** | **PATCH: API key 状态标记 — scripts/probe-env-apis.js 8 家探测 + .env.STATUS.json sidecar |  |
+| **v3.4.13** | **2026-08-14** | **PATCH: loop-watchdog 信号使用边界 + dsh 首次跑 4 步流程** — 用户感知失守修复 + dsh web 完整跑通 + PowerShell detached start trick + RULE-LOOP-WATCHDOG-INTERP-001 / RULE-DSH-FIRST-RUN-001 沉淀 | **`_recycle_bin/20260814-142002-pre-loop-watchdog-rule/`** |
+| **v3.4.14** | **2026-08-14** | **PATCH: 输出格式显式标签 RULE** — 招认“沉淀/使用工作方法不见了”根因 = thinking vs output 脱节;4 件强制 + 触发器自动跳;沉淀 RULE-OUTPUT-LABEL-001 双副本同步 | **`_recycle_bin/20260814-142644-pre-v3.4.14-output-label/`** |
+| **v3.5.0** | **2026-08-14** | **MINOR: 28 → 29 条;新增准则 29·用户感知守护** — RULE-OUTPUT-LABEL-001 升级为独立原则;多准则协同保护(R10 + R15 + R22 + R28);沉淀 RULE-USER-PERCEPTION-GUARD-001 双副本同步 | **`_recycle_bin/20260814-144545-pre-v3.5.0-r29/`** |
+| **v3.5.1** | **2026-08-14** | **PATCH: 27 条独立 RULE 沉淀(本批首 5 条 R22/R3/R13/R17/R25)** — 系统性修复 28 条准则全无独立 RULE 段;每条独立段 7 段标准(触发/纠正/定义/证据/避免/覆盖);沉淀 5 条独立 RULE 双副本同步 | **`_recycle_bin/20260814-162250-pre-v3.5.1-27rule-sediment/`** |
+| **v3.5.2** | **2026-08-14** | **PATCH: 22 条独立 RULE 沉淀(剩余 22 条全量一次完成)** — R1/R2/R4/R5/R6/R7/R8/R9/R10/R11/R12/R14/R15/R16/R18/R19/R20/R21/R23/R24/R26/R27/R28 全部独立段;系统性补全 28 条准则 7 段标准 + 触发器自动跳;双副本 RULES-TREE.md 同步 | **`_recycle_bin/20260814-162636-pre-v3.5.2-22rule-batch/`** |
+| **v3.5.3** | **2026-08-14** | **PATCH: 沉淀 RULE-USER-RAW-KEY-REPEAT-001(防用户重复贴 raw key)** — 5 件强制 + 触发器主动跳;本会话 3 次贴 raw key 误测 3 端点全 401 = 浪费 6 端点 curl;双副本 RULES-TREE.md 同步 | **`_recycle_bin/20260814-173248-pre-v3.5.3-rawkey-rule/`** |
+| **v3.5.4** | **2026-08-14** | **PATCH: QClaw/OpenClaw 适配器(第 8 个适配目标)** — build-adapters.js qclaw 目标 + 部署 ~/.qclaw/skills;运行时副本首发,主项目 v3.5.5 一并追平 | **运行时副本 `_recycle_bin/`(v3.5.4 发布记录)** |
+| **v3.5.5** | **2026-08-14** | **PATCH: token-slim 001/002** — settings.json 排除全局 skills(-87% 注入)+ compaction + 会话卫生脚本 + RULES 首读前 120 行 + [COVER-ALL] 输出取消;双副本 RULES-TREE.md 同步 | **`_recycle_bin/pre-v3.5.5-20260814-221431/`** |

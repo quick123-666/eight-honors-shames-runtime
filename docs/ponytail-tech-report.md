@@ -1,7 +1,7 @@
 # Ponytail 技术研究报告
 
 > **来源**: 一手证据,基于 `E:\新建文件夹\新建文件夹\01-AgentLayer\ponytail-main` 仓库完整扫描
-> **作者**: pi (kimi_code_test 项目会话)
+> **作者**: pi (eight-honors-shames-runtime 项目会话)
 > **日期**: 2026-08-13
 > **状态**: 第一性原理研究完成
 > **版本**: Ponytail 4.8.1(包内 `package.json` 实测)
@@ -269,7 +269,7 @@ function isShellSafe(p) {
 
 ---
 
-## 7. 启示(对本项目 kimi_code_test)
+## 7. 启示(对八荣八耻规则运行时)
 
 ### 7.1 与 AGENTS.md 八荣八耻的契合
 
@@ -298,7 +298,7 @@ function isShellSafe(p) {
 
 ### 7.3 与 Ponytail 的差异点(本项目的独特性)
 
-| 维度 | Ponytail | 本项目(kimi_code_test) |
+| 维度 | Ponytail | 本项目(八荣八耻规则运行时) |
 |---|---|---|
 | **核心载体** | 单 agent 的代码风格规范 | 28 条 AI 协作纪律 + 跨项目价值观 |
 | **范围** | coding task 优化 | 跨任务类型(分析 / 重构 / 文档 / 设计 / 编码) |
@@ -341,8 +341,8 @@ E:\新建文件夹\新建文件夹\01-AgentLayer\ponytail-main\
 
 ### 8.3 历史失败任务(警示)
 
-`~/.pi/agent/projects/lsx-mp-rust/_tickets/T-20260812004531-000.json`(2026-08-12)
-- **失败原因**:跨盘路径(E:\新建文件夹\新建文件夹\01-AgentLayer\ponytail-main)在 lsx-mp-rust 默认扫描未触发
+`外部方法树工具链工单(2026-08-12)`(2026-08-12)
+- **失败原因**:跨盘路径(E:\新建文件夹\新建文件夹\01-AgentLayer\ponytail-main)在外部工具链默认扫描未触发
 - **沉淀**:本报告是**重做后的真实研究**,基于直接 `ls/cat/grep` 拿到的一手证据
 - **教训**:**任何"看不到 = 没有"的判断都是不充分的**(准则 6 · 系统穷尽 + 准则 4 · 不装懂)
 

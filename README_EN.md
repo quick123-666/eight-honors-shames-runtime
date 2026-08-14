@@ -6,11 +6,11 @@
 
 ### Engineering AI collaboration discipline: single source · injectable · auditable · benchmarkable · acceptable
 
-**28 principles · cross-project core values · 81%+ token saved on rule injection · ready for 8+ AI tools**
+**29 principles · cross-project core values · 81%+ token saved on rule injection · ready for 8+ AI tools**
 
 [![Version](https://img.shields.io/badge/version-v1.1.1-blue)](./package.json)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
-[![Tests](https://img.shields.io/badge/tests-27%20passed-brightgreen)](./tests)
+[![Tests](https://img.shields.io/badge/tests-72%20passed-brightgreen)](./tests)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-green)](./package.json)
 [![AI Tools](https://img.shields.io/badge/AI_Tools-8+-purple)](#installation-which-md-does-each-ai-tool-need)
 
@@ -35,7 +35,7 @@ git clone https://github.com/quick123-666/eight-honors-shames-runtime.git
 cd eight-honors-shames-runtime
 npm install
 npm run adapters      # generate adapter files for 8+ AI tools → adapters/
-npm test              # 27 tests, including install-config verification
+npm test              # 72 tests, including install-config verification
 ```
 
 ---
@@ -96,7 +96,7 @@ After installation, ask your AI tool:
 
 > **"What are the 8-honors-8-shames principles?"**
 
-- ✅ Working: it lists the 28 principles (look first, align, reuse, verify, full version, accompany to completion…)
+- ✅ Working: it lists the 29 principles (look first, align, reuse, verify, full version, accompany to completion…)
 - ❌ Not working: vague answer → check the file placement against the table above.
 
 ---
@@ -128,7 +128,7 @@ off   injection off, safety floor kept
 
 ### Injection cost (measured locally)
 
-RULES.md (28 principles) is 13,196 bytes. Old design injected the full text every turn vs new design (once per session + summary per turn):
+RULES.md (29 principles) is 75,802 bytes. Old design injected the full text every turn vs new design (once per session + summary per turn):
 
 | Mode | Per-turn | 12-turn cumulative | Saved | 100-turn cumulative | Saved |
 |---|---:|---:|---:|---:|---:|
@@ -152,7 +152,7 @@ RULES.md (28 principles) is 13,196 bytes. Old design injected the full text ever
 ## 🏗️ Architecture
 
 ```text
-Rules → single source RULES.md (28 principles)
+Rules → single source RULES.md (29 principles)
    ↓ injection layers
 session_start full text once + per-turn summary + gates
    ↓ tooling
@@ -164,7 +164,7 @@ npm run adapters → adapters/ (rule files for 8+ AI tools)
 ```
 ├── src/                 # core: injection / mode arbitration / audit / acceptance / benchmark / toolenv
 ├── scripts/             # CLI (check/adapters/benchmark/accept/smoke)
-├── tests/               # 27 tests (incl. adapter install-config tests)
+├── tests/               # 72 tests (incl. adapter install-config tests)
 ├── adapters/            # generated: rule files for 8+ tools (do not edit by hand)
 ├── mcp/                 # MCP server (stdio, read-only, 3 tools)
 ├── hooks/               # lifecycle hooks (Claude Code etc.)
@@ -180,7 +180,7 @@ npm run adapters → adapters/ (rule files for 8+ AI tools)
 ## 🛠️ Development
 
 ```bash
-npm test                 # 27 tests (unit + adapter install-config)
+npm test                 # 72 tests (unit + adapter install-config)
 npm run check            # adapters + tests + rules sync + annotations
 npm run adapters         # regenerate adapters/ (run after editing RULES/AGENTS)
 npm run benchmark        # deterministic benchmark (no LLM)
@@ -201,7 +201,7 @@ SCENARIO=reuse-existing MODE=lite node scripts/run-toolenv-smoke.js
 ## Hard Constraints
 
 ```text
-1. No minimalism: the 28 principles are never trimmed
+1. No minimalism: the 29 principles are never trimmed
 2. Single source = RULES.md: no adapter embeds the full text
 3. Credentials only via env vars / platform stores, never plain .env
 4. Deletions must be recoverable; snapshot before large changes

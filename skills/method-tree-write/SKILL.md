@@ -6,7 +6,7 @@ description: >
   appends a new RULE-XXX-NNN to RULES-TREE.md. Trigger: "/mr-write" /
   "/mr write" / "method tree write" / "写 RULE" / "沉淀 7 段" / "add rule to
   RULES-TREE" / "RULES-TREE 写一条"。对标 eight-rules-acceptance 的 8 项验收。
-homepage: file:///C:/Users/Administrator/Desktop/kimi_code_test/RULES-TREE.md
+homepage: ./RULES-TREE.md
 license: MIT
 ---
 
@@ -93,7 +93,7 @@ license: MIT
 ## Tags(共享字典)
 
 - `write:` 写新 — **Replacement**:`mr-pattern`(先查后写)
-- `7-sec:` 7 段格式 — **Replacement**:`/mr-show`(有 58 条现成的可参考)
+- `7-sec:` 7 段格式 — **Replacement**:`/mr-show`(有 63 条现成的可参考)
 - `cat>>:` 追加不覆盖 — **Replacement**:`mr-publish`(commit + 5 文件同步)
 
 ## 永不精简的边界

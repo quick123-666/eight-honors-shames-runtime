@@ -6,11 +6,11 @@
 
 ### 把 AI 协作纪律工程化：单一来源 · 可注入 · 可审计 · 可基准测试 · 可验收
 
-**28 条准则 · 跨项目核心价值观 · 规则注入省 81%+ token · 8+ AI 工具即装即用**
+**29 条准则 · 跨项目核心价值观 · 规则注入省 81%+ token · 8+ AI 工具即装即用**
 
-[![Version](https://img.shields.io/badge/version-v3.4.5-blue)](./package.json)
+[![Version](https://img.shields.io/badge/version-v3.5.5-blue)](./package.json)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
-[![Tests](https://img.shields.io/badge/tests-27%20passed-brightgreen)](./tests)
+[![Tests](https://img.shields.io/badge/tests-72%20passed-brightgreen)](./tests)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-green)](./package.json)
 [![AI Tools](https://img.shields.io/badge/AI_Tools-8+-purple)](#安装各-ai-工具配置哪个-md)
 
@@ -20,7 +20,7 @@
 **让 Claude Code 改文件，它不查现有实现就硬编新接口？**
 **Copilot 生成代码，遇到边界情况直接 panic？**
 
-通用大模型没有内置你的协作纪律。八荣八耻把 **28 条工程级 AI 协作准则**工程化成一份可运行的运行时——任何 AI 工具装上后，都会像遵守团队规范的工程师一样工作：先查、对齐、复用、验证、备份、完整交付。
+通用大模型没有内置你的协作纪律。八荣八耻把 **29 条工程级 AI 协作准则**工程化成一份可运行的运行时——任何 AI 工具装上后，都会像遵守团队规范的工程师一样工作：先查、对齐、复用、验证、备份、完整交付。
 
 **一份单一来源，自动适配 8+ AI 工具。** 不同软件需要配置的规则文件不一样，本项目一条命令生成全部。
 
@@ -39,14 +39,14 @@ git clone https://github.com/quick123-666/eight-honors-shames-runtime.git
 cd eight-honors-shames-runtime
 npm install
 npm run adapters      # 生成 8+ 工具适配文件 → adapters/
-npm test              # 27 个测试,验证安装配置正确
+npm test              # 72 个测试,验证安装配置正确
 ```
 
 ---
 
 ## 🔧 安装(各 AI 工具配置哪个 md?)
 
-> **不同 AI 软件读取的规则文件不一样**：有的认 `AGENTS.md`，有的认 `CLAUDE.md`，有的认 `.cursorrules`…本项目从**单一来源**(`RULES.md` + `AGENTS.md`)自动生成各工具的适配文件，只含 28 条精简命令式、指向完整版——**零漂移**。
+> **不同 AI 软件读取的规则文件不一样**：有的认 `AGENTS.md`，有的认 `CLAUDE.md`，有的认 `.cursorrules`…本项目从**单一来源**(`RULES.md` + `AGENTS.md`)自动生成各工具的适配文件，只含 29 条精简命令式、指向完整版——**零漂移**。
 
 ### 1. 生成适配文件
 
@@ -71,11 +71,11 @@ npm run adapters     # 生成到 adapters/ 目录(可重复运行,自动同步)
 # 示例:为 Claude Code 和 Cursor 安装
 cp adapters/CLAUDE.md ../你的项目/CLAUDE.md
 cp adapters/.cursorrules ../你的项目/.cursorrules
-# 完整 28 条版放在你项目的 RULES.md(可选,适配文件会自动指向它)
+# 完整 29 条版放在你项目的 RULES.md(可选,适配文件会自动指向它)
 cp RULES.md ../你的项目/RULES.md
 ```
 
-> 💡 适配文件只含 28 条精简命令式 + 指向 `RULES.md`。把 `RULES.md` 一起放进项目即可获得完整版(耻/荣/逻辑/判断标准)。
+> 💡 适配文件只含 29 条精简命令式 + 指向 `RULES.md`。把 `RULES.md` 一起放进项目即可获得完整版(耻/荣/逻辑/判断标准)。
 
 ### 3. 接入 Pi(完整运行时,推荐)
 
@@ -101,7 +101,7 @@ npx eight-honors-shames-mcp   # stdio, 只读
 
 > **"八荣八耻有哪些准则？"**
 
-- ✅ 生效：能说出 28 条核心（先查、对齐、复用、验证、完整版、协助到底…）
+- ✅ 生效：能说出 29 条核心（先查、对齐、复用、验证、完整版、协助到底…）
 - ❌ 未生效：回答泛泛（"这是道德规范…"）→ 检查文件位置是否匹配上表
 
 ---
@@ -133,7 +133,7 @@ off   关闭注入，保留安全底线
 
 ### 注入成本（本机脚本实测）
 
-RULES.md 28 条全文 13,196 字符。旧设计每轮注入全文 vs 新设计（session 一次 + 每轮摘要）：
+RULES.md 29 条全文 75,802 字节。旧设计每轮注入全文 vs 新设计（session 一次 + 每轮摘要）：
 
 | 模式 | 每轮注入 | 12 次注入累计 | 节省 | 100 轮累计 | 节省 |
 |---|---:|---:|---:|---:|---:|
@@ -157,7 +157,7 @@ RULES.md 28 条全文 13,196 字符。旧设计每轮注入全文 vs 新设计�
 ## 🏗️ 架构
 
 ```text
-规则 → 单一来源 RULES.md（28 条）
+规则 → 单一来源 RULES.md（29 条）
    ↓ 注入分层
 session_start 全文一次 + 每轮摘要 + 门禁
    ↓ 工具
@@ -169,7 +169,7 @@ npm run adapters → adapters/（8+ AI 工具的规则文件）
 ```
 ├── src/                 # 核心：注入/模式仲裁/审计/验收/benchmark/toolenv
 ├── scripts/             # CLI 脚本（check/adapters/benchmark/accept/smoke）
-├── tests/               # 27 个测试（含适配文件安装配置测试）
+├── tests/               # 72 个测试（含适配文件安装配置测试）
 ├── adapters/            # 生成产物：8+ 工具的规则文件（勿手改）
 ├── mcp/                 # MCP server（stdio, 只读 3 工具）
 ├── hooks/               # 生命周期钩子（Claude Code 等）
@@ -185,7 +185,7 @@ npm run adapters → adapters/（8+ AI 工具的规则文件）
 ## 🛠️ 开发
 
 ```bash
-npm test                 # 27 个测试（单元 + 适配文件安装配置测试）
+npm test                 # 72 个测试（单元 + 适配文件安装配置测试）
 npm run check            # 生成适配 + 测试 + 规则校验 + 注释校验
 npm run adapters         # 重新生成 adapters/（改 RULES/AGENTS 后必跑）
 npm run benchmark        # 确定性 benchmark（无 LLM,管线自检）
@@ -206,7 +206,7 @@ SCENARIO=reuse-existing MODE=lite node scripts/run-toolenv-smoke.js
 ## 项目约束（硬性）
 
 ```text
-1. 禁止精简系统：28 条完整版不缩水
+1. 禁止精简系统：29 条完整版不缩水
 2. 规则单一来源 = RULES.md：任何适配不得内嵌完整正文
 3. 凭据只走环境变量/平台凭据库，不落 .env 明文
 4. 删除必须可恢复；大改前建立快照

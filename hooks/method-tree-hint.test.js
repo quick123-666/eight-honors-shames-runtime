@@ -1,7 +1,7 @@
 // tests for buildMethodTreeHint() — RULES-TREE 7 段沉淀硬话术核心
 // 对标 hooks/eight-rules-hint.test.js ESM 写法(import 而非 require)
 // 跑法: node --test hooks/method-tree-hint.test.js
-// v3.4.5 修正:内容从 lsx-mp-rust 工具链 → RULES-TREE 7 段元工作流沉淀
+// v3.4.5 修正:内容从 外部工具链 → RULES-TREE 7 段元工作流沉淀
 
 import { test } from "node:test";
 import assert from "node:assert/strict";

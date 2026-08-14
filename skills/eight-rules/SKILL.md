@@ -1,12 +1,12 @@
 ---
 name: eight-rules
 description: >
-  八荣八耻主持续 skill — ACTIVE EVERY RESPONSE. 28 条精简版 + 4 强度档 + 反漂移硬话术。
+  八荣八耻主持续 skill — ACTIVE EVERY RESPONSE. 29 条精简版 + 4 强度档 + 反漂移硬话术。
   Default mode **full**. Trigger: "八荣八耻"、"八耻八荣"、"eight rules"、"eight-rules"、
   "rules full" 或会话启动自动激活。切换档位: `/rules lite|full|ultra|off`。停止:
   "停止八荣八耻" / "normal mode" / "off"。本 skill 是双层架构的**主持续档**;
   one-shot 子档见 eight-rules-review / -audit / -acceptance / -benchmark / -help。
-homepage: file:///C:/Users/Administrator/Desktop/kimi_code_test/AGENTS.md
+homepage: ./AGENTS.md
 license: MIT
 ---
 
@@ -68,7 +68,7 @@ license: MIT
 |---|---|---|
 | **off** | 完全停用(罕见,默认不要) | `/rules off` / `"停止八荣八耻"` / `"normal mode"` |
 | **lite** | 写用户要的 + 一句话点名更严替代;**标准 reduce**:不主动重构已有 | `/rules lite` |
-| **full** | **默认**。28 条全执行。**不**主动重写**不**主动删 | `/rules`(无参)|
+| **full** | **默认**。29 条全执行。**不**主动重写**不**主动删 | `/rules`(无参)|
 | **ultra** | 主动挑战需求:发前一句"Y 覆盖 X;要全 X 就回";严苛 review;**敢删** | `/rules ultra` |
 | **review** | 独立档,只跑 `-review` 子 skill,持久模式不变 | `/rules-review` |
 
@@ -92,7 +92,7 @@ license: MIT
 
 **Ponytail 管的是"写代码",Eight Rules 管的是"AI 协作纪律"**。本 skill:
 
-- ✅ 管:28 条准则 / 输出骨架 / 防空转 / COVER-ALL 兑底 / 反漂移话术 / 强度档
+- ✅ 管:29 条准则 / 输出骨架 / 防空转 / COVER-ALL 兑底 / 反漂移话术 / 强度档
 - ❌ 不管:具体编码风格(那是 `## 六、编码操作纪律` + `eight-rules-review` 的事)
 - ❌ 不管:具体技术栈选型(那是用户决策,见 AGENTS.md "技术栈选型用问不用脑")
 - ❌ 不管:终端命令学习(那是 `systematic-debugging` / `bash-linux` 等的领域)
@@ -113,7 +113,7 @@ Level persists until changed or session end。
 
 ## 平行 skill 体系(方法树 — RULES-TREE 7 段元工作流沉淀)
 
-> **2026-08-13 v3.4.5 整合**(v3.4.4 首版错绑到 lsx-mp-rust mr.exe,已 revert d6283ea;本版改为 RULES-TREE 7 段沉淀范式):
+> **2026-08-13 v3.4.5 整合**(v3.4.4 首版错绑到外部工具链,已 revert;本版改为 RULES-TREE 7 段沉淀范式):
 > `method-tree` 套件独立于八荣八耻(纪律层),但**直接受八荣八耻约束**(准则 6/10/24/28 共 7 处要求主动调用+沉淀方法树)。
 > 两套档位**不联动**——纪律管"怎么沉淀",沉淀管"沉淀什么"。
 
@@ -127,7 +127,7 @@ Level persists until changed or session end。
 | `method-tree-publish` | 子 one-shot | 发布(commit + 6 文件版本号同步)(`/mr-publish`) |
 | `method-tree-feedback` | 子 one-shot | 跟踪引用次数/复用率(`/mr-feedback`) |
 
-**关键定义**:本套件的"方法树" = RULES-TREE.md 里的 7 段元工作流沉淀(58 条 RULE-XXX-001),与 lsx-mp-rust 的 mr.exe 工具链(自动生成执行树)**完全独立**。
+**关键定义**:本套件的"方法树" = RULES-TREE.md 里的 7 段元工作流沉淀(63 条 RULE-XXX-001),与外部 mr.exe 工具链(自动生成执行树)**完全独立**。
 
 详见 [method-tree/SKILL.md](./method-tree/SKILL.md) + `RULE-METHOD-TREE-001`(RULES-TREE.md 末尾)。
 
@@ -135,4 +135,4 @@ Level persists until changed or session end。
 
 > **生成信息**:本 skill 由 `skills/eight-rules/SKILL.md` 创建于 2026-08-13,
 > 对标 Ponytail `skills/ponytail/SKILL.md` 双层架构,沉淀为 `RULE-EIGHT-RULES-SKILLS-001`。
-> 完整规则见 [RULES.md](../../RULES.md) 28 条 + 六章 + 附录。
+> 完整规则见 [RULES.md](../../RULES.md) 29 条 + 六章 + 附录。

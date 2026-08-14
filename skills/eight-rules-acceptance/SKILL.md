@@ -6,7 +6,7 @@ description: >
   "rules accept" / "rule accept" / "八荣八耻 acceptance" / "规则验收" /
   "is this task done" / "validate completion"。对标 Ponytail 主档
   "Output: code first" + 八荣八耻 "走流程" 6 步验收。
-homepage: file:///C:/Users/Administrator/Desktop/kimi_code_test/AGENTS.md
+homepage: ./AGENTS.md
 license: MIT
 ---
 

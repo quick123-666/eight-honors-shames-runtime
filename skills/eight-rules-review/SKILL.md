@@ -7,7 +7,7 @@ description: >
   "review this change against rules" / "规则审查" / "八荣八耻 review" /
   "simplify review" / "is this over-engineered" / "what can we delete"。
   对标 Ponytail 的 `ponytail-review`。
-homepage: file:///C:/Users/Administrator/Desktop/kimi_code_test/AGENTS.md
+homepage: ./AGENTS.md
 license: MIT
 ---
 

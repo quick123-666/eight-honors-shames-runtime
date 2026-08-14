@@ -8,7 +8,7 @@ description: >
   audit" / "decision annotation" / "eight-rules 决策标注" / "八荣八耻
   标注" / "audit annotations" / "what annotations should I add"。
   对标 Ponytail `ponytail-debt`(扫描 + ledger + ceiling/upgrade pattern)。
-homepage: file:///C:/Users/Administrator/Desktop/kimi_code_test/AGENTS.md
+homepage: ./AGENTS.md
 license: MIT
 ---
 

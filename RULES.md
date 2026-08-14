@@ -4,7 +4,7 @@
 >
 > pi 启动时**不会**自动加载本文件;agent 侧的精简命令式清单见 [`AGENTS.md`](./AGENTS.md)。
 >
-> 📌 **版本规范**:见 [`RULES-VERSION.md`](./RULES-VERSION.md) — 当前 **v3.4.5**;新增原则升 MINOR,调优升 PATCH,大重构升 MAJOR。
+> 📌 **版本规范**:见 [`RULES-VERSION.md`](./RULES-VERSION.md) — 当前 **v3.5.5**(29 条,PATCH: token-slim 001/002 — skill 注入瘦身 + 会话卫生 + RULES 按需读 + [COVER-ALL] 输出取消);新增原则升 MINOR,调优升 PATCH,大重构升 MAJOR。
 > **v3.0.0 重构说明(2026-08-11)**: 准则由 22 条扩展为 24 条,重新编号 1-24。**旧编号 → 新编号映射见附录 D**;旧 commit / 文档中引用的准则编号在本次重排后已失效,请用新编号。
 > **v3.2.0 重构(v2.2,2026-08-11 同步本次)**:24→25→**26 条**;第二次插入新原则"准则 10 · 不重复犯错"于末尾(原 10-25 全部 +1 → 11-26)。v3 / v3.1.0 历史保留在附录 D。
 > **v3.2.1 调优(v2.3,2026-08-11 同步本次)**:26 条不变;**RULES-TREE.md RULE-10-ALGORITHM-001 调优闭环**(D 方案加和公式 + 三档阈值)反哺到 RULES.md 准则 10;调优史见 RULES-TREE.md:305。
@@ -19,6 +19,9 @@
 > **v3.4.4 升级(2026-08-13)**:MINOR — 28 条不变;**双层 skill 架构**(1 主持续 + 6 子 one-shot:`eight-rules` + `-review`/`-audit`/`-acceptance`/`-benchmark`/`-help`/`decision-annotation`)+ `hooks/index.js` 加 `buildEightRulesHint(mode)` 反漂移硬话术(`onSessionStart` + `onBeforeAgentStart` 双层注入);npm test 34/34 PASS(原 27 + 新 7);jshgd 教程 v1.1.1→v1.4.4 同步(+ §4.9 节 +123 行 + 关键决策 #13/14/15 + 踩坑 8);沉淀 **RULE-EIGHT-RULES-SKILLS-001**(RULES-TREE.md L3793);Ponytail 5-tag 字典 + 八荣八耻独有 2 个(`drift`/`unsafe`)。
 > **v3.4.5 调优(2026-08-13)**:PATCH — 28 条不变;**方法树 skill 套件重新绑定到 RULES-TREE 7 段元工作流沉淀范式**(v3.4.4 首版错绑到 lsx-mp-rust mr.exe,已 revert d6283ea;本版改为 7 段沉淀范式,7 个子档 pattern/write/show/publish/feedback/help + 主档 method-tree);`hooks/index.js` 加 `buildMethodTreeHint(mode)` 硬话术(双层并列注入);`method-tree-hint.test.js` 7 用例;沉淀 **RULE-METHOD-TREE-001** 替代 v3.4.4 的 RULE-METHOD-TREE-SKILLS-001(在 C 体系下重命名,与原 RULE 命名空间不冲突);八荣八耻主档"平行体系"段同步指向 C 体系(原指向 lsx 工具链已废弃);v3.4.4 的 mr.exe 绑定 7 个 skill 文件 + test 全部删除重建。
 > **v3.4.3 调优(2026-08-13)**:28 条不变;**运行时副本 `tuomin/eight-honors-shames-runtime/RULES.md` 三重漂移修复**(标题「二十六条」→「二十八条」、顶部 v3.3.0→v3.4.3、2.1/2.3 索引表 RULE-LOOP-001「❌ 待沉淀」→「✓ 已沉淀 L1175」、附录 E/F 24→28 条);**RULE-LOOP-002 对称检查清单 5 文件→6 文件**(补入运行时副本——本次漂移新增根因);附录 E「20 字真言」待验证项闭环(实测 **20 个词条**,非 20 汉字);沉淀 **RULE-LOOP-004**(条数/版本/沉淀状态三重漂移,LOOP 系列第 4 例)。变更摘要见 RULES-VERSION.md。
+> **v3.4.13 升级(2026-08-14)**:MINOR: 双副本追平(运行时副本 v3.4.5 → v3.4.13,7 个 PATCH 一次性真实追平,非纸面追平)+ 主项目升 v3.4.13;沉淀 **RULE-DUAL-COPY-CATCH-UP-001**;28 条结构不变。
+> **v3.4.14 升级(2026-08-14)**:PATCH: **输出格式显式标签 RULE** — 招认“沉淀/使用工作方法不见了”根因 = thinking vs output 脱节;4 件强制:每轮 ≥ 2 个 `[按 RULE-XXX]` 标签 + 每次沉淀时 `[沉淀 RULE-XXX-XXX]` 标签 + 末行 `[COVER-ALL]` 8 行兑底 + thinking 触发器自动跳 RULES-TREE;沉淀 **RULE-OUTPUT-LABEL-001** 于主 + 副本 RULES-TREE.md 同步。
+> **v3.5.0 升级(2026-08-14)**:MINOR: **28 → 29 条**;新增**准则 29 · 用户感知守护**(把 RULE-OUTPUT-LABEL-001 从 R10 子项升级为独立原则)— 补全型准则触发器自动跳 RULES-TREE 不被动等指令;沉淀 **RULE-USER-PERCEPTION-GUARD-001** 于主 + 副本 RULES-TREE.md 同步。
 
 ---
 
@@ -39,7 +42,7 @@
 
 ---
 
-## 二、二十八条准则(平铺,无分组)
+## 二、二十九条准则(平铺,无分组)
 
 > **平铺原则**: 八荣八耻所有规则**本质上不分阶段**,每条独立使用,任何时序可触发。对齐源文件 `jshgd/ai-coding-八耻八荣.md` 8 条风格(纯平铺,无章节分组)。**v3.0.0 重构引入的 4 组("执行前/中/后/价值观")已于 v3.4.0 修订为平铺**(RULE-NOPHASE-001)。
 >
@@ -608,6 +611,23 @@
   2. **架构决策必留痕**:"为什么 X 不用 Y"的决策 → AGENTS.md / README 决策段(纯文字,不靠 commit)
   3. **用户偏好必沉淀**:反复出现的偏好(中文 / 表格 / 终止标记) → 项目 AGENTS.md,非下次重述
   4. **方法树必更新**:任务完成后 → `mr tree show T-...` + `mr wiki` 同步,非只在本会话 stdout
+
+#### 准则 29:以用户感知失守为耻,以可见化增强为荣
+
+- **耻**:**功能在跑但用户看不到** = 感知失守。本质:`thinking 里走 RULE` 必要但不充分,用户从**输出**里看不见方法论在工作。示例:踩坑修了但没说,执行了但不说依据,沉淀了但没标
+- **荣**:**每轮输出必须可见** — ① ≥ 2 个 `[按 RULE-XXX]` 标签(让用户看见用了哪些准则)② 每次沉淀时 `[沉淀 RULE-XXX-XXX]` 标签(让用户看见新 RULE 在落盘)③ 末行 `[COVER-ALL]` 8 行兑底(让用户看见兑底无遗漏)④ thinking 检测到“踩坑/新流程/失守/用户反馈看不见”自动跳 RULES-TREE,不被动等指令
+- **逻辑**:用户感知决定交互质量 — 功能再好用户看不见 = 失守。**补全型准则**(R15/R16/R17/R22/R23/R24)hint 注入不够,必须配输出标签 + 触发器自动跳
+- **判断标准**:
+  1. **思考可观测** — 用户从输出能判断 AI 用了哪些 RULE;不靠猜
+  2. **沉淀可观测** — 每次写新 RULE 后,立刻 `[沉淀 RULE-XXX-XXX]` 标签 + RULES-TREE path:line
+  3. **兑底可观测** — 末行 `[COVER-ALL]` 8 行(R2/R3/R9/R10/R15/R16/R21/R27)不压缩
+  4. **触发器自动跳** — “怎么不见了”/“为啥没看到”类反馈出现,默认根因 = 输出标签脱节,主动跳 RULES-TREE 补
+- **协同**:**R10·不重复犯错**(子项强化 = RULE-OUTPUT-LABEL-001 升级版) / **R15·完整版**(不许输出“只见结论不见过程”) / **R22·帮助解难**(用户看不懂 = 未解难) / **R28·跨会话沉淀**(沉淀同步可见化)
+- **反例 3 条**:
+  1. thinking 走完 R19 6 步但输出只说“完成了” — 视为失守
+  2. 沉淀 RULE 但不标 `[沉淀 RULE-XXX-XXX]` — 用户不知有 RULE,以为啥也没发生
+  3. watchdog 提示后**误读**为通用降级,完整轮走短答 — R28 同步可见化体现失守
+- **反向守护**:**RULE-OUTPUT-LABEL-001**(v3.4.14 PATCH 调优)是 R29 的子集;R29 是其升级为独立原则版本(补足 v3.4.14 不足 = 触发器自动跳未明确)
 - **对应既有准则**: 准则 2 · 对齐(子项)/ 准则 5 · 确认后行(子项)/ 准则 10 · 不重复犯错(子项强化)/ 准则 19 · 走流程(闭环)
 - **反例**(2026-08-13): `RULES-TREE.md RULE-LOOP-001` 死循环案例写在 chat 不落盘 = 重复踩
 

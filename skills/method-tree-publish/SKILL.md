@@ -7,7 +7,7 @@ description: >
   "/mr publish" / "method tree publish" / "发布 RULE" / "commit RULE" /
   "沉淀发布" / "RULES-TREE commit"。对标 eight-rules-acceptance 8 项验收 +
   RULE-PUSH-V323-001 推送 SOP 的轻量版(只 RULE 改动,不全量推送)。
-homepage: file:///C:/Users/Administrator/Desktop/kimi_code_test/RULES-TREE.md
+homepage: ./RULES-TREE.md
 license: MIT
 ---
 

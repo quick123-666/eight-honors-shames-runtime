@@ -5,7 +5,7 @@ description: >
   display, not a persistent mode. Trigger: "/rules help" / "/rules-help" /
   "rules help" / "八荣八耻 help" / "how do I use eight rules" /
   "what rules commands". 对标 Ponytail 的 `ponytail-help` 子档。
-homepage: file:///C:/Users/Administrator/Desktop/kimi_code_test/AGENTS.md
+homepage: ./AGENTS.md
 license: MIT
 ---
 
@@ -20,7 +20,7 @@ write flag files, or persist anything.
 |-------|---------|--------------|
 | **off** | `/rules off` / `"停止八荣八耻"` / `"normal mode"` | 完全停用(罕见) |
 | **Lite** | `/rules lite` | 写用户要的;一句话点名更严替代;**不主动重构** |
-| **Full** | `/rules`(无参)| **默认**。28 条全执行;**不主动重写**;**不主动删** |
+| **Full** | `/rules`(无参)| **默认**。29 条全执行;**不主动重写**;**不主动删** |
 | **Ultra** | `/rules ultra` | 主动挑战需求;严苛 review;**敢删**;发前一句"Y 覆盖 X" |
 | **review**(独立档) | `/rules-review` | 只跑 review 子 skill;持久模式不变 |
 
@@ -83,7 +83,7 @@ export EIGHT_RULES_DEFAULT_MODE=lite
 
 ## More
 
-- 完整 28 条:[RULES.md](../../RULES.md)
+- 完整 29 条:[RULES.md](../../RULES.md)
 - 精简版 + 输出骨架:[AGENTS.md](../../AGENTS.md)
 - 沉淀池:[RULES-TREE.md](../../RULES-TREE.md)
 - 编码操作纪律(对标 Ponytail 主档):[RULES.md L711-L778](../../RULES.md)(`## 六、编码操作纪律`)

@@ -5,7 +5,7 @@ description: >
   operation. Trigger: "/mr-show" / "/mr show" / "method tree show" /
   "看 RULE" / "show rule" / "RULE 全文" / "show RULE-LOOP-001"。对标
   eight-rules-review 的"读不写"模式。
-homepage: file:///C:/Users/Administrator/Desktop/kimi_code_test/RULES-TREE.md
+homepage: ./RULES-TREE.md
 license: MIT
 ---
 

@@ -7,7 +7,7 @@ description: >
   "audit this repo for 八荣八耻" / "rules audit" / "规则审计" /
   "find violations in repo" / "what can I delete from this repo" /
   "find bloat"。对标 Ponytail 的 `ponytail-audit`。
-homepage: file:///C:/Users/Administrator/Desktop/kimi_code_test/AGENTS.md
+homepage: ./AGENTS.md
 license: MIT
 ---
 
@@ -50,7 +50,7 @@ license: MIT
 
 **示例**:
 - ✅ `yagni: AbstractRepository with one implementation. Inline until second exists. [repo.py:88]`
-- ✅ `drift: AGENTS.md says "21 条", RULES.md says "28 条", README.md says "v3.4.0". Sync required.`
+- ✅ `drift: AGENTS.md says "21 条", RULES.md says "29 条", README.md says "v3.4.0". Sync required.`
 - ✅ `unsafe: rm -rf _recycle_bin/. Use /recycle commands per rule-21. [scripts/cleanup.sh:42]`
 - ❌ "There might be some redundancy in the codebase..."(禁止 prose)
 

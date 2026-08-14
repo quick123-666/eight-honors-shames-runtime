@@ -7,7 +7,7 @@ description: >
   One-shot. Trigger: "/mr-feedback" / "/mr feedback" / "method tree feedback" /
   "RULE 引用统计" / "哪条 RULE 死代码" / "scoreboard RULE"。对标
   eight-rules-benchmark scoreboard 风格。
-homepage: file:///C:/Users/Administrator/Desktop/kimi_code_test/RULES-TREE.md
+homepage: ./RULES-TREE.md
 license: MIT
 ---
 

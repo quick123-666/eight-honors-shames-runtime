@@ -6,7 +6,7 @@ description: >
   One-shot, does NOT create new RULE. Trigger: "/mr-pattern" / "/mr pattern" /
   "method tree pattern" / "find similar rule" / "RULES-TREE 找同主题" /
   "有没有类似 RULE" / "before write rule check"。对标 eight-rules-help 速查模式。
-homepage: file:///C:/Users/Administrator/Desktop/kimi_code_test/RULES-TREE.md
+homepage: ./RULES-TREE.md
 license: MIT
 ---
 

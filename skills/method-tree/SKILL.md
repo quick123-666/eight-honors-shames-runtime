@@ -1,24 +1,24 @@
 ---
 name: method-tree
 description: >
-  方法树主持续 skill — ACTIVE EVERY RESPONSE. **RULES-TREE 7 段元工作流沉淀范式**(RULE-XXX-001 系列, 58 条)+ 反漂移硬话术。
+  方法树主持续 skill — ACTIVE EVERY RESPONSE. **RULES-TREE 7 段元工作流沉淀范式**(RULE-XXX-001 系列, 63 条)+ 反漂移硬话术。
   Default mode **full**。Trigger: "方法树"、"method tree"、"method-tree"、
   "沉淀 RULE"、"写 7 段 RULE"、"踩坑沉淀"、"RULES-TREE 7 段"。
   切换档位: `/mr lite|full|ultra|off`。停止: "停止方法树" / "no mr" / "/mr off"。
   本 skill 是双层架构的**主持续档**;one-shot 子档见
   method-tree-pattern / -write / -show / -publish / -feedback / -help。
-  **重要**: 本套件是 RULES-TREE 7 段沉淀范式,**不是** lsx-mp-rust 的 mr.exe 工具链(那个独立运行,不在本 skill 范围)。
-homepage: file:///C:/Users/Administrator/Desktop/kimi_code_test/RULES-TREE.md
+  **重要**: 本套件是 RULES-TREE 7 段沉淀范式,**不是** 外部 mr.exe 工具链(那个独立运行,不在本 skill 范围)。
+homepage: ./RULES-TREE.md
 license: MIT
 ---
 
 # Method Tree (方法树) — RULES-TREE 7 段沉淀范式
 
-> **v3.4.5 修正**:本套件 v3.4.4 时错绑到了 lsx-mp-rust 的 mr.exe 工具链
+> **v3.4.5 修正**:本套件 v3.4.4 时错绑到了外部 mr.exe 工具链
 > (commit bfad0bc,已 revert d6283ea)。
-> **正解**:方法树 = RULES-TREE.md 里的 7 段元工作流沉淀(58 条 RULE-XXX-001)
+> **正解**:方法树 = RULES-TREE.md 里的 7 段元工作流沉淀(63 条 RULE-XXX-001)
 > ——人写的、可复用的、踩坑或跑通流程后沉淀的 7 段 RULE。
-> 与 lsx-mp-rust 的 mr.exe(自动生成执行树)**完全独立**。
+> 与外部方法树工具链(自动生成执行树)**完全独立**。
 
 ## Persistence
 
@@ -74,7 +74,7 @@ license: MIT
 - **关联 RULE**: RULE-XXX-NNN (类似主题)
 ```
 
-**总沉淀池**(截至 v3.4.5): **58 条 RULE**, 含 DEBUG/EXPLAIN/LEARN/REVIEW/COVER/LOOP×4/MINICOG×45+/PUSH-V323/MR-DIAG/EIGHT-RULES-SKILLS 等。
+**总沉淀池**(截至 v3.4.5): **63 条 RULE**, 含 DEBUG/EXPLAIN/LEARN/REVIEW/COVER/LOOP×4/MINICOG×45+/PUSH-V323/MR-DIAG/EIGHT-RULES-SKILLS 等。
 
 ## 4 强度档
 
@@ -110,8 +110,8 @@ RULES-TREE 7 段沉淀**永不砍**:
 - ✅ 管:沉淀动作的 4 强度档 / 反漂移话术 / Boundaries
 - ❌ 不管:具体编码风格(那是 `## 六、编码操作纪律` + `eight-rules-review` 的事)
 - ❌ 不管:具体技术栈选型(那是用户决策)
-- ❌ 不管:RULES.md 28 条的修订(那是八荣八耻规则升级流程)
-- ❌ **不管**:lsx-mp-rust 的 mr.exe 工具链(那是独立项目,有自己的 RULES-TREE 沉淀)
+- ❌ 不管:RULES.md 29 条的修订(那是八荣八耻规则升级流程)
+- ❌ **不管**:外部 mr.exe 工具链(那是独立项目,有自己的 RULES-TREE 沉淀)
 
 `"停止方法树"` / `"no mr"` / `"/mr off"` → revert。
 Level persists until changed or session end。
@@ -139,10 +139,10 @@ Level persists until changed or session end。
 > **本 skill 的核心价值**:**把"AI 应该在失守后沉淀 RULE"这 4 条准则,变成每轮可见的硬话术**。
 > 之前是文字要求(易忘),现在是 ACTIVE EVERY RESPONSE 注入(不会忘)。
 >
-> **层级关系**(lsx-mp-rust METHOD-TREE.md 自述):
+> **层级关系**(外部方法树体系自述):
 > RULES-TREE(宪法) > METHOD-TREE(体系说明书) > 方法树(具体产物)
 >
-> **联动**:八荣八耻主档**默认**是 full(28 条全执行),方法树主档**默认**是 full(自问"是否沉淀")。
+> **联动**:八荣八耻主档**默认**是 full(29 条全执行),方法树主档**默认**是 full(自问"是否沉淀")。
 > 两套档**不联动**——纪律管"怎么沉淀",沉淀管"沉淀什么"。
 
 ## 必背三句话
@@ -156,5 +156,5 @@ Level persists until changed or session end。
 > **生成信息**:本 skill 由 `skills/method-tree/SKILL.md` v3.4.5 重做于 2026-08-13,
 > 对标 `eight-rules/SKILL.md` 双层架构 + 沉淀池改指 RULES-TREE 7 段。
 > 沉淀为 `RULE-METHOD-TREE-001`(RULES-TREE.md 末尾,替代 v3.4.4 的 RULE-METHOD-TREE-SKILLS-001)。
-> 完整沉淀池见 [RULES-TREE.md](../../RULES-TREE.md) — 58 条 RULE。
+> 完整沉淀池见 [RULES-TREE.md](../../RULES-TREE.md) — 63 条 RULE。
 > 工具:`grep` + `cat` + `git commit`(无外部工具链依赖)。

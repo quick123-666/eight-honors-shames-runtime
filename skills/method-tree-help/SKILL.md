@@ -5,7 +5,7 @@ description: >
   display, not a persistent mode. Trigger: "/mr help" / "/mr-help" /
   "method tree help" / "方法树 help" / "how do I use method tree" /
   "what mr commands"。对标 eight-rules 的 `eight-rules-help` 子档。
-homepage: file:///C:/Users/Administrator/Desktop/kimi_code_test/RULES-TREE.md
+homepage: ./RULES-TREE.md
 license: MIT
 ---
 
@@ -57,7 +57,7 @@ Level sticks until changed or session end。env 覆盖:
 
 ## 当前沉淀池(截至 v3.4.5)
 
-`grep -cE '^### RULE-[A-Z]+-[0-9]+\(' RULES-TREE.md` → **58 条 RULE**
+`grep -cE '^### RULE-[A-Z]+-[0-9]+\(' RULES-TREE.md` → **63 条 RULE**
 
 | 类别 | 数量 | 示例 |
 |---|---|---|
@@ -101,32 +101,32 @@ export METHOD_TREE_DEFAULT_MODE=lite
 
 | 维度 | 八荣八耻 | 方法树 |
 |---|---|---|
-| 管 | AI 协作纪律(28 条) | RULES-TREE 7 段沉淀(58 RULE) |
-| 档联动 | 默认 full(28 条全执行) | 默认 full(失守/新流程自问沉淀) |
+| 管 | AI 协作纪律(29 条) | RULES-TREE 7 段沉淀(63 RULE) |
+| 档联动 | 默认 full(29 条全执行) | 默认 full(失守/新流程自问沉淀) |
 | 关闭 | `/rules off` / `"停止八荣八耻"` | `/mr off` / `"停止方法树"` |
 | 互引 | 准则 28 把方法树列为必沉淀 | 主档 Boundaries 段注明"不管纪律" |
 
 **不联动**:各自独立档位。改方法树档不影响八荣八耻档(反之亦然)。
 
-## 与 lsx-mp-rust 的关系(澄清)
+## 与外部方法树工具链的关系(澄清)
 
-| 维度 | lsx-mp-rust (mr.exe) | 本套件(RULES-TREE 7 段) |
+| 维度 | 外部工具链(mr.exe 类) | 本套件(RULES-TREE 7 段) |
 |---|---|---|
 | 产物 | 自动生成执行树(`methods/trees/T-*.md`) | 人写 7 段 RULE(RULES-TREE) |
 | 触发 | 任务跑完 | 失守后/新流程跑通 |
 | 工具 | `mr.exe run/tree/wiki` | `grep` + `cat` + `git commit` |
 | 数据来源 | 工具记录 | 人脑反思 |
-| 数量 | 8 棵(本项目) | 58 条(本项目) |
+| 数量 | 按项目各自维护 | 63 条(本项目) |
 | 命名 | 同样叫"method tree" | 同样叫"method tree" |
 
 **两个系统同名但完全独立**:
-- lsx-mp-rust 是独立项目 `~/.pi/agent/projects/lsx-mp-rust/`,有自己的 METHOD-TREE.md
+- 外部工具链是独立项目,有自己的 METHOD-TREE.md(不在本仓库)
 - 本套件是 RULES-TREE 沉淀池的 pi skill 化
 - 互不引用,各自维护
 
 ## More
 
-- 沉淀池:[RULES-TREE.md](../../RULES-TREE.md)(58 条 RULE)
+- 沉淀池:[RULES-TREE.md](../../RULES-TREE.md)(63 条 RULE)
 - 沉淀方法:[method-tree-write/SKILL.md](../method-tree-write/SKILL.md)
 - 8 段精简:[method-tree/SKILL.md](../method-tree/SKILL.md)
 - 关联 RULE:`RULE-METHOD-TREE-001`(本套件自身的沉淀,见 RULES-TREE.md 末尾)

@@ -6,7 +6,7 @@ description: >
   "/rules-benchmark" / "/rules benchmark" / "rules benchmark" / "rule benchmark" /
   "benchmark 八荣八耻" / "compare modes" / "baseline vs full vs ultra"。
   对标 Ponytail `ponytail-gain`(诚实协议 + scoreboard 风格)。
-homepage: file:///C:/Users/Administrator/Desktop/kimi_code_test/AGENTS.md
+homepage: ./AGENTS.md
 license: MIT
 ---
 
