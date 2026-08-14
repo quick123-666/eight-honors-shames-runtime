@@ -8,7 +8,7 @@
 
 **29 条准则 · 跨项目核心价值观 · 规则注入省 81%+ token · 8+ AI 工具即装即用** · **技术路线双轨制 (honor / graph) · 0 成本切换**
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
-[![Tests](https://img.shields.io/badge/tests-72%20passed-brightgreen)](./tests)
+[![Tests](https://img.shields.io/badge/tests-48%20passed-brightgreen)](./tests)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-green)](./package.json)
 [![AI Tools](https://img.shields.io/badge/AI_Tools-8+-purple)](#安装各-ai-工具配置哪个-md)
 
@@ -81,7 +81,7 @@ git clone https://github.com/quick123-666/eight-honors-shames-runtime.git
 cd eight-honors-shames-runtime
 npm install
 npm run adapters      # 生成 8+ 工具适配文件 → adapters/
-npm test              # 72 个测试,验证安装配置正确
+npm test              # 48 个测试,验证安装配置正确
 ```
 
 ---
@@ -211,7 +211,7 @@ npm run adapters → adapters/（8+ AI 工具的规则文件）
 ```
 ├── src/                 # 核心：注入/模式仲裁/审计/验收/benchmark/toolenv
 ├── scripts/             # CLI 脚本（check/adapters/benchmark/accept/smoke）
-├── tests/               # 72 个测试（含适配文件安装配置测试）
+├── tests/               # 48 个测试（含适配文件安装配置测试）
 ├── adapters/            # 生成产物：8+ 工具的规则文件（勿手改）
 ├── mcp/                 # MCP server（stdio, 只读 3 工具）
 ├── hooks/               # 生命周期钩子（Claude Code 等）
@@ -227,7 +227,7 @@ npm run adapters → adapters/（8+ AI 工具的规则文件）
 ## 🛠️ 开发
 
 ```bash
-npm test                 # 72 个测试（单元 + 适配文件安装配置测试）
+npm test                 # 48 个测试（单元 + 适配文件安装配置测试）
 npm run check            # 生成适配 + 测试 + 规则校验 + 注释校验
 npm run adapters         # 重新生成 adapters/（改 RULES/AGENTS 后必跑）
 npm run benchmark        # 确定性 benchmark（无 LLM,管线自检）

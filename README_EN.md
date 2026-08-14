@@ -10,7 +10,7 @@
 
 [![Version](https://img.shields.io/badge/version-v3.6.0-blue)](./package.json)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
-[![Tests](https://img.shields.io/badge/tests-72%20passed-brightgreen)](./tests)
+[![Tests](https://img.shields.io/badge/tests-48%20passed-brightgreen)](./tests)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-green)](./package.json)
 [![AI Tools](https://img.shields.io/badge/AI_Tools-8+-purple)](#installation-which-md-does-each-ai-tool-need)
 
@@ -81,7 +81,7 @@ git clone https://github.com/quick123-666/eight-honors-shames-runtime.git
 cd eight-honors-shames-runtime
 npm install
 npm run adapters      # generate adapter files for 8+ AI tools → adapters/
-npm test              # 72 tests, including install-config verification
+npm test              # 48 tests, including install-config verification
 ```
 
 ---
@@ -210,7 +210,7 @@ npm run adapters → adapters/ (rule files for 8+ AI tools)
 ```
 ├── src/                 # core: injection / mode arbitration / audit / acceptance / benchmark / toolenv
 ├── scripts/             # CLI (check/adapters/benchmark/accept/smoke)
-├── tests/               # 72 tests (incl. adapter install-config tests)
+├── tests/               # 48 tests (incl. adapter install-config tests)
 ├── adapters/            # generated: rule files for 8+ tools (do not edit by hand)
 ├── mcp/                 # MCP server (stdio, read-only, 3 tools)
 ├── hooks/               # lifecycle hooks (Claude Code etc.)
@@ -226,7 +226,7 @@ npm run adapters → adapters/ (rule files for 8+ AI tools)
 ## 🛠️ Development
 
 ```bash
-npm test                 # 72 tests (unit + adapter install-config)
+npm test                 # 48 tests (unit + adapter install-config)
 npm run check            # adapters + tests + rules sync + annotations
 npm run adapters         # regenerate adapters/ (run after editing RULES/AGENTS)
 npm run benchmark        # deterministic benchmark (no LLM)
