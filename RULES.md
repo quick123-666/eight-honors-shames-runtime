@@ -901,7 +901,7 @@
 
 | 元算子 | 位置 | 状态 |
 |---|---|---|
-| RULE-FP-001 第一性原理复合算子 | runtime RULES-TREE.md L667 | ✓ 2026-08-12 沉淀 |
+| RULE-FP-001 第一性原理复合算子 | runtime RULES-TREE.md L668(段头) | ✓ 2026-08-12 沉淀 |
 | RULE-LOOP-001 防空转复合算子 | runtime RULES-TREE.md 缺失 | ❌ 待沉淀(v3.3.1 承诺) |
 | 反模式案例归档(本会话 5 次讽刺观察) | runtime RULES.md L578 2.2 段 | ✓ 已归档 |
 | 兑底机制(F 档 COVER-ALL / 防空转 5 段) | runtime RULES.md L590 + 主项目 RULES.md L631 | ✓ 已交叉 |
