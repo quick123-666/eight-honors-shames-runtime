@@ -4641,3 +4641,153 @@
   - ✅ 立刻**轮换该 key**:用户去 platform.minimaxi.com /user-center → interface-key → Delete / Regenerate(原 OpenAI 后台错误,实为 MiniMax 后台)
   - ✅ pre-commit hook v3.4.10 已实装,未来 `sk-` / `pk_live_` / `Bearer ` / `-----BEGIN` 命中 → 阻断 commit
 - **反向证据**:本次事件让 RULE-IX-SENSITIVE-DATA-001 从"理论"变"实战" — 5 个 DEF 块对应现实威胁的具体场景。
+
+
+### RULE-MINICOG-067(2026-08-14 沉淀 — minicog 9 Agent + LLMClient 接入 LAAP-style)
+
+- **触发场景**: minicog 18 模块"说话"接 LLM, 删除模板复读, 接 LAAP 风格 9 Agent 流水线
+- **关联**: C.a/b/c + README + 12 单元 + 316 pytest 0 回归
+- **本仓位置**: `C:/Users/Administrator/Desktop/液态神经网络/minicog 2.0.0/docs/RULE-067-minicog-9-agent-llmclient.md` (76 行, 3107 字节)
+
+#### 9 Agent 链
+
+| Agent | 真实化 |
+|---|---|
+| first_agent | 入口意图理解 + 任务路由 |
+| chat_agent | LLM 闲聊 |
+| translate_agent | LLM 翻译 |
+| summarize_agent | LLM 摘要 |
+| analyze_agent | LLM 结构化分析 |
+| code_agent | LLM 代码生成 |
+| search_agent | minicog semiotics L2 检索 |
+| fallback_agent | 兜底回复 |
+
+#### LLMClient Protocol
+
+- `MockLLMClient`(默认)/ `OpenAILLMClient`(MiniMax/DeepSeek)/ `LocalOllamaClient`
+- env var: `OPENAI_API_KEY` / `OPENAI_BASE_URL` / `OPENAI_MODEL`
+- MiniMax 接入: base_url=`https://api.minimaxi.com/v1` model=`MiniMax-M3`
+
+#### 4 错码诊断
+
+| 错码 | 原因 |
+|---|---|
+| 401 invalid | key 失效 |
+| 402 Insufficient Balance | 余额不足 |
+| 401 (2049) | MiniMax key 失效 |
+| Request timed out | 防火墙(美国 API) |
+
+#### 实战数据
+
+- 9 Agent 路由 48 测:chat 24 / analyze 12 / translate 6 / code 6
+- 316 pytest 0 回归 (303 minicog + 12 agent + 1 conftest)
+- `agents/README.md` 3275 字节 / 120 行 / 7 章节
+
+#### 关键踩坑
+
+- **OPENAI_API_KEY 命名误导**: 实际是 DeepSeek key(末 4 位 5741), 不是 OpenAI key
+- **不要在对话粘贴 key** — 用 env var 或本地 PowerShell
+- **下次如何避免**: 哈希 8 位 + 末 4 位验证 / 网络诊断(socket.gethostbyname)/ 错码诚实记录
+
+
+### RULE-MINICOG-068(2026-08-14 沉淀 — chat.py sort 逻辑真改 + 修 1 test + 完成六道真接驳)
+
+- **触发场景**: 任何"用 boost 优先级改 sort 逻辑 + 六道主道自动 top-N + 完成六道真接驳"的真改任务, 且需保证分层 DAG winners 不超 capacity、只 active 模块入选、无 deps 模块也能进 winners
+- **关联**: RFC-008 (DAG) + RFC-011 (Organizer) + RULE-LOOP-006 (稀疏改造同风格: 一次性多文件联动 + 数学验证)
+- **本仓位置**: `C:/Users/Administrator/Desktop/液态神经网络/minicog 2.0.0/docs/RULE-068-chat-sort-boost.md` (77 行, ~5.5 KB)
+- **minicog commit**: `b7c903e` (master, 2026-08-14, 6 文件 +147/-32)
+
+#### 5 处改动 + 1 边界修复
+
+| 标号 | 文件 | 改动 | 根因 |
+|---|---|---|---|
+| 主改 | `chat.py:388-417` | 拆循环: 收集 → 按 (salience+boost) 降序 + 六道主道优先 → 触发 | 原 max 改 sort |
+| N5 | `minicog_core/dag_engine.py` | 加 `add_node(node)` 方法 | 孤立节点也能进 topo_sort |
+| N6 | `minicog_core/think_engine.py` | 去"无 deps 模块不进 nodes_for_topo"过滤 | psi/conscious 等走残余模块也能进 winners |
+| N7 | 同上 | `per_layer_cap` 动态 `max(1, min(2, capacity - len(winners)))` | 3 层 × 2 = 6 > 默认 capacity=4, 违反 test_think_v21_layered |
+| N8 | 同上 | `layer_mods` 筛选加 `and n in active_set` | 防 N5 预注册的孤立节点被意外入选 |
+| N9 | `minicog_core/global_workspace.py` | `Process.activation` 默认 0.0 (原 0.5) | 所有 18 模块默认 active 违反 test_v23_salience 第 2 测试 |
+| N10 | `chat.py:420` | 嵌套 if-else, 空 candidates 也打印 | 边界 case, 防 [六道接驳] 静默漏报 |
+| N10b | `minicog_core/reply_organizer.py:118` | `_main_path = "天道"` 默认 (原 `""`) | 时序错位: compose 改 `_main_path`, 触发循环在 compose 之前读改前空值 |
+
+#### 实战数据
+
+- **修复卡住的 test**: `tests/test_v23_salience.py::test_salience_priority_in_winners` (期望 `{conscious, psi}` 都在 perception 层 winners, 实际只有 conscious)
+- **pytest 零回归**: 316/316 (原 RULE-MINICOG-067 基线, 本次修后 316/316)
+- **端到端实测**: `test_input_6paths.txt` 52 行 → 6 道全覆盖: 天道 4 / 人间道 3 / 修罗道 10 / 畜生道 4 / 饿鬼道 3 / 地狱道 28
+- **[六道接驳] 打印**: N10b 修复前 51/52 (98%) → 修复后 **52/52 (100%)**
+- **备份**: `_recycle_bin/20260814-chat-sort-boost-A/{chat.py.bak, chat.py.pre-N10.bak, think_engine.py.bak, dag_engine.py.bak, reply_organizer.py.pre-N10b.bak}`
+
+#### 关键踩坑 (下次如何避免)
+
+- **3 数学不变量**: ① per_layer_cap × 3 层 + residual ≤ capacity;② active_nodes ⊆ {trigger 过};③ DAG nodes ⊆ {active_nodes + 上游}
+- **时序错位**: organizer.organize() 在 compose 内部被调, **会改** `_main_path` — 触发循环读 `organizer._main_path` 要么在 compose 之后, 要么用默认值兜底
+- **`Process.activation` 默认 0.5 = bug**: 默认激活 ≠ 触发激活, 必须从 0 起算, 否则"未 trigger"和"trigger 0.5"混淆
+- **无 deps 模块该不该进 layered winners**: 答案是**该** (语义一致 + 测试期望), 但需要预注册孤立节点 (N5) + 去过滤 (N6) + active 限定 (N8)
+
+---
+
+- **§五十 6 道全覆盖测试** (2026-08-14 下午, 本会话补):
+  - 测试文件: `C:/Users/Administrator/Desktop/液态神经网络/minicog 2.0.0/test_input_all_paths_50.txt` (49 行)
+  - 结果: **49/49 全接驳 (100%) + 6 道全覆盖**
+  - 主道分布: 修罗 14 / 畜生 13 / 地狱 8 / 天道 6 / 饿鬼 5 / 人间 3 (= 49 数学验证)
+  - 设计原则 (3 数学不变量): 累积窗口 3 轮 / 开头 3 行必连续触发"稀有主道"词 / 每 3-5 行切换意图
+  - 上游 §在本仓 RULE-068 §五十 详述 + memory.md §十一 沉淀
+
+---
+
+### RULE-LOOP-WATCHDOG-INTERP-001(2026-08-14 v3.4.13 MINOR 沉淀 — loop-watchdog 信号使用边界,避免把它当通用短答模板)
+
+- **触发场景**: loop-watchdog 信号(类似 `RULE-LOOP-008 降级 | 本轮建议: 短答 + 不调工具 + [空转阻断] 末行 + 等用户新输入`)出现时,AI 被动接令“为啥功能都没了”“主动使用也没了”“自动沉淀好久没看到”类。
+- **核心纠正**:
+  - **❌ 旧认知**: loop-watchdog 信号是**通用降级指令** — 任何时候出现就要"短答 + [空转阻断]"
+  - **✅ 新规约**: loop-watchdog 信号是**过去式场景描述**(N 分钟前用户未输入),**不是当前轮限制**。当前轮一旦用户给了明确指令(什么什么 / A / 继续 / 继续干什么),就**应恢复正常完整模式**(开头硬话术 + 三栏 + 末行 `[COVER-ALL]` 8 行)
+- **本 RULE 定义**(2 类场景区分):
+  - **场景 A: 空转**(用户 20 分钟未输入 + watchdog 提醒 + 本轮**未收新指令**) → 走短答(≤200 字)+ 末行 `[空转阻断 · 本轮无新动作]`
+  - **场景 B: 有明确任务**(用户在新一轮开头给了指令 / 选了选项 / 主动提问 / 改方向)**即使 watchdog 还 在背景提示**, → 走完整 B/C 档 + 开头 `[八荣八耻已激活 · ${mode} · 28条 · NO DRIFT]` + 末行 `[COVER-ALL]` 8 行
+- **实战案例**(本会话近 5 轮 2026-08-14):
+  - 用户 5 连发: 研究 → 安装 → 用 MCP 启动 UI → A → 为什么功能没了
+  - watchdog 在前一轮提示过(20 分钟未输入), AI **误读**为“本轮要短答”
+  - 后 5 轮 AI 响应均**缺** 开头硬话术 + 末行 `[COVER-ALL]` 8 行 → 用户感知“主动使用工作方法也没了”
+  - **结论**: 不是“功能没了”,是“格式降级了但用户看出这不是任务所需的状态”
+- **修复**:
+  - 任何“loop-watchdog 提示”出现 + 当前轮**未收**新指令 → 场景 A
+  - 任何“loop-watchdog 提示”出现 + 当前轮**已收**新指令 → 场景 B → **恢复正常完整格式**
+  - 判别信号:**有 `[trigger from user]` → 场景 B**;无 → 场景 A
+- **下次如何避免**:
+  1. 收到 loop-watchdog 信号时,第一件事:**检查本轮开头是否有用户输入**(不是看上下文 session 状态)
+  2. 本轮有用户输入 → 走 B/C 档(本 RULE 默认路径)
+  3. 本轮无用户输入(纯轮询)→ 走 A 类短答
+  4. **不**为“节省 token”跳过 F 档 `[COVER-ALL]` 8 行兑底 — 这就是用户感知的“主动使用”信号
+- **覆盖**: R10 不重复犯错 / R15 完整版 / R22 帮助解难 / R23 协助到底
+
+### RULE-DSH-FIRST-RUN-001(2026-08-14 v3.4.13 MINOR 沉淀 — 在新机器首次跑 dsh web 的 4 步流程 + Windows 后台启动 trick)
+
+- **触发场景**: 用户接令“启动 dsh web / 研究 deepseek-harness / 用 MCP 启 UI”时。
+- **核心纠正**:
+  - **❌ 旧认知**: `pnpm dsh web` 就能启 web UI
+  - **✅ 新规约**: dsh web 需要 `pnpm install → pnpm run build → detached 后台启动 → 验 UI` 4 步走通
+- **本 RULE 定义**(4 步流程):
+  - **Step 1 — Install**: `pnpm install`(pnpm 11.7 + monorepo 50+ workspace,实测 4m51s)。预期 WARN: 2 个 Windows `.bin/` 软链失败(`examples/dsh-acp-demo` + `python/sdk-runtime/dsh-jsonrpc-agent`,源码 `bin.js` vs Windows 找 `bin.js.EXE`,不阻主程序)
+  - **Step 2 — Build**: `pnpm run build`(构建 web-frontend client bundle,实测 4m41s,出 `apps/web-frontend/dist/`)→ **不 build 会出现 `MissingClientBundleError`**(`vendor/cordis/src/fiber.ts` 报错循环)
+  - **Step 3 — Detached start**(Windows trick):
+    - ❌ `cmd /c "pnpm dsh web > log 2>&1"` 在 PowerShell `Start-Process -WindowStyle Hidden` 中间层会丢 stdout
+    - ❌ `(pnpm dsh web > log 2>&1 &)` 在 git bash 后台中存活弱(parent shell 退出可能被 SIGTERM)
+    - ✅ PowerShell 原生:`Start-Process -FilePath 'pnpm.cmd' -ArgumentList 'dsh','web' -WorkingDirectory <cwd> -RedirectStandardOutput <log> -RedirectStandardError <log> -WindowStyle Hidden -PassThru`(输出重定向 + detached + 启动 PID 可见)
+  - **Step 4 — 验证**: `netstat -ano | grep ":3080.*LISTENING"`(必 LISTENING)+ `browser_navigate http://127.0.0.1:3080` + `browser_screenshot` 看 UI(预期 first render = `__DSH_BOOT__` plugin 清单 + “Into the Unknown”/“走向未知” preview 文案)
+- **实战量化**(本会话 2026-08-14):
+  | 阶段 | 实测耗时 | 失败点 |
+  |---|---|---|
+  | pnpm install | 4m51s | 0(2 WARN 不影响) |
+  | 首次 `pnpm dsh web`(未 build) | ~30s 后 crash | MissingClientBundleError × 50+ |
+  | `pnpm run build` | 4m41s | 0(exit 0,vendor.js 745KB + index.js 443KB) |
+  | 重启 web(PowerShell Start-Process hidden) | 35s 后 startup | 0(3080 LISTENING) |
+  | `browser_navigate` | <5s | 0(UI 真容) |
+  | 发“666”消息 | <10s | LLM `Insufficient Balance`(余额,非流程 bug) |
+- **服务生命周期**(R9 不搞破坏 × R15 完整版): detached 后服务**不随 git bash session 退出被杀**,仅在 PowerShell taskkill 或 OS 重启时终止
+- **下次如何避免**:
+  1. **第一次跑 dsh web 必先 build**(避免 5 分钟 MissingClientBundleError 浪费)
+  2. **Windows detached start 必用 PowerShell `Start-Process -RedirectStandardOutput`**,不试用 bash `&`
+  3. **不要直接信任 build.log 1 行输出**(vite 输出被 stdout buffer 吞);用 `curl 3080` + `netstat` 验“是否真启”为准
+  4. **遇到 `MissingClientBundleError`** 直接 grep `cordis` + `client.js` → 几乎 100% 是 web-frontend 没 build
+- **覆盖**: R12 验证 / R19 走流程 / R28 跨会话沉淀
