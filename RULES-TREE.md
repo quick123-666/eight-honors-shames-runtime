@@ -924,9 +924,9 @@
 
 关联纪律:
 - 服务 **RULES.md 准则 11·复用** + **准则 12·主动调试** + **准则 23·立即但完整**:本 RULE 把这三条组合成"改一文件 + 跑通 + 沉淀" 的标准操作流程
-- 配套 **RULE-RUN-THROUGH-001**(L394):本 RULE 的 Pre ∧ Run ∧ Sediment 是 RUN-THROUGH 的实例化
-- 配套 **RULE-DEBUG-001**(L420):调试 chromadb bug 时按 RULE-DEBUG 跑,但**修复后**走本 RULE 沉淀
-- 配套 **RULE-METADATA-EVIDENCE**(L138):任何"数据在不在" 判断必须 5 维度交叉验证(本会话已踩过"只查 live 漏掉备份")
+- 配套 **RULE-RUN-THROUGH-001**:本 RULE 的 Pre ∧ Run ∧ Sediment 是 RUN-THROUGH 的实例化
+- 配套 **RULE-DEBUG-001**:调试 chromadb bug 时按 RULE-DEBUG 跑,但**修复后**走本 RULE 沉淀
+- 配套 **RULE-METADATA-EVIDENCE**:任何"数据在不在" 判断必须 5 维度交叉验证(本会话已踩过"只查 live 漏掉备份")
 - 同向强化:RULES.md 准则 10 / 14 / 17 / 24 / 25
 
 覆盖:
