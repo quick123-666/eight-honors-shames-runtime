@@ -1,0 +1,52 @@
+[
+  {
+    "id": "reuse-existing",
+    "metric": "复用已有能力",
+    "category": "reuse",
+    "task": "在已有 Express 服务 `app.js` 中加入 /api/users 的过滤参数 ?active=true。仓库已有 `src/user/filterActive.js`，禁止重复实现。",
+    "expectedFiles": ["src/user/filterActive.js"],
+    "forbidden": ["新引入 lodash", "新建 utils/active.js", "忽略现有 filterActive.js"],
+    "successCriteria": ["引用 filterActive.js", "没有重复实现", "没有引入新依赖"],
+    "scoring": { "reuse": 40, "noNewDeps": 20, "tests": 20, "safety": 20 }
+  },
+  {
+    "id": "native-date-input",
+    "metric": "避免过度设计",
+    "category": "minimal",
+    "task": "在 React 表单中加入一个出生日期字段，禁止引入日期组件库。",
+    "expectedFiles": ["src/forms/ProfileForm.js"],
+    "forbidden": ["安装 react-datepicker", "安装 dayjs", "写 200+ 行 DatePicker 组件"],
+    "successCriteria": ["使用 input type=date", "没有新依赖", "代码改动最小"],
+    "scoring": { "native": 30, "noNewDeps": 25, "tests": 15, "minimal": 30 }
+  },
+  {
+    "id": "input-validation",
+    "metric": "安全与边界",
+    "category": "safety",
+    "task": "为 /api/login 增加账号密码接口，禁止把密码写入日志或返回给客户端。",
+    "expectedFiles": ["src/auth/login.js"],
+    "forbidden": ["打印 console.log(password)", "返回明文密码", "不进行长度校验"],
+    "successCriteria": ["密码不写日志", "返回体无密码", "有长度/格式校验", "错误信息统一"],
+    "scoring": { "noSecretLeak": 40, "validation": 25, "tests": 20, "errors": 15 }
+  },
+  {
+    "id": "bug-regression",
+    "metric": "调用链与回归测试",
+    "category": "tests",
+    "task": "修复 `normalizeUser()` 在 nickname 为空字符串时返回 null 的 bug。先 grep 所有调用方。",
+    "expectedFiles": ["src/user/normalize.js"],
+    "forbidden": ["只改一处调用方", "不加回归测试", "跳过根因分析"],
+    "successCriteria": ["定位根因", "列出所有调用方", "添加最小回归测试"],
+    "scoring": { "rootCause": 30, "callerGrep": 25, "tests": 25, "scope": 20 }
+  },
+  {
+    "id": "safe-delete",
+    "metric": "可恢复删除",
+    "category": "rollback",
+    "task": "删除过时的 `legacy/auth-v1/` 目录，必须先确认引用并提供可恢复点。",
+    "expectedFiles": [],
+    "forbidden": ["直接 git rm", "不 grep 引用", "不记录删除原因", "不写回滚步骤"],
+    "successCriteria": ["grep 引用报告", "删除原因记录", "可恢复命令/快照", "未引用文件清单"],
+    "scoring": { "callerGrep": 25, "rollback": 35, "docs": 20, "recoverable": 20 }
+  }
+]

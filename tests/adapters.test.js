@@ -1,5 +1,5 @@
 //! 安装配置测试:验证 build-adapters 生成的各工具适配文件
-//! 1. 7 个工具目标齐全
+//! 1. 8 个工具目标齐全(含 QClaw / OpenClaw always-load skill)
 //! 2. 每个文件包含 21 条精简命令式(与 AGENTS.md 零漂移)
 //! 3. 每个文件指向 RULES.md(单一来源,不复制完整正文)
 //! 4. 无敏感内容(个人路径/密钥/内部工具)
@@ -14,7 +14,7 @@ import { buildAdapters, extractPrinciples, ADAPTER_TARGETS } from "../scripts/bu
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "adapters-test-"));
 
-test("生成 7 个工具适配文件", () => {
+test("生成 8 个工具适配文件", () => {
   const written = buildAdapters({ root: ROOT, out: tmp });
   const names = written.map((f) => path.basename(f)).sort();
   const expected = Object.keys(ADAPTER_TARGETS).sort();
@@ -46,7 +46,14 @@ test("每个适配文件指向 RULES.md 且不含完整正文", () => {
 test("适配文件无敏感内容", () => {
   const sensitive = /Administrator|jshgd|qclaw|openclaw|mr-llm|lsx-mp-rust|sk-[A-Za-z0-9]{10,}|auth\.json|\.pi\/agent/;
   for (const [file] of Object.entries(ADAPTER_TARGETS)) {
-    const content = fs.readFileSync(path.join(tmp, file), "utf8");
+    let content = fs.readFileSync(path.join(tmp, file), "utf8");
+    // QClaw skill 的 frontmatter(name: qclaw-eight-honors / metadata 键 `openclaw`)是平台规范必需
+    // (同 CLAUDE.md 标题含 "Claude Code"),豁免这两处平台标识本身
+    if (file === "qclaw-eight-honors.SKILL.md") {
+      content = content
+        .replace(/^name: qclaw-eight-honors$/m, "name: platform-skill")
+        .replace(/^  openclaw:$/m, "  platform-key:");
+    }
     assert.ok(!sensitive.test(content), `${file} 含敏感内容`);
   }
 });
@@ -54,10 +61,21 @@ test("适配文件无敏感内容", () => {
 test("build-adapters 可写入任意输出目录", () => {
   const outDir = path.join(tmp, "cli-out");
   const written = buildAdapters({ root: ROOT, out: outDir });
-  assert.equal(written.length, 7);
+  assert.equal(written.length, 8);
   assert.ok(fs.existsSync(path.join(outDir, "CLAUDE.md")));
   assert.ok(fs.existsSync(path.join(outDir, ".cursorrules")));
   assert.ok(fs.existsSync(path.join(outDir, "GEMINI.md")));
+});
+
+test("qclaw skill 模板含 always-load frontmatter 且自包含 21 条", () => {
+  const content = fs.readFileSync(path.join(tmp, "qclaw-eight-honors.SKILL.md"), "utf8");
+  assert.match(content, /^name: qclaw-eight-honors$/m, "skill name 应为 qclaw-eight-honors");
+  assert.match(content, /always: true/, "应标记 always-load 强制加载");
+  assert.match(content, /MANDATORY - ALWAYS LOAD/, "应含强制加载声明");
+  const source = extractPrinciples(path.join(ROOT, "AGENTS.md"));
+  for (const p of source) {
+    assert.ok(content.includes(`> ${p}`), `缺第 ${p.split(".")[0]} 条精简命令式`);
+  }
 });
 
 test.after(() => fs.rmSync(tmp, { recursive: true, force: true }));

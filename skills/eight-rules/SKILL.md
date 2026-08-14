@@ -113,7 +113,7 @@ Level persists until changed or session end。
 
 ## 平行 skill 体系(方法树 — RULES-TREE 7 段元工作流沉淀)
 
-> **2026-08-13 v3.4.5 整合**(v3.4.4 首版错绑到外部工具链,已 revert;本版改为 RULES-TREE 7 段沉淀范式):
+> **2026-08-13 v3.4.5 整合**(v3.4.4 首版错绑到外部 mr.exe 工具链,已 revert d6283ea;本版改为 RULES-TREE 7 段沉淀范式):
 > `method-tree` 套件独立于八荣八耻(纪律层),但**直接受八荣八耻约束**(准则 6/10/24/28 共 7 处要求主动调用+沉淀方法树)。
 > 两套档位**不联动**——纪律管"怎么沉淀",沉淀管"沉淀什么"。
 
@@ -127,7 +127,7 @@ Level persists until changed or session end。
 | `method-tree-publish` | 子 one-shot | 发布(commit + 6 文件版本号同步)(`/mr-publish`) |
 | `method-tree-feedback` | 子 one-shot | 跟踪引用次数/复用率(`/mr-feedback`) |
 
-**关键定义**:本套件的"方法树" = RULES-TREE.md 里的 7 段元工作流沉淀(63 条 RULE-XXX-001),与外部 mr.exe 工具链(自动生成执行树)**完全独立**。
+**关键定义**:本套件的"方法树" = RULES-TREE.md 里的 7 段元工作流沉淀(57 条 RULE-XXX-001),与外部 mr.exe 工具链(自动生成执行树)**完全独立**。
 
 详见 [method-tree/SKILL.md](./method-tree/SKILL.md) + `RULE-METHOD-TREE-001`(RULES-TREE.md 末尾)。
 

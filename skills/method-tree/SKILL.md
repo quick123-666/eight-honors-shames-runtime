@@ -1,7 +1,7 @@
 ---
 name: method-tree
 description: >
-  方法树主持续 skill — ACTIVE EVERY RESPONSE. **RULES-TREE 7 段元工作流沉淀范式**(RULE-XXX-001 系列, 63 条)+ 反漂移硬话术。
+  方法树主持续 skill — ACTIVE EVERY RESPONSE. **RULES-TREE 7 段元工作流沉淀范式**(RULE-XXX-001 系列, 57 条)+ 反漂移硬话术。
   Default mode **full**。Trigger: "方法树"、"method tree"、"method-tree"、
   "沉淀 RULE"、"写 7 段 RULE"、"踩坑沉淀"、"RULES-TREE 7 段"。
   切换档位: `/mr lite|full|ultra|off`。停止: "停止方法树" / "no mr" / "/mr off"。
@@ -16,9 +16,9 @@ license: MIT
 
 > **v3.4.5 修正**:本套件 v3.4.4 时错绑到了外部 mr.exe 工具链
 > (commit bfad0bc,已 revert d6283ea)。
-> **正解**:方法树 = RULES-TREE.md 里的 7 段元工作流沉淀(63 条 RULE-XXX-001)
+> **正解**:方法树 = RULES-TREE.md 里的 7 段元工作流沉淀(57 条 RULE-XXX-001)
 > ——人写的、可复用的、踩坑或跑通流程后沉淀的 7 段 RULE。
-> 与外部方法树工具链(自动生成执行树)**完全独立**。
+> 与外部 mr.exe(自动生成执行树)**完全独立**。
 
 ## Persistence
 
@@ -74,7 +74,7 @@ license: MIT
 - **关联 RULE**: RULE-XXX-NNN (类似主题)
 ```
 
-**总沉淀池**(截至 v3.4.5): **63 条 RULE**, 含 DEBUG/EXPLAIN/LEARN/REVIEW/COVER/LOOP×4/MINICOG×45+/PUSH-V323/MR-DIAG/EIGHT-RULES-SKILLS 等。
+**总沉淀池**(截至 v3.4.5): **57 条 RULE**, 含 DEBUG/EXPLAIN/LEARN/REVIEW/COVER/LOOP×4/MINICOG×45+/PUSH-V323/MR-DIAG/EIGHT-RULES-SKILLS 等。
 
 ## 4 强度档
 
@@ -156,5 +156,5 @@ Level persists until changed or session end。
 > **生成信息**:本 skill 由 `skills/method-tree/SKILL.md` v3.4.5 重做于 2026-08-13,
 > 对标 `eight-rules/SKILL.md` 双层架构 + 沉淀池改指 RULES-TREE 7 段。
 > 沉淀为 `RULE-METHOD-TREE-001`(RULES-TREE.md 末尾,替代 v3.4.4 的 RULE-METHOD-TREE-SKILLS-001)。
-> 完整沉淀池见 [RULES-TREE.md](../../RULES-TREE.md) — 63 条 RULE。
+> 完整沉淀池见 [RULES-TREE.md](../../RULES-TREE.md) — 57 条 RULE。
 > 工具:`grep` + `cat` + `git commit`(无外部工具链依赖)。

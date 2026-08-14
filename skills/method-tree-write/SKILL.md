@@ -93,7 +93,7 @@ license: MIT
 ## Tags(共享字典)
 
 - `write:` 写新 — **Replacement**:`mr-pattern`(先查后写)
-- `7-sec:` 7 段格式 — **Replacement**:`/mr-show`(有 63 条现成的可参考)
+- `7-sec:` 7 段格式 — **Replacement**:`/mr-show`(有 57 条现成的可参考)
 - `cat>>:` 追加不覆盖 — **Replacement**:`mr-publish`(commit + 5 文件同步)
 
 ## 永不精简的边界

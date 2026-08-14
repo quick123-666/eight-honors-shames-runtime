@@ -26,7 +26,7 @@ export function buildEightRulesHint(currentMode) {
 }
 
 // 方法树硬话术(每轮显式前缀,反漂移核心)
-// v3.4.5 修正:内容从 外部工具链 → RULES-TREE 7 段元工作流沉淀
+// v3.4.5 修正:内容从外部工具链 → RULES-TREE 7 段元工作流沉淀
 // (commit bfad0bc 错绑已 revert d6283ea)
 // 对标 eight-rules hint 模式 + skills/method-tree/SKILL.md "Persistence" 段
 export function buildMethodTreeHint(currentMode) {
