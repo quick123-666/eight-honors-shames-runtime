@@ -2,7 +2,7 @@
 
 > **作用**:固化八荣八耻(本项目 AI 工作准则)的**版本号命名规范**和**升级流程**,避免"v3+2.1" vs "v2.3" vs "2026-08-11 v2.3" 之类的命名混乱。
 > **维护触发**:任何新增原则 / 调优 / 反哺 / 大重构之前 + 之后
-> **当前版本**:**v3.5.5**(2026-08-14,PATCH: v3.5.4 QClaw 适配器追平 + token-slim 001/002 — skill 注入瘦身 ~87% + 会话卫生 + RULES 按需读 + [COVER-ALL] 输出取消)
+> **当前版本**:**v3.6.0**(2026-08-15,MINOR: 双轨制升级 + 图谱决策路线接入 — AGENTS.md 加 "## 技术路线双轨制" 段落(`honor` 原模式 + `graph` 图谱决策模式,通过 `AGENTS_MODE` env var / `~/.agents/mode.json` / `Mode.set()` 切换,默认 `graph`)+ `scripts/check_mode.py` 模式检测(env > config > 默认 优先级);5 类 8 条准则降级映射走图谱决策(R1/R3/R4/R6/R7/R11/R19/R28)+ 21 条保留为行为约束;切换成本 = 0,任意时刻一键回退原模式;沉淀 **RULE-CORE-B-003 + RULE-CORE-B-004** 于主 + 副本 RULES-TREE.md 同步)
 > **上一版本**:v3.5.4
 > **关联文件**:RULES.md(完整版 **28 条**) / AGENTS.md(精简版 **28 条**) / RULES-TREE.md(方法论沉淀)
 
@@ -81,7 +81,8 @@ v<MAJOR>.<MINOR>.<PATCH>
 | **v3.5.2** | **PATCH: 22 条独立 RULE 沉淀(剩余 22 条全量一次完成)** — R1/R2/R4/R5/R6/R7/R8/R9/R10/R11/R12/R14/R15/R16/R18/R19/R20/R21/R23/R24/R26/R27/R28 全部独立段;系统性补全 28 条准则 7 段标准(触发/纠正/定义/证据/避免/覆盖)+ 触发器自动跳机制;npm test 47/47 PASS;双副本 RULES-TREE.md 同步 | **29 条**(不变) | 已发布,保留 |
 | **v3.5.3** | **PATCH: 沉淀 RULE-USER-RAW-KEY-REPEAT-001(防用户重复贴 raw key)** — 5 件强制(masks 显示 / 不擅自写 / 不 echo 完整 / 主动 grep RULES-TREE 已知端点 / 主动补测该端点);本会话触发场景:3 次贴 raw key 误测 3 端点全 401 = 浪费 6 端点 curl + RULES-TREE L4669 minimax 端点未主动查;npm test 47/47 PASS;双副本 RULES-TREE.md 同步 | **29 条**(不变) | 已发布,保留 |
 | **v3.5.4** | **PATCH: QClaw/OpenClaw 适配器(第 8 个适配目标)** — `scripts/build-adapters.js` 新增 qclaw 目标生成 always-load skill 模板(metadata.openclaw.always: true + 21 条精简命令式 + 指针);部署 `~/.qclaw/skills/qclaw-eight-honors/` + openclaw.json 注册 main/mr-llm;npm test 48/48 PASS;**沉淀 RULE-QCLAW-ADAPTER-001**(本版为运行时副本先发,主项目 v3.5.5 追平) | **29 条**(不变) | 已发布,保留 |
-| **v3.5.5** | **PATCH: token-slim 001/002(用户报 token 消耗暴涨)** — ① settings.json 排除 `~/.agents/skills`(2022 个 skill description 全量注入 ≈358KB/请求 → 排除后 -87%,pi 0.84.1 `!` 排除语法已验证)② compaction 显式化 + 会话卫生脚本 `scripts/session-health.py`(近 30 天 128 会话 126.7MB,63 个 >15 万 token)③ RULES.md 会话首读改前 120 行索引(81KB→~6KB)④ [COVER-ALL] 8 行输出先分级后完全取消(用户指令,防空转由二点五 A 终止标记兑底);三文件 + 全局 AGENTS.md 同步;**沉淀 RULE-TOKEN-SLIM-001/002** 主 + 副本 | **29 条**(不变) | **当前最新** |
+| **v3.5.5** | **PATCH: token-slim 001/002(用户报 token 消耗暴涨)** — ① settings.json 排除 `~/.agents/skills`(2022 个 skill description 全量注入 ≈358KB/请求 → 排除后 -87%,pi 0.84.1 `!` 排除语法已验证)② compaction 显式化 + 会话卫生脚本 `scripts/session-health.py`(近 30 天 128 会话 126.7MB,63 个 >15 万 token)③ RULES.md 会话首读改前 120 行索引(81KB→~6KB)④ [COVER-ALL] 8 行输出先分级后完全取消(用户指令,防空转由二点五 A 终止标记兑底);三文件 + 全局 AGENTS.md 同步;**沉淀 RULE-TOKEN-SLIM-001/002** 主 + 副本 | **29 条**(不变) | 已发布,保留 |
+| **v3.6.0** | **MINOR: 技术路线双轨制 + 图谱决策路线接入(5 类 8 条降级映射)** — ① AGENTS.md 加 "## 技术路线双轨制" 段落(`honor` 原八荣八耻模式 + `graph` 图谱决策模式,通过 `AGENTS_MODE` env var / `~/.agents/mode.json` / `Mode.set()` API 切换,默认 `graph`)② `scripts/check_mode.py` 模式检测脚本(env > config > 默认 优先级)③ 5 类 8 条准则降级映射(R1 查接口→ `semantic_search`/ R3 妄想业务→ `record_decision`/ R4 复用→ `find_related_entities`/ R6 系统穷尽→ `vector_search + policy`/ R7 数学验证→ `record_decision(confidence)`/ R11 复用→ `ContextCore.to_dict()`/ R19 沉淀环节→ `decisions_log.json`/ R28 跨会话沉淀→ `auto_record_decision`)+ 21 条保留为行为约束(R2/R5/R8/R9/R10/R12/R13/R14/R15/R16/R17/R18/R20/R21/R22/R23/R24/R25/R26/R27/R29)④ 切换成本 = 0,任意时刻一键回退原模式;npm test **32/32 PASS**(test_core_b.py 15 + test_semantica_integration.py 17);**沉淀 RULE-CORE-B-003(降级映射)+ RULE-CORE-B-004(双轨制)** 于主 + 副本 RULES-TREE.md 同步;备份 `_recycle_bin/20260815-222900-pre-rule-graph-replace/`(8 文件: AGENTS.main/runtime / RULES-TREE.main/runtime / RULES.md / RULES-VERSION.md / README.md / README_EN.md) | **29 条**(不变,加 5 类 8 条走图谱决策) | **当前最新** |
 ---
 
 ## 三、升级检查清单

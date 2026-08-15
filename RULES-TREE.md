@@ -5472,3 +5472,160 @@
   3. npm test 数量变化后必核 README 徽章与正文「N 个测试」
   4. 脱敏发布前必跑:`git ls-files | grep -E "父项目目录"` 检查索引残留
 - **覆盖**: R8·复述必验证 / R10·不重复犯错 / R19·走流程 / R27·稳扎稳打 / R28·跨会话沉淀 / R29·用户感知守护
+---
+
+# RULE-CORE-B-001 · kg_rag_kuzu 中等适配模式(2026-08-15)
+
+- **触发场景**: 自研小型向量图谱 KB(kg_rag_kuzu,967 节点/1170 边,NetworkX + FAISS + BGE,纯 Python,**零容器依赖**)想升级到"可解释 + 可审计 + 可移植",但不愿丢弃零依赖优势,也不愿承担 TrustGraph 全套部署成本
+- **核心纠正**:
+  - **❌ 旧认知**: 升级 = 换 TrustGraph / Semantica 等成熟框架,代价是引入 Docker + Neo4j + 大量 Python 包,违背"零依赖"初衷
+  - **✅ 新规约**: 升级 = 自实现 TrustGraph 三大能力的**轻量子集**,保留 NetworkX + FAISS 栈 + 零容器
+- **本 RULE 定义**(7 文件,零新依赖):
+  1. **Context Core 自实现**:`core_pack.py` 把 `graph_data.pkl` + `vector_index.faiss` + `vector_idmap.pkl` 打包成单文件 `.corepack`(JSON + base64),内含 manifest(版本/创建时间/标签)—— TrustGraph "build once, deploy anywhere" 的轻量版
+  2. **OWL-lite 本体**:`core_ontology.py` 用 dataclass 实现 `OntologyClass`(owl:Class)+ `OntologyProperty`(owl:ObjectProperty,带 domain/range + 父类继承),不引入 owlready2
+  3. **Evidence 一等公民**:`core_provenance.py` 把节点 `sources` 字段升级为 `evidence_list[]`,每条含 doc/chunk/source_page/char_offset/extracted_at/extractor—— 对齐 TrustGraph fact-level provenance
+  4. **RetrievalPolicy 声明**:`core_policy.py` 把检索策略从代码抽到 JSON 声明(freshness_days / traversal=BFS|DFS|none / traversal_depth / authority_by_source / vector_graph 权重),含 traverse() 遍历器
+  5. **Schema 校验**:`core_validate.py` 校验节点/边必填字段 + 本体 + evidence_list 格式,返回 ValidationReport(errors / warnings)
+  6. **透明适配层**:`core_adapter.py` 不改现有 knowledge_graph_rag.py,通过 Adapter 提供 v2 能力(evidence 读取 + reasoning_path 记录 + 本体校验 + 策略遍历)
+  7. **零破坏迁移**:`migrate_core_v1_to_v2.py` 把 v1 `sources`/`source_doc` 平滑升级为 `evidence_list`,完整备份到 `_backup_v1_<时间戳>/`,**加性写入新字段,原字段保留**
+- **三档分级**(对应 R27·稳扎稳打分层判断):
+  | 档 | 工作量 | 代码量 | 何时选 |
+  |---|---|---|---|
+  | **A 轻量**(打包 + evidence_list) | ~5 天 | ~200 行 | demo / POC |
+  | **B 中等**(本 RULE 沉淀) | ~2-3 周 | ~800 行 / 7 文件 | 生产可用,审计合规能查 |
+  | **C 完全对标**(hypergraph + PROV-O) | ~1-2 月 | ~3000 行 | 百万节点级 |
+- **量化证据**(2026-08-15 实施现场):
+  - 7 新文件合计 ~52 KB:`core_ontology.py` 10.6 KB / `core_provenance.py` 6.2 KB / `core_policy.py` 7.1 KB / `core_validate.py` 6.6 KB / `core_pack.py` 8.5 KB / `core_adapter.py` 5.4 KB / `migrate_core_v1_to_v2.py` 7.6 KB
+  - 迁移结果:967 节点 / 1170 边,evidence_list 升级 936 节点 + 1170 边(100%),自动构建 ontology **144 classes + 222 properties**
+  - 产出:`core_v0.2.0.corepack` 5.1 MB(JSON + base64,可 git diff),含 manifest/ontology/policy/graph/vector_index
+  - round-trip 验证:节点数 / 边数 / ontology 全部一致;现有 `knowledge_graph_rag.py` 加载 `graph_data.pkl` 仍正常
+  - Windows bash 编码坑:CLI 输出必须 `sys.stdout.reconfigure(encoding="utf-8")` 否则中文乱码(项目 `_test_gbk.py` 已知同类问题)
+  - vector_idmap.pkl 陷阱:它是 pickle 对象(不是 bytes),Core 保存必须按原始 bytes 读,Adapter 用时再 `pickle.loads`(已在 `migrate_core_v1_to_v2.py` 修)
+- **下次如何避免**:
+  1. 自研小型 KB 想加 TrustGraph 风格能力时,**先评估三档(轻量 / 中等 / 完全对标)**,不要一上来重写
+  2. 中等适配必须**保留零破坏迁移**(原字段不删,新字段加性写入),否则破坏现有程序
+  3. 升级前**完整备份到 `_backup_v1_<时间戳>/`** ,出问题 `cp` 回滚,无需 Git(纯数据)
+  4. OWL-lite 本体校验默认 WARN 模式(放行+提示),只在 `strict=True` 时阻断——避免一次迁移搞挂现网
+  5. Core 文件格式选 **JSON + base64**(可读 + 可 git diff + 可人肉审)而非纯 pickle(不可读 + 易漂移)
+  6. TrustGraph 三大能力**只有 ① + ② + ④ 值得自实现**;③ (Workspace/Collection/Flow 多租户) + ⑤ (多模存储) + ⑥ (RAG 三件套) + ⑦ (跨云部署) 对小型 KB 是过度设计,不必为它们上 TrustGraph
+  7. 中文 CLI 输出记得 `PYTHONIOENCODING=utf-8` 或 stdout reconfigure
+- **未做**(主动放弃):
+  - 不实现 hypergraph(NetworkX 不支持,需自实现,性价比差)
+  - 不引入 owlready2 / rdflib / SPARQL(零依赖原则)
+  - 不改 knowledge_graph_rag.py 主程序(用 Adapter 透明层)
+- **覆盖**: R3·复用 / R4·复用 / R10·不重复犯错 / R11·复用 / R12·验证 / R14·谨慎改 / R15·完整版 / R16·超越平凡 / R19·走流程 / R20·备份先行 / R22·联系全文 / R27·稳扎稳打 / R28·跨会话沉淀---
+
+# RULE-CORE-B-002 · kg_rag_kuzu ↔ Semantica 集成模式(2026-08-15)
+
+- **触发场景**: 已升级到 kg_rag_kuzu v0.2(自带 Context Core 三大能力),想再把每次 query 自动产出**可追溯的决策**——把"知识生产端"和"决策消费端"打通
+- **核心纠正**:
+  - **❌ 旧认知**:决策 = 每次 query 后手动写脚本推 Semantica
+  - **✅ 新规约**:`generate_answer_with_citations()` 函数末尾自动调 Bridge,跑 query = 自动推送 + JSON 日志 + 跨会话可查
+- **本 RULE 定义**(1 文件 + 主程序 17 行):
+  1. **SemanticaBridge 懒加载 ContextGraph**:首次调用时 `ContextGraph(advanced_analytics=True)`,不预加载(避免没用 Semantica 时占资源)
+  2. **JSON 日志持久化**:每次 `record_decision` 后追加到 `decisions_log.json`(`_persist_decision`),Semantica `save_to_file` 不存决策
+  3. **决策作为图节点接进 Semantica**:除写字典外,调 `sg.add_node(did, "decision", ...)` + `add_node(entity, "entity")` + `add_edge(decision, entity, "relates_to_entity")`,否则 `analyze_decision_impact` 报 `Decision not found`
+  4. **补全 3 个 Semantica 索引**:`_decision_index` / `_entity_index` / `_temporal_index` + 整体排序,否则 `find_precedents` / `query_decisions` 工作不完整
+  5. **answer 末尾追加 `[Semantica]: <UUID>`**:用户/审计员一眼看到决策关联,不另起 audit 对象
+  6. **try/except 包住自动推送**:`reasoning_trace.append("⚠️ Semantica 推送失败")`,不影响主查询(接而不破)
+- **三档分级**(对应 R27·稳扎稳打):
+  | 档 | 工作量 | 何时选 |
+  |---|---|---|
+  | **A 手动**(无 Adapter)| 0 | 不用 Semantica,或一天<5 次 query |
+  | **B 浅接入**(Adapter 单独用)| ~半天 | 需要时手动调 `query_and_decide()` |
+  | **C 全自动**(主程序接入 Bridge)| **~1 小时** | **query 是日常工作流,默认推荐** |
+- **量化证据**(2026-08-15 实施现场):
+  - 新文件:`semantica_kg_adapter.py` 15.6 KB(4 函数 + SemanticaBridge 类 + 2 staticmethod)
+  - 主程序改动:`knowledge_graph_rag.py` +17 行(`generate_answer_with_citations` 末尾)
+  - 测试:17/17 全过(`test_semantica_integration.py`)
+  - Semantica 决策 API 覆盖:14/14 100%(write/query/analyze/insight/rules/trace)
+- **量化证据**(跨会话持久化验证):
+  - `decisions_log.json` 跨进程可读(实测 reload 模块后 `load_decision_log()` 仍可见)
+  - `load_history_to_semantica()` 把 JSON 决策**重新接进 Semantica 图**(不是只写字典)
+- **本次如何避免**(下次踩坑指引):
+  1. **gensim 必须跳过**:`pip install --no-deps -e .` 不然后续全卡(Windows + Python 3.14 无 wheel)
+  2. **rdflib 必须装**:`pip install rdflib` 不然 `from semantica.context import ContextGraph` 直接 ModuleNotFoundError
+  3. **vector_idmap.pkl 是 tuple**:实际是 `(idmap_dict, faiss_index)`,直接 pickle.load 后 isinstance(d, dict) 失败,正确处理是 `tuple_data[0]`
+  4. **find_related_nodes 参数错**:实际是 `how_many=10`,不是 `max_depth=2`(Adapter 已修正)
+  5. **enforce_decision_policy 签名**:接受 `decision_data: Dict`,**不是 decision_id**(搞错就 AttributeError)
+  6. **决策只写 _decisions 字典不行**:必须 `sg.add_node(..., "decision")` + `add_edge(...)` 接图,否则 `analyze_decision_impact` 报 not found(已修)
+  7. **causal relationship 需手动调**:`find_precedents` / `trace_decision_xxx` 返回 0 条是正常的——业务场景需要先例/因果时才调 `add_causal_relationship()`,不在自动推送范围
+- **未做**(主动放弃):
+  - 不引入 Node2Vec / gensim 高级 KG 功能(装不上)
+  - 不起 Semantica Knowledge Explorer web UI(本地未跑 HTTP server)
+  - 不实现 PROV-O 标准本体(用 Semantica 默认的简化版 metadata)
+- **配套教程**:`jshgd/kg_rag_kuzu_tutorials/kg_rag_kuzu-semantica-集成教程-v0.2.md`(14 章,含跨会话持久化 + 图查询集成 + 14/14 API 评估)
+- **覆盖**: R3·复用 / R4·复用 / R11·复用 / R12·验证 / R14·谨慎改 / R15·完整版 / R16·超越纯 / R19·走流程 / R20·备份先行 / R22·联系全文 / R27·稳扎稳打 / R28·跨会话沉淀---
+
+# RULE-CORE-B-003 · 八荣八耻 → 图谱决策降级映射(2026-08-15)
+
+- **触发场景**: 八荣八耻 29 条准则中有 5 类 8 条与 kg_rag_kuzu + Semantica"图谱决策"工具能力**功能重叠**,为避免"工具能做的还被要求人脑做"的双重负担,将这些功能**降级为"由图谱决策具体实现"**
+- **核心纠正**:
+  - **❌ 旧认知**: 八荣八耻 = 行为准则(必须遵守)+ 工具 = 工具(辅助)
+  - **✅ 新规约**: 八荣八耻 = **行为约束**(价值观、对齐、安全、备份等);**检索/复用/沉淀/审计**等可由工具具体实现的部分走工具
+- **本 RULE 定义**(8 条降级映射):
+  | 八荣八耻准则 | 原行为 | 图谱决策替代 |
+  |---|---|---|
+  | **R1 · 查接口** | 先 read / grep / codegraph_explore | `kg_rag_kuzu.semantic_search(query, top_k=10)` |
+  | **R3 · 妄想业务** | 主动列假设 + 信心度 | `Bridge.record_decision(category, scenario, reasoning)` |
+  | **R4 · 复用** | 主动扫项目 lib/bin/函数 | `kg_rag_kuzu.find_related_entities(name, how_many=10)` |
+  | **R6 · 系统穷尽** | 路径广度优先 + 多维度交叉 | `vector_search + _find_related_with_policy` |
+  | **R7 · 数学验证** | 能算就算 + 主观判断标 confidence | `Semantica.record_decision(confidence=...)` |
+  | **R11 · 复用** | 主动扫项目函数 | `ContextCore.to_dict()` / `Bridge.query_decisions()` |
+  | **R19 · 走流程** | 备份 → 预览 → 确认 → 执行 → 验证 → 沉淀 | 沉淀环节走 `decisions_log.json` + `_persist_decision` |
+  | **R28 · 跨会话沉淀** | 踩坑 / 架构决策 / 用户偏好必须落盘 | `Bridge.auto_record_decision()` + `load_history_to_semantica()` |
+- **未替代的准则**(保留 21 条):
+  - R2 对齐 / R5 确认后行 / R8 复述验证 / R9 不搞破坏 / R10 不重复犯错 / R12 验证 / R13 贴规范 / R14 谨慎改 / R15 完整版 / R16 超越平凡 / R17 通俗易懂 / R18 节约 token / R20 备份先行 / R21 删走回收站 / R22 联系全文 / R23 立即但完整 / R24 协助到底 / R25 核心价值观 / R26 稳扎稳打 / R27 分分层判断 / R29 用户感知守护
+- **量化证据**(2026-08-15 实施现场):
+  - AGENTS.md 主 + 副本各加 "## 图谱决策替代清单" 段落(5 类 8 条 + 21 条未替代清单)
+  - 备份在 `_recycle_bin/20260815-222900-pre-rule-graph-replace/`(4 文件完整备份)
+- **下次如何避免**:
+  1. **降级路径明确**:图谱决策不可用时(`core_adapter=None` 或 Semantica 未装)→ 走八荣八耻原准则(不要硬等)
+  2. **混合场景**:复杂场景两者都走(图谱决策产出 + 八荣八耻校验,例如 R7 数学验证用 confidence 字段 + 八荣八耻 "能算就算" 准则)
+  3. **新功能扩展时**:优先考虑"是否可以用图谱决策实现",再做八荣八耻新准则(避免重复造轮子)
+- **未做**(主动放弃):
+  - 不删除原八荣八耻 RULES-TREE 段(保留完整 29 条 + RULE-CORE-B-001/002),只通过 AGENTS.md 段落指明"哪些走图谱决策"
+  - 不强行改造 R5(确认后行)/ R9(不搞破坏)/ R10(不重复犯错) 等核心价值准则(这些是行为约束,不可被工具替代)
+- **覆盖**: R3·复用 / R5·确认后行 / R19·走流程 / R27·稳扎稳打 / R28·跨会话沉淀
+- **配套文档**: `AGENTS.md` "## 图谱决策替代清单" 段落(主 + 运行时副本同步)
+- **备份路径**: `_recycle_bin/20260815-222900-pre-rule-graph-replace/AGENTS.{main,runtime}.md` + `RULES-TREE.{main,runtime}.md`---
+
+# RULE-CORE-B-004 · 八荣八耻 × 图谱决策 双轨制(2026-08-15)
+
+- **触发场景**: 之前 RULE-CORE-B-003 把 8 条八荣八耻准则"走图谱决策",但**没有保留切换路径**——一旦 graph 模式出问题,无法回退到原 honor 模式。需要补建**双轨制**,保证两条路线**随时可切**。
+- **核心纠正**:
+  - **❌ 旧认知(RULE-CORE-B-003 单一路线)**:默认走 graph,只能"降级路径"兜底
+  - **✅ 新规约**:两条路线**并列存在**,通过 `AGENTS_MODE` env var / `~/.agents/mode.json` 配置文件 / `Mode.set()` API **任意时刻切换**,**切换成本 0**
+- **本 RULE 定义**:
+  1. **两条路线并列**(不互斥):`honor`(原 29 条八荣八耻独立走)+ `graph`(5 类 8 条走图谱决策,21 条仍走准则)
+  2. **3 种切换方式等价**(环境变量 > 配置文件 > 默认):
+     - `AGENTS_MODE=honor` / `AGENTS_MODE=graph`(env var 最高优先级)
+     - `~/.agents/mode.json` 写入 `{"mode": "honor"}` 或 `"graph"`
+     - 运行时 `Mode.set("honor")` / `Mode.current()`
+  3. **默认模式**:`graph`(图谱决策模式,kg_rag_kuzu + Semantica 都装好后默认走这个)
+  4. **模式检测脚本**:`scripts/check_mode.py` 实现 `detect_mode()` 函数,优先级 env > config > 默认
+  5. **切换成本 = 0**:改 env var 即可,不需要改代码
+  6. **A/B 对比能力**:两个模式可以同时跑(对比 answer / 沉淀 / 决策)
+- **使用场景决策表**:
+  | 场景 | 推荐模式 | 理由 |
+  |---|---|---|
+  | 日常开发(kg_rag_kuzu + Semantica 都装好)| `graph`(默认)| 审计 / 沉淀自动 |
+  | 紧急回退(工具出问题 / 想用纯人脑)| `honor` | 1 行 env var 切回 |
+  | 复现历史 session | `honor` | 保证 100% 行为准则 |
+  | A/B 对比测试 | 两个都跑 | 验证图谱决策效果 |
+  | CI/CD / 自动化 | `honor` | 行为可预测 |
+- **量化证据**(2026-08-15 实施):
+  - AGENTS.md 主 + 副本各加 "## 技术路线双轨制" 段落(2 条路线 + 3 切换方式 + 模式检测代码)
+  - 模式切换示例命令 4 条(env var / config / runtime / check)
+  - 模式差异表 8 行(8 条降级准则)
+- **下次如何避免**:
+  1. **新加功能前先查双轨制**:任何新工具/新准则都先考虑"是否要支持两条路线"
+  2. **保持两条路线独立可跑**:`honor` 不依赖任何图谱决策工具,`graph` 才用 kg_rag_kuzu + Semantica
+  3. **不要轻易改默认模式**:从 `graph` 改回 `honor` 会让所有新会话失去图谱决策能力
+  4. **CI/CD 用 `honor`**:`graph` 依赖第三方工具,自动化环境难保证可用
+- **未做**(主动放弃):
+  - 不删除原 29 条八荣八耻 RULES-TREE 段(`honor` 模式仍依赖)
+  - 不把 RULE-CORE-B-003 改写(它是降级映射,本 RULE 是双轨制开关,职责不同)
+- **覆盖**: R3·复用 / R5·确认后行 / R19·走流程 / R22·联系全文 / R27·稳扎稳打 / R28·跨会话沉淀
+- **配套文档**: AGENTS.md "## 技术路线双轨制" 段落(主 + 运行时副本同步)
+- **前置 RULE**: RULE-CORE-B-003(降级映射)+ RULE-CORE-B-002(Semantica 集成)+ RULE-CORE-B-001(中等适配模式)

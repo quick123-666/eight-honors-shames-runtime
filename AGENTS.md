@@ -87,6 +87,153 @@
 - 改前先 grep 影响面(调用方/被调用方),用 `codegraph_impact` 评估爆炸半径。
 - 完成编辑后跑一遍构建/测试,不要甩"应该能跑"。
 
+## 已知工具套装(2026-08-15 补充)
+
+> 本会话开始时如涉及下表能力,直接读套装教程 + 对应 RULE,免去重复调研:
+
+| 套装 | 完整教程 | 配套 RULE | 能力范围 |
+|---|---|---|---|
+| **kg_rag_kuzu + Semantica 集成** | `jshgd/kg_rag_kuzu_tutorials/kg_rag_kuzu-semantica-集成教程-v0.2.md`(14 章)| `RULE-CORE-B-002` | 跑 query 自动推决策 + 跨会话 JSON 日志 + 14/14 决策 API |
+| **kg_rag_kuzu v0.2 自升级** | `jshgd/kg_rag_kuzu_tutorials/kg_rag_kuzu-向量图谱教程-v0.2.0.md`(15 章)| `RULE-CORE-B-001` | OWL-lite 本体 + Evidence 一等公民 + Policy + Schema 校验 + Core 打包 |
+
+**何时使用**:
+- 遇到"向量知识库" + "决策系统"配合问题 → 查表第 1 行
+- 遇到"自研图谱 KB 想加 TrustGraph 风格能力"问题 → 查表第 2 行
+- 优先用现成经验,不要重发明轮子
+
+---
+
+## 技术路线双轨制(2026-08-15)
+
+> 本项目同时维护**两条技术路线**,通过开关随时切换。默认走图谱决策,但可以 1 命令切回原八荣八耻。
+
+### 两条路线
+
+| 路线 | 名称 | 模式 | 描述 |
+|---|---|---|---|
+| **A** | **八荣八耻原模式** | `honor` | 29 条准则全独立走,工具零替换 |
+| **B**(默认)| **图谱决策模式** | `graph` | 5 类 8 条准则由 kg_rag_kuzu + Semantica 具体实现,21 条仍走准则 |
+
+### 切换开关(3 种等价方式)
+
+#### 方式 1:环境变量(推荐)
+
+```bash
+# 切换到原模式
+export AGENTS_MODE=honor
+
+# 切换到图谱决策模式(默认)
+export AGENTS_MODE=graph
+
+# 查看当前模式
+python scripts/check_mode.py
+```
+
+#### 方式 2:配置文件
+
+```bash
+# ~/.agents/mode.json
+{"mode": "honor"}  # 或 "graph"
+```
+
+#### 方式 3:运行时指定
+
+```python
+from eight_honors_shames import Mode
+Mode.set("honor")  # 运行时切换
+Mode.current()      # 查当前
+```
+
+### 模式判断逻辑(`scripts/check_mode.py`)
+
+```python
+import os, json
+from pathlib import Path
+
+def detect_mode():
+    # 优先级: 环境变量 > 配置文件 > 默认
+    env = os.environ.get("AGENTS_MODE")
+    if env in ("honor", "graph"):
+        return env
+    cfg = Path.home() / ".agents/mode.json"
+    if cfg.exists():
+        data = json.loads(cfg.read_text())
+        if data.get("mode") in ("honor", "graph"):
+            return data["mode"]
+    return "graph"  # 默认图谱决策模式
+
+if __name__ == "__main__":
+    print(f"当前模式: {detect_mode()}")
+    if detect_mode() == "honor":
+        print("→ 走原 29 条八荣八耻")
+    else:
+        print("→ 走图谱决策(kg_rag_kuzu + Semantica)")
+```
+
+### 两个模式的准则差异表
+
+| 八荣八耻准则 | `honor` 模式 | `graph` 模式 |
+|---|---|---|
+| R1 查接口 | 先 read / grep / codegraph_explore | `kg_rag_kuzu.semantic_search(query, top_k=10)` |
+| R3 妄想业务 | 主动列假设 + 信心度 | `Bridge.record_decision(category, scenario, reasoning)` |
+| R4 复用 | 主动扫项目 lib/bin/函数 | `kg_rag_kuzu.find_related_entities(name, how_many=10)` |
+| R6 系统穷尽 | 路径广度优先 + 多维度交叉 | `vector_search + _find_related_with_policy` |
+| R7 数学验证 | 能算就算 + 主观判断标 confidence | `Semantica.record_decision(confidence=...)` |
+| R11 复用 | 主动扫项目函数 | `ContextCore.to_dict()` / `Bridge.query_decisions()` |
+| R19 走流程(沉淀环节)| 手写 RULES-TREE.md | `decisions_log.json` + `_persist_decision` |
+| R28 跨会话沉淀 | 手写 RULES-TREE.md | `Bridge.auto_record_decision()` + `load_history_to_semantica()` |
+| 其他 21 条 | 仍走八荣八耻 | **不变**(仍是行为约束)|
+
+### 切换成本
+
+| 切换 | 工作量 |
+|---|---|
+| `graph` → `honor` | **0**(改 env var 即可)|
+| `honor` → `graph` | **0**(改 env var + 确保 kg_rag_kuzu + Semantica 可用)|
+
+### 模式选择建议
+
+- **日常开发**(`graph`):kg_rag_kuzu + Semantica 都在,审计/沉淀自动
+- **紧急回退**(`honor`):工具出问题 / 想用纯人脑判断 / 复现历史 session
+- **A/B 对比**:两个模式可以同时运行(`honor` 跑一次,`graph` 跑一次,对比 answer)
+
+---
+
+## 图谱决策替代清单(2026-08-15 降级映射)
+
+> 以下 5 类 8 条八荣八耻行为准则,在 `graph` 模式默认走图谱决策(kg_rag_kuzu + Semantica),`honor` 模式仍走准则本身。
+
+### 替换表
+
+| 八荣八耻准则 | 原行为(`honor` 模式) | 图谱决策替代(`graph` 模式) |
+|---|---|---|
+| **R1 · 查接口**(准则 1)| 先 read / grep / codegraph_explore | `kg_rag_kuzu.semantic_search(query, top_k=10)` |
+| **R3 · 妄想业务**(准则 3)| 主动列假设 + 信心度 | `Bridge.record_decision(category, scenario, reasoning)` |
+| **R4 · 复用**(准则 4)| 主动扫项目 lib/bin/函数 | `kg_rag_kuzu.find_related_entities(name, how_many=10)` |
+| **R6 · 系统穷尽**(准则 6)| 路径广度优先 + 多维度交叉 | `vector_search + _find_related_with_policy` |
+| **R7 · 数学验证**(准则 7)| 能算就算 + 主观判断标 confidence | `Semantica.record_decision(confidence=...)` |
+| **R11 · 复用**(准则 11)| 主动扫项目函数 | `ContextCore.to_dict()` / `Bridge.query_decisions()` |
+| **R19 · 走流程**(准则 19)| 备份 → 预览 → 确认 → 执行 → 验证 → 沉淀 | 沉淀环节走 `decisions_log.json` + `Semantica._persist_decision` |
+| **R28 · 跨会话沉淀**(准则 28)| 踩坑 / 架构决策 / 用户偏好必须落盘 | `Bridge.auto_record_decision()` + `load_history_to_semantica()` |
+
+### 切换示例
+
+```bash
+# 当前默认 graph 模式(kg_rag_kuzu + Semantica 自动使用)
+python knowledge_graph_rag.py
+
+# 一键切换回 honor 模式
+AGENTS_MODE=honor python knowledge_graph_rag.py
+
+# 同样可以一行切回 graph
+AGENTS_MODE=graph python knowledge_graph_rag.py
+
+# 查当前模式
+python scripts/check_mode.py
+```
+
+---
+
 ## 省 token 操作纪律(命令式)
 
 > 目标:压缩 tool 输出(输入 token 大头)。pi 的 bash 输出内建截断(2000 行/50KB),真正省 token 靠操作习惯,以下强制。
