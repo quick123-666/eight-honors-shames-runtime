@@ -6,9 +6,9 @@
 
 ### Engineering AI collaboration discipline: single source · injectable · auditable · benchmarkable · acceptable
 
-**29 principles · cross-project core values · 81%+ token saved on rule injection · ready for 8+ AI tools** · **Dual-track mode (honor / graph) · 0-cost switching**
+**30 principles · cross-project core values · 82.5%+ token saved on rule injection · ready for 8+ AI tools**
 
-[![Version](https://img.shields.io/badge/version-v3.6.0-blue)](./package.json)
+[![Version](https://img.shields.io/badge/version-v3.10.0-blue)](./package.json)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 [![Tests](https://img.shields.io/badge/tests-48%20passed-brightgreen)](./tests)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-green)](./package.json)
@@ -16,53 +16,7 @@
 
 <br/>
 
-General-purpose LLMs don't have your team's engineering discipline built in. This project turns **21 engineering-grade AI collaboration principles** into a runnable runtime — after installing it, any AI tool behaves like an engineer who follows team norms: look before you call, align before you act, reuse before you reinvent, verify after every change, back up before destructive edits, and deliver the full version.
-
-## ✨ What's New in v3.6.0 (Dual-Track + Graph-Based Decision)
-
-### Dual-Track Architecture
-
-The project maintains **two parallel modes**, switchable via environment variable. Default is the graph-based mode, but you can switch back to the original eight-honors-and-shames model with one command:
-
-| Track | Name | Mode | Description |
-|---|---|---|---|
-| **A** | Original Honor Mode | `honor` | All 29 principles enforced independently, zero tool replacement |
-| **B** (default) | **Graph-Based Mode** | `graph` | 5 categories × 8 principles implemented by kg_rag_kuzu + Semantica, 21 principles still enforced |
-
-**One-line switching** (3 equivalent ways):
-
-```bash
-# Environment variable (recommended)
-export AGENTS_MODE=honor   # Switch back to original honor model
-export AGENTS_MODE=graph    # Switch back to graph-based mode (default)
-
-# Config file
-echo '{"mode": "honor"}' > ~/.agents/mode.json
-
-# Runtime API
-from eight_honors_shames import Mode; Mode.set("honor")
-```
-
-### Graph-Based Decision Mapping
-
-In `graph` mode, the following 5 categories × 8 principles are implemented by graph-based decision:
-
-| Principle | `honor` mode | `graph` mode |
-|---|---|---|
-| R1 Lookup | `read` / `grep` / `codegraph_explore` | `kg_rag_kuzu.semantic_search(query, top_k=10)` |
-| R3 Assumptions | List assumptions + confidence | `Bridge.record_decision()` |
-| R4 Reuse | Scan project functions | `kg_rag_kuzu.find_related_entities()` |
-| R6 Exhaustive | Multi-dimensional cross-check | `vector_search + _find_related_with_policy` |
-| R7 Math Verify | Mark confidence | `Semantica.record_decision(confidence=...)` |
-| R11 Reuse | Scan project | `ContextCore.to_dict()` |
-| R19 Workflow (record) | Manual write to RULES-TREE.md | `decisions_log.json` + `_persist_decision` |
-| R28 Cross-Session | Manual | `Bridge.auto_record_decision()` + `load_history_to_semantica()` |
-
-**Unchanged 21 principles** remain as behavioral constraints (R2/R5/R8/R9/R10/R12/R13/R14/R15/R16/R17/R18/R20/R21/R22/R23/R24/R25/R26/R27/R29).
-
-Full docs see [`AGENTS.md` "## Dual-Track Architecture" section](./AGENTS.md) and **RULE-CORE-B-003 + RULE-CORE-B-004** at the end of [`RULES-TREE.md`](./RULES-TREE.md).
-
----
+General-purpose LLMs don't have your team's engineering discipline built in. This project turns **30 engineering-grade AI collaboration principles** into a runnable runtime — after installing it, any AI tool behaves like an engineer who follows team norms: look before you call, align before you act, reuse before you reinvent, verify after every change, back up before destructive edits, and deliver the full version.
 
 **One single source, auto-adapted to 8+ AI tools.** Different tools read different rule files; this project generates all of them with one command.
 
@@ -88,7 +42,7 @@ npm test              # 48 tests, including install-config verification
 
 ## 🔧 Installation(which md does each AI tool need?)
 
-> **Different AI tools read different rule files**: some use `AGENTS.md`, some use `CLAUDE.md`, some use `.cursorrules`… This project generates each tool's adapter from a **single source** (`RULES.md` + `AGENTS.md`) — each adapter contains only the 21 compact principles and points back to the full version — **zero drift**.
+> **Different AI tools read different rule files**: some use `AGENTS.md`, some use `CLAUDE.md`, some use `.cursorrules`… This project generates each tool's adapter from a **single source** (`RULES.md` + `AGENTS.md`) — each adapter contains only the 30 compact principles and points back to the full version — **zero drift**.
 
 ### 1. Generate adapters
 
@@ -113,7 +67,7 @@ npm run adapters     # → adapters/ directory (idempotent, auto-syncs)
 # Example: install for Claude Code and Cursor
 cp adapters/CLAUDE.md ../your-project/CLAUDE.md
 cp adapters/.cursorrules ../your-project/.cursorrules
-# Optional: full 21-principle version
+# Optional: full 30-principle version
 cp RULES.md ../your-project/RULES.md
 ```
 
@@ -142,7 +96,7 @@ After installation, ask your AI tool:
 
 > **"What are the 8-honors-8-shames principles?"**
 
-- ✅ Working: it lists the 29 principles (look first, align, reuse, verify, full version, accompany to completion…)
+- ✅ Working: it lists the 29 principles (look first, align, reuse, verify, full version, accompany to completion, cross-session sediment…)
 - ❌ Not working: vague answer → check the file placement against the table above.
 
 ---
@@ -174,13 +128,13 @@ off   injection off, safety floor kept
 
 ### Injection cost (measured locally)
 
-RULES.md (29 principles) is 75,802 bytes. Old design injected the full text every turn vs new design (once per session + summary per turn):
+RULES.md (29 principles, v3.5.5 as of 2026-08-14) is 82,638 bytes. Old design injected the full text every turn vs new design (once per session + summary per turn):
 
 | Mode | Per-turn | 12-turn cumulative | Saved | 100-turn cumulative | Saved |
 |---|---:|---:|---:|---:|---:|
-| lite | ~223 B | ~8.6K tok | **81.9%** | — | **~97%** |
-| full | ~273 B | ~8.7K tok | **81.6%** | — | **~97%** |
-| ultra | ~314 B | ~8.9K tok | **81.4%** | — | **~97%** |
+| lite | ~223 B | ~19.3K tok | **82.7%** | ~16.0K tok | **98.3%** |
+| full | ~287 B | ~19.5K tok | **82.6%** | ~17.9K tok | **98.1%** |
+| ultra | ~328 B | ~19.6K tok | **82.5%** | ~19.1K tok | **98.0%** |
 
 ### Full vs minimal (real A/B)
 
@@ -198,7 +152,7 @@ RULES.md (29 principles) is 75,802 bytes. Old design injected the full text ever
 ## 🏗️ Architecture
 
 ```text
-Rules → single source RULES.md (29 principles)
+Rules → single source RULES.md (29 principles, v3.5.5)
    ↓ injection layers
 session_start full text once + per-turn summary + gates
    ↓ tooling

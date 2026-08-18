@@ -2,11 +2,13 @@
 
 [English](./README_EN.md) | **简体中文**
 
-# 🎌 八�八耻 · AI 编程核心价值观
+# 🎌 八荣八耻 · AI 编程核心价值观
 
 ### 把 AI 协作纪律工程化：单一来源 · 可注入 · 可审计 · 可基准测试 · 可验收
 
-**29 条准则 · 跨项目核心价值观 · 规则注入省 81%+ token · 8+ AI 工具即装即用** · **技术路线双轨制 (honor / graph) · 0 成本切换**
+**30 条准则 · 跨项目核心价值观 · 规则注入省 82.5%+ token · 8+ AI 工具即装即用**
+
+[![Version](https://img.shields.io/badge/version-v3.10.0-blue)](./package.json)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 [![Tests](https://img.shields.io/badge/tests-48%20passed-brightgreen)](./tests)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-green)](./package.json)
@@ -18,53 +20,9 @@
 **让 Claude Code 改文件，它不查现有实现就硬编新接口？**
 **Copilot 生成代码，遇到边界情况直接 panic？**
 
-通用大模型没有内置你的协作纪律。八荣八耻把 **29 条工程级 AI 协作准则**工程化成一份可运行的运行时——任何 AI 工具装上后，都会像遵守团队规范的工程师一样工作：先查、对齐、复用、验证、备份、完整交付。
+通用大模型没有内置你的协作纪律。八荣八耻把 **30 条工程级 AI 协作准则**工程化成一份可运行的运行时——任何 AI 工具装上后，都会像遵守团队规范的工程师一样工作：先查、对齐、复用、验证、备份、完整交付。
 
-## ✨ v3.6.0 新功能(双轨制 + 图谱决策路线)
-
-### 技术路线双轨制
-
-本项目同时维护**两条技术路线**,通过环境变量随时切换,默认走图谱决策但可以 1 命令切回原八荣八耻:
-
-| 路线 | 名称 | 模式 | 描述 |
-|---|---|---|---|
-| **A** | 八荣八耻原模式 | `honor` | 29 条准则全独立走,工具零替换 |
-| **B**(默认)| **图谱决策模式** | `graph` | 5 类 8 条准则由 kg_rag_kuzu + Semantica 具体实现,21 条仍走准则 |
-
-**一键切换**(3 种等价方式):
-
-```bash
-# 环境变量(推荐)
-export AGENTS_MODE=honor   # 切回原八荣八耻
-export AGENTS_MODE=graph    # 切回图谱决策(默认)
-
-# 配置文件
-echo '{"mode": "honor"}' > ~/.agents/mode.json
-
-# 运行时 API
-from eight_honors_shames import Mode; Mode.set("honor")
-```
-
-### 图谱决策降级映射
-
-`graph` 模式下,以下 5 类 8 条八荣八耻准则**走图谱决策**(kg_rag_kuzu + Semantica):
-
-| 八荣八耻准则 | `honor` 模式 | `graph` 模式 |
-|---|---|---|
-| R1 查接口 | `read` / `grep` / `codegraph_explore` | `kg_rag_kuzu.semantic_search(query, top_k=10)` |
-| R3 妄想业务 | 主动列假设 + 信心度 | `Bridge.record_decision()` |
-| R4 复用 | 扫项目函数 | `kg_rag_kuzu.find_related_entities()` |
-| R6 系统穷尽 | 多维度交叉 | `vector_search + _find_related_with_policy` |
-| R7 数学验证 | confidence 标 | `Semantica.record_decision(confidence=...)` |
-| R11 复用 | 扫项目 | `ContextCore.to_dict()` |
-| R19 走流程(沉淀环节)| 手写 RULES-TREE.md | `decisions_log.json` + `_persist_decision` |
-| R28 跨会话沉淀 | 手写 | `Bridge.auto_record_decision()` + `load_history_to_semantica()` |
-
-**未替代的 21 条**保留为行为约束(R2/R5/R8/R9/R10/R12/R13/R14/R15/R16/R17/R18/R20/R21/R22/R23/R24/R25/R26/R27/R29)。
-
-完整文档见 [`AGENTS.md` "## 技术路线双轨制" 段落](./AGENTS.md) 与 [`RULES-TREE.md`](./RULES-TREE.md) 末尾的 **RULE-CORE-B-003(降级映射)+ RULE-CORE-B-004(双轨制)**。
-
----
+**一份单一来源，自动适配 8+ AI 工具。** 不同软件需要配置的规则文件不一样，本项目一条命令生成全部。
 
 <br/>
 
@@ -88,7 +46,7 @@ npm test              # 48 个测试,验证安装配置正确
 
 ## 🔧 安装(各 AI 工具配置哪个 md?)
 
-> **不同 AI 软件读取的规则文件不一样**：有的认 `AGENTS.md`，有的认 `CLAUDE.md`，有的认 `.cursorrules`…本项目从**单一来源**(`RULES.md` + `AGENTS.md`)自动生成各工具的适配文件，只含 29 条精简命令式、指向完整版——**零漂移**。
+> **不同 AI 软件读取的规则文件不一样**：有的认 `AGENTS.md`，有的认 `CLAUDE.md`，有的认 `.cursorrules`…本项目从**单一来源**(`RULES.md` + `AGENTS.md`)自动生成各工具的适配文件，只含 21 条精简命令式、指向完整版——**零漂移**。
 
 ### 1. 生成适配文件
 
@@ -113,11 +71,11 @@ npm run adapters     # 生成到 adapters/ 目录(可重复运行,自动同步)
 # 示例:为 Claude Code 和 Cursor 安装
 cp adapters/CLAUDE.md ../你的项目/CLAUDE.md
 cp adapters/.cursorrules ../你的项目/.cursorrules
-# 完整 29 条版放在你项目的 RULES.md(可选,适配文件会自动指向它)
+# 完整 21 条版放在你项目的 RULES.md(可选,适配文件会自动指向它)
 cp RULES.md ../你的项目/RULES.md
 ```
 
-> 💡 适配文件只含 29 条精简命令式 + 指向 `RULES.md`。把 `RULES.md` 一起放进项目即可获得完整版(耻/荣/逻辑/判断标准)。
+> 💡 适配文件只含 21 条精简命令式 + 指向 `RULES.md`。把 `RULES.md` 一起放进项目即可获得完整版(耻/荣/逻辑/判断标准)。
 
 ### 3. 接入 Pi(完整运行时,推荐)
 
@@ -143,7 +101,7 @@ npx eight-honors-shames-mcp   # stdio, 只读
 
 > **"八荣八耻有哪些准则？"**
 
-- ✅ 生效：能说出 29 条核心（先查、对齐、复用、验证、完整版、协助到底…）
+- ✅ 生效：能说出 21 条核心（先查、对齐、复用、验证、完整版、协助到底…）
 - ❌ 未生效：回答泛泛（"这是道德规范…"）→ 检查文件位置是否匹配上表
 
 ---
@@ -175,13 +133,13 @@ off   关闭注入，保留安全底线
 
 ### 注入成本（本机脚本实测）
 
-RULES.md 29 条全文 75,802 字节。旧设计每轮注入全文 vs 新设计（session 一次 + 每轮摘要）：
+RULES.md 30 条全文(2026-08-18 v3.10.0)。旧设计每轮注入全文 vs 新设计（session 一次 + 每轮摘要）：
 
 | 模式 | 每轮注入 | 12 次注入累计 | 节省 | 100 轮累计 | 节省 |
 |---|---:|---:|---:|---:|---:|
-| lite | ~223 B | ~8.6K tok | **81.9%** | — | **~97%** |
-| full | ~273 B | ~8.7K tok | **81.6%** | — | **~97%** |
-| ultra | ~314 B | ~8.9K tok | **81.4%** | — | **~97%** |
+| lite | ~223 B | ~19.3K tok | **82.7%** | ~16.0K tok | **98.3%** |
+| full | ~287 B | ~19.5K tok | **82.6%** | ~17.9K tok | **98.1%** |
+| ultra | ~328 B | ~19.6K tok | **82.5%** | ~19.1K tok | **98.0%** |
 
 ### 完整版 vs 精简版（真实对照实验）
 
@@ -199,7 +157,7 @@ RULES.md 29 条全文 75,802 字节。旧设计每轮注入全文 vs 新设计�
 ## 🏗️ 架构
 
 ```text
-规则 → 单一来源 RULES.md（29 条）
+规则 → 单一来源 RULES.md（21 条）
    ↓ 注入分层
 session_start 全文一次 + 每轮摘要 + 门禁
    ↓ 工具
@@ -248,7 +206,7 @@ SCENARIO=reuse-existing MODE=lite node scripts/run-toolenv-smoke.js
 ## 项目约束（硬性）
 
 ```text
-1. 禁止精简系统：29 条完整版不缩水
+1. 禁止精简系统：21 条完整版不缩水
 2. 规则单一来源 = RULES.md：任何适配不得内嵌完整正文
 3. 凭据只走环境变量/平台凭据库，不落 .env 明文
 4. 删除必须可恢复；大改前建立快照
