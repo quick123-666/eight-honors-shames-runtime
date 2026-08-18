@@ -8,6 +8,43 @@
 
 ---
 
+## 0. 权重分级(执行前必查 · 2026-08-18 PATCH 沉淀)
+
+> **目的**: 让沉淀从"堆在矿底"到"AI 接令时自动挖出"。每条 RULE 段头加 P0/P1/P2 权重元数据。
+>
+> **痛点根因**(RULE-DSH-FIRST-RUN-001 违规 2026-08-18): 用户问"启动 dsh web",AI 跳过 RULES-TREE 检索直接看 README 启动 → 已沉淀的 RULE-DSH-FIRST-RUN-001(L1203)未被调用 → 触发 R10·不重复犯错。沉淀系统"沉而不调" = 等于没沉淀。
+
+### 0.1 三档定义
+
+| 权重 | 触发场景 | 执行前要求 | 例子 |
+|---|---|---|---|
+| **P0** | 启动 / 部署 / 不可逆操作 / 数据丢失 / 公开仓库推送 | **必查** RULES-TREE(grep 关键词 + 子目录 + 备份) | RULE-DSH-FIRST-RUN-001 / RULE-PUSH-PRE-CHECK-001 / RULE-DRIFT-FIX-001 |
+| **P1** | 日常开发 / 改代码 / 调试 / 沉淀新 RULE | **建议查**(R10 触发或复杂任务时) | RULE-DEBUG-001 / RULE-EXPLAIN-001 / RULE-REVIEW-001 |
+| **P2** | 背景知识 / 优化 / 美化 / 文档 | **被动**(用户主动提及或 R10 警示时才查) | RULE-FP-001 / RULE-OUTPUT-LABEL-001 |
+
+### 0.2 段头元数据格式
+
+`### RULE-XXX-001(YYYY-MM-DD v3.X.Y [PATCH|MINOR|MAJOR] · [P0|P1|P2] · 一句话描述)`
+
+例:`### RULE-DSH-FIRST-RUN-001(2026-08-14 v3.4.13 MINOR · P0 · 在新机器首次跑 dsh web 的 4 步流程 + Windows 后台启动 trick)`
+
+### 0.3 P0 RULE 当前清单(2026-08-18 盘点 · 持续更新)
+
+| RULE | 位置 | 触发关键词 |
+|---|---|---|
+| RULE-DSH-FIRST-RUN-001 | RULES-TREE.md L1203 / 主项目 L4781 | dsh / deepseek-harness / 启动 web / MCP UI |
+| RULE-PUSH-PRE-CHECK-001 | 待沉淀(本次任务触发) | push / origin / rebase / 公开仓库 / 强制推送 |
+| RULE-DRIFT-FIX-001 | RULES-TREE.md(主项目 L5448) | drift / 漂移 / 父项目名 / 脱敏 / 版本号 |
+| RULE-LOOP-001 | RULES-TREE.md(主项目 L1175 · 待加 P0 标注) | loop / 空转 / watchdog / 终止标记 |
+
+### 0.4 执行规则(配合 R10 + R28)
+
+1. **AI 接令前**:grep `RULES-TREE.md` + `RULES-TREE/` + `_backups/`(主 + 副本),命中 P0 关键词 → **强制走 RULE 流程**;命中 P1 → 提示用户"⚠ 有相关 RULE 是否走";命中 P2 → 仅 R10 触发时查
+2. **新 RULE 沉淀默认 P1**,涉及 P0 场景显式标 P0 + 触发关键词
+3. **R10·不重复犯错触发器自检**: 即使不是 P0 任务,若遇"看起来熟悉"问题,先 grep RULES-TREE
+
+---
+
 ## 1. 沉淀规则(怎么往这写)
 
 - 每条沉淀 = 一个独立段落,带 **时间戳 + 来源 + 解决思路**
@@ -1200,7 +1237,7 @@
   4. **不**为“节省 token”跳过 F 档 `[COVER-ALL]` 8 行兑底 — 这就是用户感知的“主动使用”信号
 - **覆盖**: R10 不重复犯错 / R15 完整版 / R22 帮助解难 / R23 协助到底
 
-### RULE-DSH-FIRST-RUN-001(2026-08-14 v3.4.13 MINOR 沉淀 — 在新机器首次跑 dsh web 的 4 步流程 + Windows 后台启动 trick)
+### RULE-DSH-FIRST-RUN-001(2026-08-14 v3.4.13 MINOR · **P0** · 在新机器首次跑 dsh web 的 4 步流程 + Windows 后台启动 trick)
 
 - **触发场景**: 用户接令“启动 dsh web / 研究 deepseek-harness / 用 MCP 启 UI”时。
 - **核心纠正**:
