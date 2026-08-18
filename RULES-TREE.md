@@ -36,6 +36,7 @@
 | RULE-PUSH-PRE-CHECK-001 | 待沉淀(本次任务触发) | push / origin / rebase / 公开仓库 / 强制推送 |
 | RULE-DRIFT-FIX-001 | RULES-TREE.md(主项目 L5448) | drift / 漂移 / 父项目名 / 脱敏 / 版本号 |
 | RULE-LOOP-001 | RULES-TREE.md(主项目 L1175 · 待加 P0 标注) | loop / 空转 / watchdog / 终止标记 |
+| RULE-AUTO-GRAPH-LINK-001 | 本会话落地 | kg_rag_kuzu / 图谱 / 孤立节点 / auto_link / 抽取 |
 
 ### 0.4 执行规则(配合 R10 + R28)
 
@@ -1284,6 +1285,28 @@
   3. 跳过流程时必须显式招认违反 R10 + 报告沉淀 RULE 未调用的根因,**不允许"结果对 = 过程对"的隐式合理化**
   4. 用户中途改变输入路径时,**回溯 grep 关键词**(R18·联系全文)
 - **R 编号引用**: R10 / R15 / R18 / R28 — 4 条准则协同触发
+
+---
+
+### RULE-AUTO-GRAPH-LINK-001(2026-08-18 PATCH · P1 · kg_rag_kuzu 抽取后自动建边机制 — 防止知识图谱退化为"知识列表")
+
+- **触发场景**: 任何 kg_rag_kuzu 文档抽取 / 图谱重建 / 知识导入 / `graph_data.pkl` 重建完成后,必须验证孤立节点率
+- **核心纠正**: ❌ 抽取只建节点没建边 → ✅ 抽取 = 建节点 + 自动建边 + 验证孤立率 ≤ 5%
+- **本 RULE 定义**(4 步):
+  1. **抽取后跑 `kg_auto_link.py`** — 扫 0 度 Rule 节点 + 按 description 关键词自动建边(关键词: `RULE-XXX-NNN-001` / `原则 N` / `dsh|harness|deepseek` / `MCP|CodeGraph` / `MiniCog` / 兜底 `RULES-TREE.md`)
+  2. **边元数据必含** `type=auto_link` + `script=kg_auto_link.py` + `date=<YYYY-MM-DD>` + `weight=0.5`
+  3. **每 RULE 最多连 5 条边**(防爆 + 保留可读性)
+  4. **验证标准**: 孤立 Rule = 0(非 Rule 节点允许 ≤ 15% 孤立)
+- **自动化脚本** — `kg_rag_kuzu/kg_auto_link.py`: 7 类建边规则 + `--dry-run` / `--limit N` + 自动备份 + Before/After 报告
+- **实战量化**(本会话 2026-08-18):
+  | 阶段 | 孤立 Rule | 边数 | 耗时 |
+  |---|---|---|---|
+  | 抽取初始 | **147 / 147** (100%) | 1170 | — |
+  | 跑 `kg_auto_link.py` | 0 / 147 (0%) | 1378 (+208) | <2s |
+  | RULE-DSH-FIRST-RUN-001 单独 | 0 度 → **3 度** | +3 | — |
+- **关联**: RULE-DSH-FIRST-RUN-001(本次违规沉淀)+ RULE-METADATA-EVIDENCE(5 维度证据)+ RULE-SEARCH-DISCIPLINE-001(3 层搜索)
+- **未做**: 抽取脚本集成 hook / CI 门禁 / 非 Rule 孤立节点清理(下批)
+- **覆盖**: R10 / R15 / R16 / R28
 
 ---
 
