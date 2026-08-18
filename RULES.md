@@ -4,7 +4,7 @@
 >
 > pi 启动时**不会**自动加载本文件;agent 侧的精简命令式清单见 [`AGENTS.md`](./AGENTS.md)。
 >
-> 📌 **版本规范**:见 [`RULES-VERSION.md`](./RULES-VERSION.md) — 当前 **v3.5.5**(29 条,PATCH: token-slim 001/002 — skill 注入瘦身 + 会话卫生 + RULES 按需读 + [COVER-ALL] 输出取消);新增原则升 MINOR,调优升 PATCH,大重构升 MAJOR。
+> 📌 **版本规范**:见 [`RULES-VERSION.md`](./RULES-VERSION.md) — 当前 **v3.10.0**(30 条,MINOR: 29 → 30 条 · 新增第三十条准则「以漏解模块为耻,以全功能打通为荣」,与既有 R15 完整版互补:R15 重范围不切片,R30 重模块间接通;端到端 4 件必查:模块有真实调用方 / 端到端链路测 / 集成清单自检 4 问 / 失败不藏;AGENTS.md 精简版同步加第 30 条;RULES-TREE.md 双副本沉淀 RULE-30-MODULE-INTEGRATION-001);新增原则升 MINOR,调优升 PATCH,大重构升 MAJOR。
 > **v3.0.0 重构说明(2026-08-11)**: 准则由 22 条扩展为 24 条,并按"执行前 / 执行中 / 执行后 / 价值观"4 组重排,组内重新编号 1-24。**旧编号 → 新编号映射见附录 D**;旧 commit / 文档中引用的准则编号在本次重排后已失效,请用新编号。
 > **v3.2.0 重构(v2.2,2026-08-11 同步本次)**:24→25→**26 条**;L2 第二次插入新原则"准则 10 · 不重复犯错"于第二组;原 10-25 全部 +1(→ 11-26)。v3 / v3.1.0 历史保留在附录 D。
 > **v3.2.1 调优(v2.3,2026-08-11 同步本次)**:26 条不变;**RULES-TREE.md RULE-10-ALGORITHM-001 调优闭环**(D 方案加和公式 + 三档阈值)反哺到 RULES.md 准则 10;调优史见 RULES-TREE.md:305。
@@ -24,7 +24,7 @@
 > **v3.4.10 调优(2026-08-13)**:28 条不变;**pre-commit hook 升级(2 段门禁 = 漂移检测 + 敏感数据 grep)+ RULE-IX-SENSITIVE-DATA-001 实战案例沉淀**。`.githooks/pre-commit` 加 secret scan(扫 `git diff --cached`,5 类标准 secret 模式:`sk-` / `pk_live_` / `-----BEGIN` / `[A-Z_]+_API_KEY=[^${ ]+` / `Bearer`)+ 命中即阻断 commit + 列 ≤5 行样本 + 处置清单。RULES-TREE.md 加实战段描述事件 + key rotate 推荐 + pre-commit 启用方法(1 行 `git config core.hooksPath .githooks`)。npm test 66/66 PASS。
 > **v3.4.11 调优(2026-08-13)**:28 条不变;**勘误:本会话原拟 amend(选项 A),但 rebase 撞 Vim 恢复崩溃,改追加勘误 commit(选项 B 改良);不动 git 历史**。v3.4.9/v3.4.10 误判 OpenAI → 真实是 MiniMax 平台 key(8 家端点探测确认 `api.minimaxi.com` 返回 HTTP 200,模型 MiniMax-M3/M2.7/M2.7-highspeed);+ 新增 `docs/minimax-api-usage.md`(使用说明 endpoint/auth/curl/Python/Node.js/故障排查)。npm test 66/66 PASS。**注**:本会话原拟 amend(选项 A),但 rebase 撞 Vim 恢复崩溃,改追加勘误 commit(选项 B 改良),不动 git 历史。
 > **v3.4.12 调优(2026-08-13)**:28 条不变;**API key 状态标记基础设施**。`.env` 内每条 key 上方加 inline 状态注释(`status=✅ verified_provider / rotate_required / verified_at / next_check`)+ `.env.STATUS.json` sidecar(只含 prefix+suffix + 端点 + 模型,**无 secret**)+ `scripts/probe-env-apis.js`(扫 `_API_KEY/_TOKEN/_SECRET` 等模式 → 8 家 curl 探测 → 只显示 maskValue → 写 sidecar)+ `npm run probe:env` 命令 + `tests/probe-env-apis.test.js` 6 用例。npm test **72/72 PASS**(原 66 + 6)。沉淀:**RULE-IX-001 演进** = 不光"不显示 secret",还得"追踪已用 key 的状态"。
-> **v3.4.13 升级(2026-08-14)**:28 条不变;**双副本追平(运行时副本 v3.4.5 → v3.4.13,7 个 PATCH 一次性追平)**。本次升级为 R19·走流程的标准"完整版"实施 — 真实追平(非纸面追平),含:① 备份:`_recycle_bin/20260814-132552-pre-v3.4.13-runtime/`(RULES/RULES-VERSION/RULES-TREE/AGENTS/README/README_EN/hooks/src/scripts/docs/tests/package.json 12 件)② 6 文件复制 + chmod:`.githooks/pre-commit` / `scripts/eight-rules-status.js` / `scripts/probe-env-apis.js` / `scripts/check-version-drift.js` / `docs/minimax-api-usage.md` / `tests/probe-env-apis.test.js` ③ npm scripts 补 4 个:`status` / `check:drift` / `check:drift:fix` / `probe:env`,check 链加 `npm run check:drift` ④ 4 文档升头部 + 表加 7 PATCH + 历史表连带:本 RULES.md / AGENTS.md / RULES-TREE.md / RULES-VERSION.md / README.md / README_EN.md ⑤ 代码层:`hooks/index.js` 替换为 188 行 v3.4.6 版(mtInstanceId/mtStartedAt/mtLastHeartbeat/mtHeartbeats/mtMode + syncMtMode + mt_session_start/heartbeat/end)`src/runtime-log.js` 替换为 95 行 v3.4.6 版(SUBSYSTEMS 注册表 + appendLogFor/tailLogFor/logFileFor + DEFAULT_MT_MODE + resolveMtMode)⑥ 沉淀 2 条 RULE:本批规格内不动 RULES-TREE(后续 v3.4.14 批次维护)。npm test **47/47 PASS**(原 41 + probe-env 6)。**v3.4.14 调优(2026-08-14)**:PATCH — 28 条不变;**输出格式显式标签 RULE 沉淀** — 招认“沉淀/使用工作方法不见了”根因 = thinking vs output 脱节;4 件强制:每轮 ≥ 2 个 `[按 RULE-XXX]` 标签 + 每次沉淀时 `[沉淀 RULE-XXX-XXX]` 标签 + 末行 `[COVER-ALL]` 8 行兑底 + thinking 触发器自动跳 RULES-TREE;沉淀 **RULE-OUTPUT-LABEL-001** 于主 + 副本 RULES-TREE.md 同步。**v3.5.0 升级(2026-08-14)**:MINOR — **28 → 29 条**;新增**准则 29 · 用户感知守护**(把 RULE-OUTPUT-LABEL-001 从 R10 子项升级为独立原则)— 补全型准则触发器自动跳 RULES-TREE 不被动等指令;沉淀 **RULE-USER-PERCEPTION-GUARD-001** 于主 + 副本 RULES-TREE.md 同步。**v3.5.4 调优(2026-08-14)**:PATCH — 29 条不变;**QClaw / OpenClaw 适配器** — `scripts/build-adapters.js` 新增 qclaw 目标(生成 always-load skill 模板 `adapters/qclaw-eight-honors.SKILL.md`),部署 `~/.qclaw/skills/qclaw-eight-honors/` + 注册 main/mr-llm 两 agent;npm test **48/48 PASS**(原 46 + adapters 2);沉淀 **RULE-QCLAW-ADAPTER-001** 于 RULES-TREE.md。**v3.5.5 调优(2026-08-14)**:PATCH — 29 条不变;**token-slim 001/002**(用户报 token 消耗暴涨):① settings.json 排除 `~/.agents/skills`(2022 个 skill description 全量注入 ≈358KB/请求 → -87%,pi 0.84.1 `!` 排除语法已验证)② compaction 显式化 + 会话卫生脚本 `scripts/session-health.py`(近 30 天 128 会话 126.7MB,63 个 >15 万 token)③「会话首读」改前 120 行索引(81KB→~6KB)④ `[COVER-ALL]` 8 行输出先分级后**完全取消**(用户指令,防空转由第五章 5.1-5.5 A 终止标记兑底,算子保留按需手动);全局 AGENTS.md F 档 + 准则 29 + 附录索引同步;沉淀 **RULE-TOKEN-SLIM-001/002** 于主 + 副本。
+> **v3.4.13 升级(2026-08-14)**:28 条不变;**双副本追平(运行时副本 v3.4.5 → v3.4.13,7 个 PATCH 一次性追平)**。本次升级为 R19·走流程的标准"完整版"实施 — 真实追平(非纸面追平),含:① 备份:`_recycle_bin/20260814-132552-pre-v3.4.13-runtime/`(RULES/RULES-VERSION/RULES-TREE/AGENTS/README/README_EN/hooks/src/scripts/docs/tests/package.json 12 件)② 6 文件复制 + chmod:`.githooks/pre-commit` / `scripts/eight-rules-status.js` / `scripts/probe-env-apis.js` / `scripts/check-version-drift.js` / `docs/minimax-api-usage.md` / `tests/probe-env-apis.test.js` ③ npm scripts 补 4 个:`status` / `check:drift` / `check:drift:fix` / `probe:env`,check 链加 `npm run check:drift` ④ 4 文档升头部 + 表加 7 PATCH + 历史表连带:本 RULES.md / AGENTS.md / RULES-TREE.md / RULES-VERSION.md / README.md / README_EN.md ⑤ 代码层:`hooks/index.js` 替换为 188 行 v3.4.6 版(mtInstanceId/mtStartedAt/mtLastHeartbeat/mtHeartbeats/mtMode + syncMtMode + mt_session_start/heartbeat/end)`src/runtime-log.js` 替换为 95 行 v3.4.6 版(SUBSYSTEMS 注册表 + appendLogFor/tailLogFor/logFileFor + DEFAULT_MT_MODE + resolveMtMode)⑥ 沉淀 2 条 RULE:本批规格内不动 RULES-TREE(后续 v3.4.14 批次维护)。npm test **47/47 PASS**(原 41 + probe-env 6)。**v3.4.14 调优(2026-08-14)**:PATCH — 28 条不变;**输出格式显式标签 RULE 沉淀** — 招认“沉淀/使用工作方法不见了”根因 = thinking vs output 脱节;4 件强制:每轮 ≥ 2 个 `[按 RULE-XXX]` 标签 + 每次沉淀时 `[沉淀 RULE-XXX-XXX]` 标签 + 末行 `[COVER-ALL]` 8 行兑底 + thinking 触发器自动跳 RULES-TREE;沉淀 **RULE-OUTPUT-LABEL-001** 于主 + 副本 RULES-TREE.md 同步。**v3.5.0 升级(2026-08-14)**:MINOR — **28 → 29 条**;新增**准则 29 · 用户感知守护**(把 RULE-OUTPUT-LABEL-001 从 R10 子项升级为独立原则)— 补全型准则触发器自动跳 RULES-TREE 不被动等指令;沉淀 **RULE-USER-PERCEPTION-GUARD-001** 于主 + 副本 RULES-TREE.md 同步。**v3.5.4 调优(2026-08-14)**:PATCH — 29 条不变;**QClaw / OpenClaw 适配器** — `scripts/build-adapters.js` 新增 qclaw 目标(生成 always-load skill 模板 `adapters/qclaw-eight-honors.SKILL.md`),部署 `~/.qclaw/skills/qclaw-eight-honors/` + 注册 main/mr-llm 两 agent;npm test **48/48 PASS**(原 46 + adapters 2);沉淀 **RULE-QCLAW-ADAPTER-001** 于 RULES-TREE.md。**v3.5.5 调优(2026-08-14)**:PATCH — 29 条不变;**token-slim 001/002**(用户报 token 消耗暴涨):① settings.json 排除 `~/.agents/skills`(2022 个 skill description 全量注入 ≈358KB/请求 → -87%,pi 0.84.1 `!` 排除语法已验证)② compaction 显式化 + 会话卫生脚本 `scripts/session-health.py`(近 30 天 128 会话 126.7MB,63 个 >15 万 token)③「会话首读」改前 120 行索引(81KB→~6KB)④ `[COVER-ALL]` 8 行输出先分级后**完全取消**(用户指令,防空转由第五章 5.1-5.5 A 终止标记兑底,算子保留按需手动);全局 AGENTS.md F 档 + 准则 29 + 附录索引同步;沉淀 **RULE-TOKEN-SLIM-001/002** 于主 + 副本。**v3.10.0 升级(2026-08-18)**:MINOR — **29 → 30 条**;新增**准则 30 · 全功能打通**(以漏解模块为耻,以全功能打通为荣) — 与既有 R15 完整版互补(R15 重范围,R30 重集成);端到端 4 件必查(模块有真实调用方 / 端到端链路测 / 集成清单自检 4 问 / 失败不藏);AGENTS.md 精简版同步加第 30 条;沉淀 **RULE-30-MODULE-INTEGRATION-001** 于主 + 副本 RULES-TREE.md 同步;RULES-VERSION.md 升 v3.10.0。
 
 ---
 
@@ -45,7 +45,7 @@
 
 ---
 
-## 二、二十九条准则
+## 二、三十条准则
 
 > **分组逻辑**: 按"任务时序"组织 — 执行前(任务接收 → 动手前)→ 执行中(动手改/写代码)→ 执行后(交付前/验证/沉淀)→ 价值观(贯穿全局)。组内编号连续。
 >
@@ -636,6 +636,36 @@
 - **反向守护**:**RULE-OUTPUT-LABEL-001**(v3.4.14 PATCH 调优)是 R29 的子集;R29 是其升级为独立原则版本(补足 v3.4.14 不足 = 触发器自动跳未明确)
 - **反例**(2026-08-13): `RULES-TREE.md RULE-LOOP-001` 死循环案例写在 chat 不落盘 = 重复踩
 
+#### 准则 30:以漏解模块为耻,以全功能打通为荣
+
+- **耻**:**模块/接口/函数写完,但没接通上下游** = 漏解/漏接/漏跑通。**术语澄清**(v3.10.0 补):**"漏解" = 漏掉了某模块(没接通) ≠ "未理解"**;与"漏接"同义,都是"该接没接"的意思。形态:接口存在但无人调用(孤儿节点)、调用方有但被调用方缺失、依赖装了但未集成、配置写了但未生效、单测过但链路测过不了
+- **荣**:**端到端可跑通** = 每个模块都有真实调用方、每次集成都有端到端验证、每个交付都"一键跑通"而非"看代码能跑"
+- **逻辑**:功能完整(R15·完整版)+ 质量出彩(R16·超越平凡)+ 单点验证(R12·验证) **≠** 链路打通。漏解模块 = 用户看到的"功能缺失" — 即使每个模块都"做完了",整体仍是半成品;**与 R15/R16/R12 的差异**:R15 重"范围不切片"(做 100%),R30 重"模块间接通"(做 100% 且通);R16 重"代码质量补全",R30 重"链路集成补全";R12 重"单点验证",R30 重"端到端链路验证"
+- **"全功能"的"全"字定义**(v3.10.0 补):**不止主路径打通,所有功能路径(主路径 + 错误路径 + 降级路径 + 边界场景)都要走通 1 次**;只看主跑通 = 漏接 30% 场景。用户原话「做了功能但不接通」的"不接通"= 主路径通了但**错误路径/降级/边界**没接通,只跑通 happy path = 假打通。
+- **判断标准**(4 件必查):
+  1. **模块有真实调用方** — 每个新接口/函数/配置,至少有 1 个真实下游在用,**无孤儿节点**;新写接口无调用 = 视为漏解
+  2. **端到端链路测** — 必跑"输入 → 处理 → 输出"完整路径 1 次,**不止单点**;集成测覆盖率 ≥ 关键路径 80%
+  3. **集成清单自检 4 问** — 交付前过:① 模块依赖全装?② 配置项全生效(env / 配置文件 / .env.example)?③ 上下游接口签名对得上(参数类型 / 返回值 / 异常)?④ 失败时降级路径有?(重试 / 兜底 / 报错信息)?
+  4. **失败不藏** — 链路跑通时若发现某模块漏解/漏接,**先补**再标"完成",不假装没事;发现链路断点 → 主动暴露,不藏到交付后
+- **协同**:
+  - **R12·验证**(单点验证是 R30 的子集;R30 把验证推到"链路级")
+  - **R15·完整版**(范围完整,链路完整是更深一层)
+  - **R16·超越平凡**(出彩不止代码,也出彩在"能跑")
+  - **R28·跨会话沉淀**(漏解案例必落盘 RULES-TREE,下次避免)
+- **反例 4 条**:
+  1. daemon 写了但 Node 客户端没调通 — 用户看不见 daemon 在工作 = **漏接**
+  2. 接口函数齐了但从未被实际调用 = 孤儿模块 = **漏解**
+  3. 单测 100% 过但集成测 0% 过 = 链路失守 = **漏跑**
+  4. **用户能登录、能看数据,但提交订单时 401** — 因为下单接口没接通新鉴权中间件 = "做了登录功能,但下单功能不接通鉴权" = **全功能失守**(只通了主路径 70%,漏接鉴权路径 30%)
+- **典型触发场景**:交付前自检 / 新模块上线 / 重构后回归 / 配置改动后验证 / 多模块拼装时
+- **落地 4 步**(借鉴 RULE-FP-001 第一性原理复合算子):
+  1. **列调用方清单** — 拿新模块问"谁会用?" → 写 1 行;无调用方 = 暂不做
+  2. **跑端到端 1 次** — 输入最小数据 → 走完链路 → 看输出,记录在 commit message
+  3. **过 4 问自检** — 依赖/配置/接口/降级,任一不达标 = 不算完成
+  4. **失败必暴露** — 链路断点写 RULES-TREE(标 RULE-30-XXX-NNN),不当哑巴
+- **真实案例**(2026-08-18 v3.9.5 daemon spawn 修复):daemon 写了但 `_ensureDaemon` 没探活 → 双启僵进程(57536/79776)根因 = 链路断(daemon 启动后没人确认它真在跑);v3.9.5 加 `_ensureDaemon` + 端口轮询验证 = R30 落地
+- **反向守护**:**RULE-30-MODULE-INTEGRATION-001** 是 R15·完整版在"集成维度"的深化,不是替代
+
 ---
 
 ## 分类 2:非八荣八耻格式内容(同系统,语法不通)
@@ -897,6 +927,10 @@ RULE-* 复合算子沉淀于 `RULES-TREE.md`(沉淀格式统一 7 段:触发 / �
 | 准则 24 · 联系全文 | 不立即抢答 / 不跳读 / 不基于片段;主动通读用户输入+上下文+RULES+历史再答 |
 | 准则 25 · 协助到底 | 用户明确目标后不劝降;主动理解意图、拆解路径、加固执行、陪跑到底 |
 | 准则 26 · 核心价值观 | 八荣八耻跨项目跨会话生效,工具与流程可换,价值观不变 |
+| 准则 27 · 稳扎稳打分分层判断 | 每个动作前必3 维问询(类型 / 上版差异 / 漂移诊断)+ 矩阵分类(严格对齐 / 微调 / 改动);**不**无脑复用 / 复制 / 跑流程 / 接受“看上去对”的结果 |
+| 准则 28 · 跨会话沉淀 | 踩坑 / 架构决策 / 用户偏好 / 方法树必落盘(RULES-TREE.md / AGENTS.md / wiki),禁止只在本会话上下文;**协同** R2·对齐 + R5·确认后行 + R10·不重复犯错 + R19·走流程 |
+| 准则 29 · 用户感知守护 | 每轮输出必须可见:① ≥ 2 个 `[按 RULE-XXX]` 标签 ② 每次沉淀时 `[沉淀 RULE-XXX-XXX]` 标签 ③ 防空转由「二点五」A 终止标记兑底(`[COVER-ALL]` 8 行已取消,2026-08-14 token-slim v2)④ thinking 检测到脱节就主动跳 RULES-TREE;**协同** R10·不重复犯错 + R15·完整版 + R22·帮助解难 + R28·跨会话沉淀(补全型准则多准则协同保护) |
+| 准则 30 · 全功能打通 | 模块必有真实调用方 / 接口必跑端到端链路 / 交付前过 4 问(依赖全装 / 配置全生效 / 接口签名对得上 / 降级路径有);失败不藏,先补再标完成;**协同** R12·验证(单点 → 链路) + R15·完整版(范围 → 集成) + R16·超越平凡(代码 → 链路) + R28·跨会话沉淀(漏解案例必落盘) |
 
 ---
 
