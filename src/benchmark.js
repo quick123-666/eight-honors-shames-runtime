@@ -139,7 +139,7 @@ function deterministicRun(scenario, mode, prompt) {
   return { output: `deterministic:${mode}:${scenario.id}`, violations, score, provider: "deterministic" };
 }
 
-function llmProvider() { return process.env.EIGHT_RULES_LLM || "deterministic"; }
+function llmProvider() { if (process.env.NODE_ENV === "test" || process.env.npm_lifecycle_event === "test") return "deterministic"; return process.env.EIGHT_RULES_LLM || "deterministic"; }
 
 // 允许从 Pi 的 auth.json 读取 MiniMax key，避免把 key 写进 .env / 对话
 function loadMinimaxKeyFromPi() {
