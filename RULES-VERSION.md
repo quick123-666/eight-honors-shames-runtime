@@ -11,7 +11,7 @@
 - **本质**: PATCH 调优 — 29 条不变;token 消耗暴涨根因治理(用户报"最近 token 消耗量特别大")
 - **根因量化**: ① skill 全量注入 — pi 内建扫描 `~/.agents/skills`(2022 个 SKILL.md)description 每次请求全量注入 system prompt ≈358KB/请求(~10 万+ token)② 会话滚雪球 — 近 30 天 128 会话合计 126.7MB,63 个 >800KB(15-20 万 token),最大单会话 105 万 token;deepseek contextWindow=1M 导致 auto-compaction 阈值 984k 才触发 ③ 规则文件 81KB 完整版首读整读 ④ 每轮 [COVER-ALL] 8 行强制输出
 - **落地 4 件**:
-  1. `~/.pi/agent/settings.json` 加 `!C:/Users/Administrator/.agents/skills/**` 排除(pi 0.84.1 `isEnabledByOverrides` 支持 `!` 排除,minimatch 实测通过) → 注入 ~358KB → ~47KB(-87%)
+  1. `~/.pi/agent/settings.json` 加 `!~/.agents/skills/**` 排除(pi 0.84.1 `isEnabledByOverrides` 支持 `!` 排除,minimatch 实测通过) → 注入 ~358KB → ~47KB(-87%)
   2. `compaction` 显式化(`enabled/reserveTokens/keepRecentTokens`)+ 会话卫生脚本 `~/.pi/agent/scripts/session-health.py`(>200KB WARN />800KB ALERT 建议 /compact)
   3. 项目 AGENTS.md「会话首读」改 read 前 120 行建索引,完整正文 grep/分段读
   4. [COVER-ALL] 8 行输出先分级(token-slim v1)后**完全取消**(v2 用户指令)—— 防空转由 RULES.md 第五章 5.1-5.5 A 终止标记兑底;算子 `python -m rules_tree cover-all` 保留按需手动

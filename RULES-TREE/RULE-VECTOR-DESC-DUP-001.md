@@ -46,8 +46,8 @@ dups = {d: ns for d, ns in by_desc.items() if len(ns) >= 2 and len(d) > 80}
 
 ```python
 fixes = {
-    'GEMINI.md': 'AI 编程适配文件 for Google Gemini CLI · 八荣八耻核心价值观注入 · kimi_code_test 7 个 adapter 之一',
-    'MIT': 'MIT License · kimi_code_test 项目开源许可证 · 允许商用/修改/分发/私有使用/再许可 · 仅需保留版权声明',
+    'GEMINI.md': 'AI 编程适配文件 for Google Gemini CLI · 八荣八耻核心价值观注入 · 本项目 7 个 adapter 之一',
+    'MIT': 'MIT License · 本项目开源许可证 · 允许商用/修改/分发/私有使用/再许可 · 仅需保留版权声明',
 }
 for name, desc in fixes.items():
     graph.nodes[name]['description'] = desc

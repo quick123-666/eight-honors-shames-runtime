@@ -1855,7 +1855,7 @@
   - ❌ 旧认知: token 贵在模型输出、单次调用
   - ✅ 新规约: **固定开销(system prompt)才是大头**;省 token 边界 = 省"冗余描述",不省"证据链"(path:line/验证输出本身就是最省的 token)
 - **落地 4 件**(全部可回滚,备份 `_backups/token-slim-20260814-220710/`):
-  1. **settings.json 排除 ~/.agents/skills**:`skills: ["!C:/Users/Administrator/.agents/skills/**", ...]`(pi 0.84.1 `isEnabledByOverrides` 支持 `!` 排除,`+` 强制包含,`-` 强制排除;minimatch `**` 匹配绝对路径已验证) → 注入从 ~358KB → ~47KB
+  1. **settings.json 排除 ~/.agents/skills**:`skills: ["!~/.agents/skills/**", ...]`(pi 0.84.1 `isEnabledByOverrides` 支持 `!` 排除,`+` 强制包含,`-` 强制排除;minimatch `**` 匹配绝对路径已验证) → 注入从 ~358KB → ~47KB
   2. **compaction 显式化**:`settings.json` 加 `compaction: {enabled: true, reserveTokens: 16384, keepRecentTokens: 20000}` + 会话卫生脚本 `~/.pi/agent/scripts/session-health.py`(扫描 jsonl 大小,>200KB WARN />800KB ALERT 建议 /compact)
   3. **RULES.md 按需读**:项目 AGENTS.md "会话首读"改省 token 版 — read 前 120 行建立索引,完整正文 grep/分段读
   4. **COVER-ALL 分级**:全局 AGENTS.md F 档 + 运行时 RULES.md 准则 29 + 项目 AGENTS.md 同步 — 交付轮 8 行,工具循环中途轮/A 档 1 行 `[COVER-ALL 进行中]`(防空转价值由二点五 A 终止标记兜底)

@@ -270,7 +270,7 @@ os.replace(tmp, backup_path)  # 原子 rename
 | 假设 | 验证方法 | 信心度 |
 |---|---|---|
 | A. 备份脚本读"自己刚备份的版本" | 读 `auto_ticket.py` 或类似脚本源码 | 80% 未验证 |
-| B. 八荣八耻钩子被某次错误配置 disable | 查 `kimi_code_test/.eight-rules/` 钩子配置 | 70% 未验证 |
+| B. 八荣八耻钩子被某次错误配置 disable | 查 `项目根/.eight-rules/` 钩子配置 | 70% 未验证 |
 | C. 用户消息重复 = 编辑器卡键,不是 pi bug | 看 pi 编辑器源码 / 用户手动复现 | 60% 未验证 |
 | D. liquid_ticket_v2 批量脚本真的死循环了 | 跑 `auto_ticket.py` 看是否无限生成 | 50% 未验证 |
 
@@ -288,6 +288,6 @@ os.replace(tmp, backup_path)  # 原子 rename
 
 ---
 
-**写完**:2026-08-12 18:30+,文件 `C:/Users/Administrator/Desktop/kimi_code_test/RULES-TREE/RULE-DEADLOCK-001.md`,9 节全覆盖,数字全部现场实测。
+**写完**:2026-08-12 18:30+,文件 `RULES-TREE/RULE-DEADLOCK-001.md`(本仓库内),9 节全覆盖,数字全部现场实测。
 
 **R 编号引用统计**: R2/R3/R4/R5/R6/R7/R8/R9/R10/R12/R14/R15/R17/R18/R20/R23/R27 = 17 条(用户消息原重复的 R6/R10/R17 已去重,本报告每条只引一次)
