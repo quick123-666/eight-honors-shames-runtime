@@ -1268,6 +1268,23 @@
   4. **遇到 `MissingClientBundleError`** 直接 grep `cordis` + `client.js` → 几乎 100% 是 web-frontend 没 build
 - **覆盖**: R12 验证 / R19 走流程 / R28 跨会话沉淀
 
+### 反例 2026-08-18(违规沉淀 — R10 不重复犯错未生效)
+
+- **触发场景**: 用户接令"看看怎么启动 dsh web"(本项目上下文)
+- **违规**:
+  - AI 跳过 RULES-TREE 检索(本 RULE 已沉淀于 RULES-TREE.md L1203),直接看 deepseek-harness-master/README.md
+  - 走 PATH 全局 `@deepseek-ai/dsh@0.1.0-rc.6`(`dsh web`)启动,跳过 RULE 第 1-2 步(pnpm install / pnpm run build)
+  - 启动成功(`http://127.0.0.1:3080` HTTP 200),**掩盖了"未走 RULE 流程"的事实**
+- **影响**: 沉淀 RULE 价值未实现(R10 违规);用户正确质疑"之前不是沉淀过吗,为什么找不到了";暴露系统性问题:沉淀系统"沉而不调" = 等于没沉淀
+- **根因**: 沉淀层 OK,但**检索层断** — AI 接令前无强制 grep RULES-TREE 机制,无 P0/P1/P2 权重元数据,触发场景是中文散文
+- **修复**(2026-08-18 PATCH · commit e3febd8): RULES-TREE.md §0 权重分级元数据落地(三档 P0/P1/P2 定义);本 RULE 升 P0;§0.3 P0 当前清单登记本 RULE + 关键词 `dsh / deepseek-harness / 启动 web / MCP UI`
+- **下次如何避免**:
+  1. **接令前 grep RULES-TREE.md**(关键词 `dsh|deepseek.?harness|MCP|启动.*web`)→ 命中 P0 → 强制走 RULE 流程,**禁止跳过**
+  2. 即使"看起来简单"任务,只要 P0 关键词命中,**必须走完整 4 步**(pnpm install → pnpm run build → detached start → 验 UI)
+  3. 跳过流程时必须显式招认违反 R10 + 报告沉淀 RULE 未调用的根因,**不允许"结果对 = 过程对"的隐式合理化**
+  4. 用户中途改变输入路径时,**回溯 grep 关键词**(R18·联系全文)
+- **R 编号引用**: R10 / R15 / R18 / R28 — 4 条准则协同触发
+
 ---
 
 ### RULE-OUTPUT-LABEL-001(2026-08-14 v3.4.14 PATCH 沉淀 — 输出格式显式标签:让用户看见方法论在工作)
