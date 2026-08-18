@@ -1,6 +1,6 @@
 //! 安装配置测试:验证 build-adapters 生成的各工具适配文件
 //! 1. 8 个工具目标齐全(含 QClaw / OpenClaw always-load skill)
-//! 2. 每个文件包含 21 条精简命令式(与 AGENTS.md 零漂移)
+//! 2. 每个文件包含 AGENTS.md 全量精简命令式清单(与 AGENTS.md 零漂移,当前 29 条)
 //! 3. 每个文件指向 RULES.md(单一来源,不复制完整正文)
 //! 4. 无敏感内容(个人路径/密钥/内部工具)
 import test from "node:test";
@@ -21,9 +21,9 @@ test("生成 8 个工具适配文件", () => {
   assert.deepEqual(names, expected);
 });
 
-test("每个适配文件与 AGENTS.md 的 21 条零漂移", () => {
+test("每个适配文件与 AGENTS.md 精简清单全量零漂移", () => {
   const source = extractPrinciples(path.join(ROOT, "AGENTS.md"));
-  assert.equal(source.length, 21);
+  assert.ok(source.length >= 21, `AGENTS.md 精简清单应完整(当前 ${source.length} 条)`);
   for (const [file] of Object.entries(ADAPTER_TARGETS)) {
     const content = fs.readFileSync(path.join(tmp, file), "utf8");
     for (const p of source) {
@@ -67,7 +67,7 @@ test("build-adapters 可写入任意输出目录", () => {
   assert.ok(fs.existsSync(path.join(outDir, "GEMINI.md")));
 });
 
-test("qclaw skill 模板含 always-load frontmatter 且自包含 21 条", () => {
+test("qclaw skill 模板含 always-load frontmatter 且含全量精简清单", () => {
   const content = fs.readFileSync(path.join(tmp, "qclaw-eight-honors.SKILL.md"), "utf8");
   assert.match(content, /^name: qclaw-eight-honors$/m, "skill name 应为 qclaw-eight-honors");
   assert.match(content, /always: true/, "应标记 always-load 强制加载");

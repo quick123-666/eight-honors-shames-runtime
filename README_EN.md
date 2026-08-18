@@ -71,7 +71,7 @@ cp adapters/.cursorrules ../your-project/.cursorrules
 cp RULES.md ../your-project/RULES.md
 ```
 
-> 💡 Adapters contain only the 21 compact principles + a pointer to `RULES.md`. Drop `RULES.md` into your project to get the full version (shame/honor/logic/acceptance criteria).
+> 💡 Adapters contain the compact-principles list (mirrors AGENTS.md, currently 29 items) + a pointer to `RULES.md`. Drop `RULES.md` into your project to get the full version (shame/honor/logic/acceptance criteria, currently 30 principles).
 
 ### 3. Pi (full runtime, recommended)
 

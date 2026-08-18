@@ -10,7 +10,7 @@
 //!   - Cline / Roo Code             → custom-instructions.md
 //!   - QClaw / OpenClaw(skill)      → qclaw-eight-honors.SKILL.md
 //!
-//! 原则:每个适配文件只含 21 条精简命令式 + 指向 RULES.md,不复制完整正文
+//! 原则:每个适配文件只含 30 条精简命令式 + 指向 RULES.md,不复制完整正文
 //! (单一来源,杜绝漂移)。用法:
 //!   node scripts/build-adapters.js [--out <dir>]
 import fs from "node:fs";
@@ -31,14 +31,18 @@ export const ADAPTER_TARGETS = {
   "qclaw-eight-honors.SKILL.md": "QClaw / OpenClaw (always-load skill)",
 };
 
-/** 从 AGENTS.md 提取 21 条精简命令式("> N. ..." 行),去掉 "> " 前缀 */
+/**
+ * 从 AGENTS.md 提取全部精简命令式("> N. ..." / "> **N. ...**" 行),去掉 "> " 前缀。
+ * AGENTS.md 采用两段式:1-15 旧编号 + 16-29 加粗加详版(历史分层,非重复),
+ * 故不做去重、不截断,全量镜像(当前 29 条)。
+ */
 export function extractPrinciples(agentsPath) {
   const text = fs.readFileSync(agentsPath, "utf8");
-  const lines = [...text.matchAll(/^> (\*?\*?\d+\*?\*?\. .+)$/gm)].map((m) => m[1].trim());
+  const lines = [...text.matchAll(/^> (\*{0,2}\d+\.\*{0,2} .+)$/gm)].map((m) => m[1].trim());
   if (lines.length < 21) {
     throw new Error(`AGENTS.md 精简清单不完整: 只提取到 ${lines.length} 条(期望 ≥21)`);
   }
-  return lines.slice(0, 21);
+  return lines;
 }
 
 /** 生成全部适配文件;返回写入的文件绝对路径列表 */
@@ -59,7 +63,7 @@ export function buildAdapters({ root, out }) {
           `<!-- 本文件由 scripts/build-adapters.js 自动生成,请勿手改;改 AGENTS.md / RULES.md 后重跑。 -->`,
           `# 八荣八耻 AI 编程纪律 — ${tool}`,
           ``,
-          `> 精简命令式 21 条(适用于 ${tool});完整版(含耻/荣/逻辑/判断标准)见仓库根 [RULES.md](./RULES.md)(${rulesSize} 字节,单一来源,杜绝漂移)。`,
+          `> 精简命令式 ${principles.length} 条(适用于 ${tool});完整版(含耻/荣/逻辑/判断标准)见仓库根 [RULES.md](./RULES.md)(${rulesSize} 字节,单一来源,杜绝漂移)。`,
           ``,
           body,
           ``,
@@ -73,7 +77,7 @@ export function buildAdapters({ root, out }) {
 
 /**
  * 生成 QClaw / OpenClaw 的 always-load skill 模板(SKILL.md)。
- * 与其他适配器同源:21 条精简命令式 + RULES.md 指针,不复制完整正文。
+ * 与其他适配器同源:精简命令式清单 + RULES.md 指针,不复制完整正文。
  * 部署:拷贝为 ~/.qclaw/skills/qclaw-eight-honors/SKILL.md,并在
  * ~/.qclaw/openclaw.json 的 agents.list[].skills 注册 "qclaw-eight-honors"。
  */
@@ -85,7 +89,7 @@ export function buildQclawSkill({ principles, rulesSize, tool }) {
     `description: |`,
     `  [八荣八耻 SYSTEM RULES - MANDATORY - ALWAYS LOAD - DO NOT SKIP]`,
     `  QClaw 基础工程纪律,每次会话强制加载,优先级高于普通 skill。`,
-    `  含 21 条精简命令式 + 完整版 RULES.md 指针(单一来源,杜绝漂移)。`,
+    `  含精简命令式清单(镜像 AGENTS.md)+ 完整版 RULES.md 指针(单一来源,杜绝漂移)。`,
     `metadata:`,
     `  openclaw:`,
     `    emoji: "🏆"`,
@@ -102,7 +106,7 @@ export function buildQclawSkill({ principles, rulesSize, tool }) {
     `- **无条件遵守**:所有任务都必须遵守,不可以任何理由跳过`,
     `- **违规即错误**:任何违反本规则的输出视为系统错误,必须立即纠正`,
     ``,
-    `> 精简命令式 21 条(适用于 ${tool});完整版(含耻/荣/逻辑/判断标准)见仓库根 [RULES.md](./RULES.md)(${rulesSize} 字节,单一来源,杜绝漂移)。`,
+    `> 精简命令式 ${principles.length} 条(适用于 ${tool});完整版(含耻/荣/逻辑/判断标准)见仓库根 [RULES.md](./RULES.md)(${rulesSize} 字节,单一来源,杜绝漂移)。`,
     ``,
     body,
     ``,
